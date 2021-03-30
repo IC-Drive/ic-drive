@@ -1,0 +1,17 @@
+{
+  "canisters": {
+    "photo_application": {
+      "main": "src/photo_application/main.mo"
+    },
+    "photo_application_assets": {
+      "dependencies": [
+        "photo_application"
+      ],
+      "frontend": {
+        "entrypoint": "src/photo_application_assets/index.jsx"
+      },
+      "type": "assets"
+    }
+  },
+  "dfx": "0.6.26"
+}
