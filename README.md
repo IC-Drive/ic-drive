@@ -3,7 +3,12 @@
 ![Compatibility](https://img.shields.io/badge/compatibility-0.6.25-blue)
 
 This app is a photo storage app on IC as an alternate to google photos. 
+Current State of the application
+- UI is on ReactJS
+- Backend is in motoko
+- User can upload an image on the react frontend that is stored in the canister. The uploaded image is then served on the frontend via the canister call from frontend.
 
+![alt text](https://github.com/ravish1729/photo-application/blob/master/photo-application.jpeg?raw=true)
 
 ## Prerequisites
 
