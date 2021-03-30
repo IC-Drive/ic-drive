@@ -2,7 +2,8 @@
 
 ![Compatibility](https://img.shields.io/badge/compatibility-0.6.25-blue)
 
-This app is a photo storage app on IC as an alternate to google photos. 
+This app is a photo storage app on IC as an alternate to google photos. <br>
+
 **Current State of the application ->**
 - UI is on ReactJS
 - Backend is in motoko
