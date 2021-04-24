@@ -1,13 +1,15 @@
-## Superheroes
+## Photo App on IC
 
 ![Compatibility](https://img.shields.io/badge/compatibility-0.6.25-blue)
-[![Build Status](https://github.com/dfinity/examples/workflows/motoko-superheroes-example/badge.svg)](https://github.com/dfinity/examples/actions?query=workflow%3Amotoko-superheroes-example)
 
-This example demonstrates how to build a
-[CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete)
-application on the [Internet Computer](https://dfinity.org) using
-[Motoko](https://sdk.dfinity.org/docs/language-guide/motoko.html) and
-[React](https://reactjs.org). 
+This app is a photo storage app on IC as an alternate to google photos. <br>
+
+**Current State of the application ->**
+- UI is on ReactJS
+- Backend is in motoko
+- User can upload an image on the react frontend that is stored in the canister. The uploaded image is then served on the frontend via the canister call from frontend.
+
+![alt text](https://github.com/ravish1729/photo-application/blob/master/photo-application.jpeg?raw=true)
 
 ## Prerequisites
 
@@ -62,3 +64,10 @@ Verify the following before running this demo:
    ```
 
 1. Open the aforementioned URL in your web browser.
+
+## Current web2 alternates are broken
+- They are susceptible to many types of hacks
+- They have backdoor access to user data
+- Privacy invading algorithms
+
+![alt text](https://github.com/ravish1729/photo-application/blob/master/broken%20web2%20services.PNG?raw=true)
