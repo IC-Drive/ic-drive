@@ -1,8 +1,8 @@
-## Photo App on IC
+## IC Drive
 
 ![Compatibility](https://img.shields.io/badge/compatibility-0.6.25-blue)
 
-This app is a photo storage app on IC as an alternate to google photos. <br>
+IC Drive is a storage application built on the internet computer, which offers the users a decentralized alternate to the current web2 storage services like dropbox, google drive, etc. <br>
 
 **Current State of the application ->**
 - UI is on ReactJS
