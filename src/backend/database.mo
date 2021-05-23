@@ -6,7 +6,7 @@ import Principal "mo:base/Principal";
 import Types "./types";
 
 module {
-  type NewProfile = Types.NewProfile;
+  //type NewProfile = Types.NewProfile;
   type Profile = Types.Profile;
   type UserId = Types.UserId;
 
@@ -14,9 +14,9 @@ module {
     // The "database" is just a local hash map
     let hashMap = HashMap.HashMap<UserId, Profile>(1, isEq, Principal.hash);
 
-    public func createOne(userId: UserId, profile: NewProfile) {
-      hashMap.put(userId, makeProfile(userId, profile));
-    };
+//    public func createOne(userId: UserId, profile: NewProfile) {
+//      hashMap.put(userId, makeProfile(userId, profile));
+//    };
 
     public func updateOne(userId: UserId, profile: Profile) {
       hashMap.put(userId, profile);
@@ -26,14 +26,14 @@ module {
       hashMap.get(userId)
     };
 
-    public func findMany(userIds: [UserId]): [Profile] {
-      func getProfile(userId: UserId): Profile {
-        Option.unwrap<Profile>(hashMap.get(userId))
-      };
-      Array.map<UserId, Profile>(userIds, getProfile)
-    };
+//    public func findMany(userIds: [UserId]): [Profile] {
+//      func getProfile(userId: UserId): Profile {
+//        Option.unwrap<Profile>(hashMap.get(userId))
+//      };
+//      Array.map<UserId, Profile>(userIds, getProfile)
+//    };
 
-    public func findBy(term: Text): [Profile] {
+    /*public func findBy(term: Text): [Profile] {
       var profiles: [Profile] = [];
       for ((id, profile) in hashMap.entries()) {
         let fullName = profile.firstName # " " # profile.lastName;
@@ -42,11 +42,11 @@ module {
         };
       };
       profiles
-    };
+    };*/
 
     // Helpers
 
-    func makeProfile(userId: UserId, profile: NewProfile): Profile {
+/*    func makeProfile(userId: UserId, profile: NewProfile): Profile {
       {
         id = userId;
         firstName = profile.firstName;
@@ -54,8 +54,8 @@ module {
         img = profile.img;
       }
     };
-
-    func includesText(string: Text, term: Text): Bool {
+*/
+/*    func includesText(string: Text, term: Text): Bool {
       let stringArray = Iter.toArray<Char>(string.chars());
       let termArray = Iter.toArray<Char>(term.chars());
 
@@ -74,7 +74,7 @@ module {
       };
       false
     };
+  };*/
   };
-
   func isEq(x: UserId, y: UserId): Bool { x == y };
 };

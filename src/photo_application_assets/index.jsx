@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-
-import Create from './components/UploadFiles.jsx';
+import UploadFiles from './components/UploadFiles.jsx';
 
 class App extends React.Component {
 
@@ -10,7 +9,7 @@ class App extends React.Component {
       <div>
         <h1>Photo Application</h1>
         <hr/>
-        <Create/>
+        <UploadFiles/>
         <hr/>
       </div>
     );
