@@ -6,8 +6,8 @@
     "@babel/preset-react": "7.9.0",
     "@dfinity/agent": "0.6.20",
     "babel-loader": "8.1.0",
-    "react": "16.13.1",
-    "react-dom": "16.13.1",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
     "webpack": "4.43.0",
     "webpack-cli": "3.3.12"
   },

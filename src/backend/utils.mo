@@ -4,12 +4,12 @@ import Database "./database";
 import Types "./types";
 
 module {
-  type NewProfile = Types.NewProfile;
+  //type NewProfile = Types.NewProfile;
   type Profile = Types.Profile;
   type UserId = Types.UserId;
 
   // Profiles
-  public func getProfile(directory: Database.Directory, userId: UserId): Profile {
+  /*public func getProfile(directory: Database.Directory, userId: UserId): Profile {
     let existing = directory.findOne(userId);
     switch (existing) {
       case (?existing) { existing };
@@ -22,7 +22,7 @@ module {
         }
       };
     };
-  };
+  };*/
 
 	public func hasAccess(userId: UserId, profile: Profile): Bool {
     userId == profile.id
