@@ -9,7 +9,7 @@ class App extends React.Component {
       <div>
         <h1>Photo Application</h1>
         <hr/>
-        <UploadFiles/>
+          <UploadFiles/>
         <hr/>
       </div>
     );
