@@ -1,17 +1,22 @@
 {
   "name": "photos_application",
   "version": "0.0.0",
+  "description": "",
+  "keywords": [],
+  "scripts": {
+    "build": "webpack"
+  },
   "dependencies": {
     "@babel/core": "7.9.0",
     "@babel/preset-react": "7.9.0",
-    "@dfinity/agent": "0.6.20",
     "babel-loader": "8.1.0",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1",
-    "webpack": "4.43.0",
-    "webpack-cli": "3.3.12"
+    "react-dom": "^17.0.1"
   },
-  "scripts": {
-    "build": "webpack"
+  "devDependencies": {
+    "@dfinity/agent": "0.6.26",
+    "terser-webpack-plugin": "2.2.2",
+    "webpack": "4.41.3",
+    "webpack-cli": "3.3.10"
   }
 }
