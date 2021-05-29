@@ -10,10 +10,8 @@ import Text "mo:base/Text";
 import Int "mo:base/Int";
 import Nat "mo:base/Nat";
 
-import RelObj "../backend/RelObj";
 import Prelude "mo:base/Prelude";
 import TrieMap "mo:base/TrieMap";
-import Rel "../backend/Rel";
 import Buffer "mo:base/Buffer";
 
 actor photos {
@@ -83,7 +81,7 @@ actor photos {
       Debug.print(videoId);
       let v = state.videos.get(videoId)!;
       Debug.print(v.name);
-      Debug.print(v.userId);
+      Debug.print(Principal.toText(v.userId));
       {
         videoId = videoId;
         userId = v.userId ;

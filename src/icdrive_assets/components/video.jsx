@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import photo_application from 'ic:canisters/photo_application';
+import icdrive from 'ic:canisters/icdrive';
 
 const MAX_CHUNK_SIZE = 1024 * 500; // 500kb
 
@@ -18,7 +18,7 @@ async function processAndUploadChunk(
   const sliceToNat = encodeArrayBuffer(videoSlice);
   console.log("slice")
   console.log(sliceToNat)
-  photo_application.putVideoChunk(videoId, chunk, sliceToNat);
+  icdrive.putFileChunk(videoId, chunk, sliceToNat);
   console.log("done")
   return 1;
 }
@@ -46,12 +46,12 @@ async function uploadVideo(userId, file) {
   console.log(userId)
   //let reader = new FileReader();
   //const videoBuffer = (await reader.readAsArrayBuffer(file)) || new ArrayBuffer(0);
-  const id = await photo_application.getOwnId()
+  const id = await icdrive.getOwnId()
   const videoBuffer = (await file.arrayBuffer()) || new ArrayBuffer(0);
   const videoInit = getVideoInit(id, file);
   console.log("videoInit")
   console.log(videoInit)
-  let videoId = await photo_application.createVideo(videoInit);
+  let videoId = await icdrive.createFile(videoInit);
   videoId = videoId[0]
   let chunk = 1;
   //const thumb = await generateThumbnail(file);
@@ -67,7 +67,7 @@ async function uploadVideo(userId, file) {
   }
   console.log("resultFromCanCan")
   console.log(typeof(videoId))
-  const resultFromCanCan = await photo_application.getVideoInfo(videoId);
+  const resultFromCanCan = await icdrive.getFileInfo(videoId);
   console.log(resultFromCanCan)
   //console.log("put chunk promise")
   //console.log(putChunkPromises)
