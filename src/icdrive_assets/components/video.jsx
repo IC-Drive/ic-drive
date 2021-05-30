@@ -64,11 +64,12 @@ async function uploadVideo(userId, file) {
     byteStart += MAX_CHUNK_SIZE, chunk++
   ) {
     await processAndUploadChunk(videoBuffer, byteStart, file.size, videoId, chunk)
+    if(chunk >= videoInit["chunkCount"]){
+      return(videoId)
+    }
   }
-  console.log("resultFromCanCan")
-  console.log(typeof(videoId))
-  const resultFromCanCan = await icdrive.getFileInfo(videoId);
-  console.log(resultFromCanCan)
+  
+  //await icdrive.getChunks()
   //console.log("put chunk promise")
   //console.log(putChunkPromises)
   //await Promise.all(putChunkPromises);
@@ -85,12 +86,20 @@ export function useUploadVideo(userId) {
     console.info("Storing video...");
     try {
       console.time("Stored in");
-      const video = await uploadVideo(userId, fileToUpload);
+      const videoId = await uploadVideo(userId, fileToUpload);
 
       //setCompletedVideo(video);
       setReady(false);
       setFile(undefined);
       console.timeEnd("Stored in");
+      //////////////////////////////////
+      /*console.log("resultFromCanCan")
+      console.log(typeof(videoId))
+      const resultFromCanCan = await icdrive.getFileInfo(videoId);
+      console.log(resultFromCanCan)
+      const bytes = await icdrive.getFileChunk(resultFromCanCan[0]["fileId"], 1)
+      console.log(bytes)*/
+      //////////////////////////////////
     } catch (error) {
       console.error("Failed to store video.", error);
     }
