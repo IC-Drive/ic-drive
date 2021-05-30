@@ -1,7 +1,7 @@
 {
   "canisters": {
     "icdrive": {
-      "main": "src/icdrive/main2.mo",
+      "main": "src/icdrive/main.mo",
       "type": "motoko"
     },
     "icdrive_assets": {
