@@ -1,7 +1,6 @@
 // Make the Connectd app's public methods available locally
 
 import Types "../backend/types";
-import Utils "../backend/utils";
 import Database "../backend/database";
 import Debug "mo:base/Debug";
 import Principal "mo:base/Principal";
@@ -9,56 +8,36 @@ import Time "mo:base/Time";
 import Text "mo:base/Text";
 import Int "mo:base/Int";
 import Nat "mo:base/Nat";
+import Nat8 "mo:base/Nat8";
 
 import Prelude "mo:base/Prelude";
 import TrieMap "mo:base/TrieMap";
 import Buffer "mo:base/Buffer";
 
-actor photos {
+actor icdrive {
 
-	var directory: Database.Directory = Database.Directory();
-  
-	//type NewProfile = Types.NewProfile;
   type Profile = Types.Profile;
   type UserId = Types.UserId;
-  type Timestamp = Types.Timestamp;
-  public type VideoId = Types.VideoId;
+  public type FileId = Types.FileId;
   public type ChunkId = Types.ChunkId;
   public type ChunkData = Types.ChunkData;
-  public type VideoInfo = Types.VideoInfo;
-  public type VideoInit = Types.VideoInit;
-  var state = Types.empty();
-//  public shared(msg) func create(profile: NewProfile): async () {
-//    directory.createOne(msg.caller, profile);
-//  };
+  public type FileInfo = Types.FileInfo;
+  public type FileInit = Types.FileInit;
   
-  public shared(msg) func update(profile: Profile): async () {
-    Debug.print(Principal.toText(profile.id));
-    Debug.print(profile.firstName);
-    if(Utils.hasAccess(msg.caller, profile)) {
-      directory.updateOne(profile.id, profile);
-    };
-  };
+  var state = Types.empty();
+  var user: Database.User = Database.User();
 
-  public shared query(msg) func getOwnId(): async UserId { Debug.print(Principal.toText(msg.caller)); msg.caller };
+  public shared query(msg) func getOwnId(): async UserId { msg.caller };
 
-//  public query func get(userId: UserId): async Profile {
-//    Utils.getProfile(directory, userId)
-//  };
-
-  func timeNow_() : Int {
-    Time.now()
-  };
-
-  func createVideo_(i : VideoInit) : ?VideoId {
-    let now = timeNow_();
-    let videoId = Principal.toText(i.userId) # "-" # i.name # "-" # (Int.toText(now));
-    switch (state.videos.get(videoId)) {
+  func createFile_(i : FileInit) : ?FileId {
+    let now = Time.now();
+    let fileId = Principal.toText(i.userId) # "-" # i.name # "-" # (Int.toText(now));
+    switch (state.files.get(fileId)) {
     case (?_) { /* error -- ID already taken. */ null };
     case null { /* ok, not taken yet. */
-           state.videos.put(videoId,
+           state.files.put(fileId,
                             {
-                              videoId = videoId;
+                              fileId = fileId;
                               userId = i.userId ;
                               name = i.name ;
                               createdAt = i.createdAt ;
@@ -66,24 +45,24 @@ actor photos {
                               chunkCount = i.chunkCount ;
                             });
            //state.uploaded.put(i.userId, videoId);
-           ?videoId
+           ?fileId
          };
     }
   };
 
-  public shared(msg) func createVideo(i : VideoInit) : async ?VideoId {
-      createVideo_(i)
+  public shared(msg) func createFile(i : FileInit) : async ?FileId {
+      createFile_(i)
   };
 
-  func getVideoInfo_ (videoId : VideoId) : ?VideoInfo {
+  func getFileInfo_ (fileId : FileId) : ?FileInfo {
     do ? {
       Debug.print("here do");
-      Debug.print(videoId);
-      let v = state.videos.get(videoId)!;
+      Debug.print(fileId);
+      let v = state.files.get(fileId)!;
       Debug.print(v.name);
       Debug.print(Principal.toText(v.userId));
       {
-        videoId = videoId;
+        fileId = fileId;
         userId = v.userId ;
         createdAt = v.createdAt ;
         name = v.name ;
@@ -92,19 +71,19 @@ actor photos {
     }
   };
   
-  public query(msg) func getVideoInfo (videoId : VideoId) : async ?VideoInfo {
-    getVideoInfo_(videoId)
+  public query(msg) func getFileInfo (fileId : FileId) : async ?FileInfo {
+    getFileInfo_(fileId)
   };
-  
-  public shared(msg) func putVideoInfo(videoId : VideoId, videoInit : VideoInit) : async () {
-    let i = videoInit ;
-    let v = state.videos.get(videoId);
-    state.videos.put(videoId,
+
+  public shared(msg) func putFileInfo(fileId : FileId, fileInit : FileInit) : async () {
+    let i = fileInit ;
+    let v = state.files.get(fileId);
+    state.files.put(fileId,
                       {
                         // some fields are "immutable", regardless of caller data:
                         userId = msg.caller ;
-                        uploadedAt = timeNow_() ;
-                        videoId = videoId ;
+                        uploadedAt = Time.now() ;
+                        fileId = fileId ;
                         // -- above uses old data ; below is from caller --
                         createdAt = i.createdAt ;
                         name = i.name ;
@@ -112,18 +91,40 @@ actor photos {
                       })
   };
   
-  func chunkId(videoId : VideoId, chunkNum : Nat) : ChunkId {
-    videoId # (Nat.toText(chunkNum));
+  func chunkId(fileId : FileId, chunkNum : Nat) : ChunkId {
+    fileId # (Nat.toText(chunkNum));
   };
 
-  public shared(msg) func putVideoChunk
-    (videoId : VideoId, chunkNum : Nat, chunkData : [Nat8]) : async ()
+  public shared(msg) func putFileChunk
+    (fileId : FileId, chunkNum : Nat, chunkData : [Nat8]) : async ()
   {
-    state.chunks.put(chunkId(videoId, chunkNum), chunkData);
+    state.chunks.put(chunkId(fileId, chunkNum), chunkData);
   };
 
-  public query(msg) func getVideoChunk(videoId : VideoId, chunkNum : Nat) : async ?[Nat8] {
-    state.chunks.get(chunkId(videoId, chunkNum));
+  public query(msg) func getFileChunk(fileId : FileId, chunkNum : Nat) : async ?[Nat8] {
+    Debug.print("File ID GET");
+    Debug.print(fileId);
+    Debug.print("Chunk ID GET");
+    Debug.print(chunkId(fileId, chunkNum));
+    Debug.print("Chunk ID GET Over");
+    state.chunks.get(chunkId(fileId, chunkNum));
+  };
+
+  public query(msg) func getFiles() : async ?[FileInfo] {
+    do ? {
+      let b = Buffer.Buffer<FileInfo>(0);
+      for ((v, _) in state.files.entries()) {
+        b.add(getFileInfo_(v)!)
+      };
+      b.toArray()
+    }
+  };
+/////////////////////////////////////////////////////
+  public query(msg) func getChunks() : async () {
+      Debug.print("chunk printing");
+      for ((v, _) in state.chunks.entries()) {
+        Debug.print(v);
+      };
   };
 
 };
