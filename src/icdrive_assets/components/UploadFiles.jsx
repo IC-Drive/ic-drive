@@ -9,6 +9,7 @@ const UploadFiles = () =>{
   const [uploadingClean, setUploadingClean] = useState(true);
   const [id, setId] = React.useState("6xdxb-7x3to-6jznm-nkldc-5n76r-csrgg-47owm-hbc3p-5zblf-eongq-rqe")
   const videoUploadController = useUploadVideo(id);
+  const [i, setI] = useState("");
 
   useEffect(async () => {
     const id = await icdrive.getOwnId()
@@ -35,6 +36,31 @@ const UploadFiles = () =>{
     //const videoId = "6xdxb-7x3to-6jznm-nkldc-5n76r-csrgg-47owm-hbc3p-5zblf-eongq-rqe-VID_20200116_195645-1621593711132203605"
     const resultFromCanCan = await icdrive.getFiles();
     console.log(resultFromCanCan)
+    for(let i=0; i<resultFromCanCan.length; i++){
+      if(resultFromCanCan[i][0]["name"].split(".")[1]==="jpeg" || resultFromCanCan[i][0]["name"].split(".")[1]==="jpg" || resultFromCanCan[i][0]["name"].split(".")[1]==="png"){
+        let c_count = resultFromCanCan[i][0]["chunkCount"]["c"][0]
+        const chunkBuffers = [];
+        for(let j=0; j<c_count; j++){
+          const bytes = await icdrive.getFileChunk(resultFromCanCan[i][0]["fileId"], j+1);
+          const bytesAsBuffer = Buffer.from(new Uint8Array(bytes[0]));
+          console.log(bytes)
+          console.log(bytesAsBuffer)
+          chunkBuffers.push(bytesAsBuffer);
+          console.log(chunkBuffers)
+        }
+        const picBlob = new Blob([Buffer.concat(chunkBuffers)], {
+          type: "image/jpeg",
+        });
+        console.log(picBlob)
+        const pic = URL.createObjectURL(picBlob);
+        console.log(pic)
+        setI(pic)
+        //const picBlob = new Blob([Buffer.concat(chunkBuffers)], {
+        //  type: "image/jpeg",
+        //});
+        
+      }
+    }
   }
   // Wraps and triggers several functions in the videoUploadController to
   // generate a videoId and begin uploading.
@@ -74,6 +100,7 @@ const UploadFiles = () =>{
           </div>
         </div>
       )}
+      <img src={i} />
     </main>
   )
 }
