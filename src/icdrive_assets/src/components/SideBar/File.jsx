@@ -1,4 +1,8 @@
-import icdrive from 'ic:canisters/icdrive';
+import { Actor, HttpAgent } from '@dfinity/agent';
+import { idlFactory as icdrive_idl, canisterId as icdrive_id } from 'dfx-generated/icdrive';
+
+const agent = new HttpAgent();
+const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
 
 const MAX_CHUNK_SIZE = 1024 * 500; // 500kb
 
