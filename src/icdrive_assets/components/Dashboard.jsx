@@ -5,7 +5,6 @@ import styled from 'styled-components';
 import TopBar from './TopBar/TopBar.jsx';
 import SideBar from './SideBar/SideBar.jsx';
 import CenterPortion from './CenterPortion/CenterPortion.jsx'
-import icdrive from 'ic:canisters/icdrive';
 
 // 3rd party imports
 
