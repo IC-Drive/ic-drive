@@ -1,6 +1,6 @@
 ## IC Drive
 
-![Compatibility](https://img.shields.io/badge/compatibility-0.6.25-blue)
+![Compatibility](https://img.shields.io/badge/compatibility-0.7.0-blue)
 
 IC Drive is a storage application built on the internet computer, which offers the users a decentralized alternate to the current web2 storage services like dropbox, google drive, etc. <br>
 
