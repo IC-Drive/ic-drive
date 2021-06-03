@@ -1,10 +1,25 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# Various IDEs and Editors
+.vscode/
+.idea/
+**/*~
+
+# Mac OSX temporary files
+.DS_Store
+**/.DS_Store
+
+# dfx temporary files
+.dfx/
+
+# frontend code
+node_modules/
+dist/
+package-lock.json
+
 # dependencies
-/node_modules
 /.pnp
 .pnp.js
-package-lock.json
 
 # testing
 /coverage
@@ -13,12 +28,10 @@ package-lock.json
 /build
 
 # misc
-.DS_Store
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
-.dfx
 
 npm-debug.log*
 yarn-debug.log*

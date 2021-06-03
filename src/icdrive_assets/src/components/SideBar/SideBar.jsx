@@ -2,13 +2,17 @@ import React from "react";
 import styled from 'styled-components';
 
 // custom imports
-import icdrive from 'ic:canisters/icdrive';
 import {useUploadFile} from './File.jsx';
+import { Actor, HttpAgent } from '@dfinity/agent';
+import { idlFactory as icdrive_idl, canisterId as icdrive_id } from 'dfx-generated/icdrive';
 
 // 3rd party imports
 import { CloudUploadOutlined, ShareAltOutlined, SyncOutlined, BookOutlined } from '@ant-design/icons';
 
 const SideBar = () =>{
+
+  const agent = new HttpAgent();
+  const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
 
   const [id, setId] = React.useState("");
   
