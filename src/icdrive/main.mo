@@ -1,7 +1,7 @@
 // Make the Connectd app's public methods available locally
 
-import Types "../backend/types";
-import Database "../backend/database";
+import Types "./backend/types";
+import Database "./backend/database";
 import Debug "mo:base/Debug";
 import Principal "mo:base/Principal";
 import Time "mo:base/Time";

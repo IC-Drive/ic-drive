@@ -2,7 +2,8 @@ import React from "react";
 import styled from 'styled-components';
 
 // custom imports
-import icdrive from 'ic:canisters/icdrive';
+import { Actor, HttpAgent } from '@dfinity/agent';
+import { idlFactory as icdrive_idl, canisterId as icdrive_id } from 'dfx-generated/icdrive';
 
 // 3rd party imports
 import * as streamSaver from 'streamsaver';
@@ -10,6 +11,8 @@ import { WritableStream } from 'web-streams-polyfill/ponyfill'
 
 const CenterPortion = () =>{
 
+  const agent = new HttpAgent();
+  const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
   const [files, setFiles] = React.useState("")
   
   const download = async (fileId, chunk_count, fileName) => {
@@ -31,13 +34,14 @@ const CenterPortion = () =>{
 
   React.useEffect(async()=>{
     const file_list = await icdrive.getFiles()
+    console.log(file_list)
     const files_obj = file_list[0].map(value => 
       <div className="strip">
         <span id="name">{value.name}</span>
         <span id="owner"></span>
         <span id="updated"></span>
-        <span id="size">{value["chunkCount"]["c"][0]*0.5}&nbsp;MB</span>
-        <span id="down" onClick={()=>handleDownload(value.fileId, value["chunkCount"]["c"][0], value.name)}>Download</span>
+        <span id="size">{value["chunkCount"]*0.5}&nbsp;MB</span>
+        <span id="down" onClick={()=>handleDownload(value.fileId, value["chunkCount"], value.name)}>Download</span>
       </div>)
       setFiles(files_obj)
   }, [])
