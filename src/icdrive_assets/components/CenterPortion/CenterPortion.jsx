@@ -5,25 +5,28 @@ import styled from 'styled-components';
 import icdrive from 'ic:canisters/icdrive';
 
 // 3rd party imports
-import { createWriteStream } from 'streamsaver';
+import * as streamSaver from 'streamsaver';
+import { WritableStream } from 'web-streams-polyfill/ponyfill'
 
 const CenterPortion = () =>{
 
   const [files, setFiles] = React.useState("")
-
-  const handleDownload1 = async (fileId, chunk_count, fileName) => {
-    const fileStream = createWriteStream(fileName);
+  
+  const download = async (fileId, chunk_count, fileName) => {
+    streamSaver.WritableStream = WritableStream
+    const fileStream = streamSaver.createWriteStream(fileName);
     const writer = fileStream.getWriter();
     for(let j=0; j<chunk_count; j++){
       const bytes = await icdrive.getFileChunk(fileId, j+1);
-      const bytesAsBuffer = Buffer.from(new Uint8Array(bytes[0]));
+      //const bytesAsBuffer = Buffer.from(new Uint8Array(bytes[0]));
+      const bytesAsBuffer = new Uint8Array(bytes[0]);
       writer.write(bytesAsBuffer);
     }
     writer.close();
   };
 
   const handleDownload = async (fileId, chunk_count, fileName) =>{
-    let k = await handleDownload1(fileId, chunk_count, fileName)
+    let k = await download(fileId, chunk_count, fileName)
   }
 
   React.useEffect(async()=>{
