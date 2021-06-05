@@ -2,20 +2,23 @@ import React from "react";
 import styled from 'styled-components';
 
 // custom imports
-import { Actor, HttpAgent } from '@dfinity/agent';
-import { idlFactory as icdrive_idl, canisterId as icdrive_id } from 'dfx-generated/icdrive';
+import ListView from './ListView'
+import GridView from './GridView'
+//import { Actor, HttpAgent } from '@dfinity/agent';
+//import { idlFactory as icdrive_idl, canisterId as icdrive_id } from 'dfx-generated/icdrive';
 
 // 3rd party imports
-import * as streamSaver from 'streamsaver';
-import { WritableStream } from 'web-streams-polyfill/ponyfill'
+//import * as streamSaver from 'streamsaver';
+//import { WritableStream } from 'web-streams-polyfill/ponyfill'
 
 const CenterPortion = () =>{
 
-  const agent = new HttpAgent();
-  const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
-  const [files, setFiles] = React.useState("")
-  
-  const download = async (fileId, chunk_count, fileName) => {
+  const [selectedView, setSelectedView] = React.useState("listView");
+
+  //const agent = new HttpAgent();
+  //const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
+
+  /*const download = async (fileId, chunk_count, fileName) => {
     streamSaver.WritableStream = WritableStream
     const fileStream = streamSaver.createWriteStream(fileName);
     const writer = fileStream.getWriter();
@@ -44,18 +47,15 @@ const CenterPortion = () =>{
         <span id="down" onClick={()=>handleDownload(value.fileId, value["chunkCount"], value.name)}>Download</span>
       </div>)
       setFiles(files_obj)
-  }, [])
+  }, [])*/
 
   return(
     <Style>
-      <div className="strip">
-        <span id="name"><strong>File Name</strong></span>
-        <span id="owner"><strong>Owner</strong></span>
-        <span id="updated"><strong>Last Updated</strong></span>
-        <span id="size"><strong>File Size</strong></span>
-      </div>
       {
-        files
+        selectedView==="listView"?
+        <ListView setSelectedView={setSelectedView}/>
+        :
+        <GridView setSelectedView={setSelectedView}/>
       }
     </Style>
   )
@@ -66,23 +66,7 @@ export default CenterPortion;
 const Style = styled.div`
   width: calc(100vw - 225px);
   height: calc(100vh - 50px);
-  .data{
-    display: flex;
-    flex-direction: column;
-  }
-  .strip{
-    display: flex;
-    flex-direction: row;
-    font-size: 18px;
-  }
-  #owner{
-    margin-left: 10%;
-  }
-  #updated{
-    margin-left: 10%;
-  }
-  #size{
-    margin-left: 10%;
-  }
-
+  box-sizing: border-box;
+  overflow-x: auto;
+  overflow-y: auto;
 `
