@@ -32,16 +32,16 @@ const Style = styled.div`
   .container {
     height: 50px;
     width: 100vw;
-    background: #000;
+    background: #2A3132;
     color: #fff;
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
   .left-section {
-    font-size: 24px;
-    font-weight: 800;
-    padding-left: 5px;
+    font-size: 22.5px;
+    font-weight: 700;
+    padding-left: 22px;
   }
   .right-section{
     width: 420px;
@@ -51,12 +51,12 @@ const Style = styled.div`
   }
   .ant-input {
     height: 25px;
-    width: 300px;
+    width: 250px;
   }
   .dot {
     height: 25px;
     width: 25px;
-    background-color: #19AAAB;
+    background-color: #e5e5e5;
     border-radius: 50%;
     display: inline-block;
   }
