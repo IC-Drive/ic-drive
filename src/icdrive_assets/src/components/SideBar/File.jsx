@@ -46,11 +46,17 @@ function getFileInit(
 async function uploadFile(userId, file) {
   const fileBuffer = (await file.arrayBuffer()) || new ArrayBuffer(0);
   const fileInit = getFileInit(userId, file);
-  //console.log("fileInit")
-  //console.log(fileInit)
-  //console.log("fileInit over")
   let fileId = await icdrive.createFile(fileInit);
   fileId = fileId[0]
+
+  let file_obj = {
+    chunkCount: fileInit["chunkCount"],
+    createdAt: fileInit["createdAt"],
+    fileId: fileId,
+    name: file.name,
+    userId: userId
+  }
+
   let chunk = 1;
   
   for (
@@ -60,7 +66,7 @@ async function uploadFile(userId, file) {
   ) {
     await processAndUploadChunk(fileBuffer, byteStart, file.size, fileId, chunk)
     if(chunk >= fileInit["chunkCount"]){
-      return(fileId)
+      return(file_obj)
     }
   }
 }
@@ -69,9 +75,9 @@ export async function useUploadFile(userId, file) {
   console.info("Storing File...");
   try {
     console.time("Stored in");
-    const fileId = await uploadFile(userId, file);
+    const file_obj = await uploadFile(userId, file);
     console.timeEnd("Stored in");
-    return(1);
+    return(file_obj);
   } catch (error) {
     console.error("Failed to store file.", error);
     return(0);
