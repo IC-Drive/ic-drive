@@ -9,7 +9,7 @@ IC Drive is a storage application built on the internet computer, which offers t
 - Backend is in motoko
 - User can upload an image on the react frontend that is stored in the canister. The uploaded image is then served on the frontend via the canister call from frontend.
 
-![alt text](https://github.com/IC-Drive/ic-drive/blob/master/dashboard.png?raw=true)
+![alt text](https://github.com/IC-Drive/ic-drive/blob/master/res/images/dashboard.png?raw=true)
 
 ## Prerequisites
 
@@ -70,4 +70,4 @@ Verify the following before running this demo:
 - They have backdoor access to user data
 - Privacy invading algorithms
 
-![alt text](https://github.com/IC-Drive/ic-drive/blob/master/broken-web2-services.png?raw=true)
+![alt text](https://github.com/IC-Drive/ic-drive/blob/master/res/images/broken-web2-services.png?raw=true)
