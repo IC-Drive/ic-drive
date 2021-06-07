@@ -119,11 +119,29 @@ actor icdrive {
       b.toArray()
     }
   };
-/////////////////////////////////////////////////////
+///////////////////////////////////////////////////// TEST  //////////////////////////////////////
   public query(msg) func getChunks() : async () {
       Debug.print("chunk printing");
       for ((v, _) in state.chunks.entries()) {
         Debug.print(v);
+      };
+  };
+
+  type HeaderField = (Text, Text);
+
+  type HttpResponse = {
+      status_code: Nat16;
+      headers: [HeaderField];
+      body: Blob;
+  };
+
+  public query func http_request() : async HttpResponse {
+      //let data := state.chunks.get(chunkId(fileId, chunkNum));
+      Debug.print("Woah, it works!!");
+      return {
+          status_code = 200;
+          headers = [("Content-Type", "application/octet-stream; charset=utf-8"),("Content-Disposition", "attachment; filename*=UTF-8''abc.txt")];
+          body = Text.encodeUtf8("<b>Hello World!</b>");
       };
   };
 

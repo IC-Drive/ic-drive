@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 
+import {registerWorker} from './mitm.js'
+
 import {Provider} from 'react-redux';
 import {createStore} from 'redux';
 import reducers from './state/reducers';
@@ -20,3 +22,4 @@ ReactDOM.render(
   document.getElementById('root')
 );
 
+registerWorker();
