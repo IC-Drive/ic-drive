@@ -9,12 +9,21 @@
         "icdrive"
       ],
       "frontend": {
-        "entrypoint": "src/icdrive_assets/index.jsx"
+        "entrypoint": "src/icdrive_assets/src/index.html"
       },
+      "source": [
+        "src/icdrive_assets/assets",
+        "dist/icdrive_assets/"
+      ],
       "type": "assets"
     }
   },
-  "dfx": "0.6.26",
+  "defaults": {
+    "build": {
+      "packtool": ""
+    }
+  },
+  "dfx": "0.7.0",
   "networks": {
     "local": {
       "bind": "127.0.0.1:8000",
@@ -23,4 +32,3 @@
   },
   "version": 1
 }
-
