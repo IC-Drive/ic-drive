@@ -2,58 +2,72 @@ import React from "react";
 import styled from 'styled-components';
 
 // custom imports
-import icdrive from 'ic:canisters/icdrive';
 import {useUploadFile} from './File.jsx';
+import { Actor, HttpAgent } from '@dfinity/agent';
+import { idlFactory as icdrive_idl, canisterId as icdrive_id } from 'dfx-generated/icdrive';
 
 // 3rd party imports
-import { CloudUploadOutlined, ShareAltOutlined, SyncOutlined, BookOutlined } from '@ant-design/icons';
+import {useDispatch, useSelector} from 'react-redux'
+import {uploadUpdate, filesUpdate} from '../../state/actions'
 
 const SideBar = () =>{
 
+  const dispatch = useDispatch();
+  const agent = new HttpAgent();
+  const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
+
   const [id, setId] = React.useState("");
-  
+  const files = useSelector(state=>state.FileHandler.files)
+
   React.useEffect(async()=>{
     const id = await icdrive.getOwnId();
     setId(id);
   },[])
 
   const onFileSelect = async (evt) => {
-    console.log(evt.target.files)
     const file_list = evt.target.files
+
+    const file_array = [...files]
     for(let i=0; i<file_list.length; i++){
       const file = file_list[i];
-      //console.log(file)
-      let _ = await useUploadFile(id, file)
+      dispatch(uploadUpdate({file_uploading: file.name, file_count: file_list.length, completed: i+1}))
+      const file_obj = await useUploadFile(id, file);
+      file_array.push(file_obj)
     }
+    dispatch(uploadUpdate({file_uploading: "", file_count: 0, completed: 0}))
+    dispatch(filesUpdate(file_array))
   }
 
   return(
     <Style>
       <div className="container">
         <div className="content">
+          
           <div className="element">
+            <label id="label-file" for="upload-file">
             <div className="element-section">
               <div className="icon-part">
-                <CloudUploadOutlined style={{ fontSize: '25px', color: '#fff' }} />
+              <img src="./icons/upload.svg" style={{ height: '22px', color: '#fff' }} />
               </div>
               <div className="text-part">
                 <span>
                   <div>
-                    <label id="label-file" for="upload-file">Upload</label>
+                    Upload
                     <input type="file" id="upload-file" onChange={onFileSelect} className="file_upload" multiple/>
                   </div>
                 </span>
               </div>
             </div>
+            </label>
           </div>
 
           <div className="element">
             <div className="element-section">
               <div className="icon-part">
-                <ShareAltOutlined style={{ fontSize: '25px', color: '#fff' }} />
+                <img src="./icons/share.svg" style={{ height: '22px', color: '#fff' }} />
               </div>
               <div className="text-part">
-                <span>Share</span>
+                <span>Shared</span>
               </div>
             </div>
           </div>
@@ -61,7 +75,7 @@ const SideBar = () =>{
           <div className="element">
             <div className="element-section">
               <div className="icon-part">
-                <BookOutlined style={{ fontSize: '25px', color: '#fff' }} />
+                <img src="./icons/mark.svg" style={{ height: '22px', color: '#fff' }} />
               </div>
               <div className="text-part">
                 <span>Marked</span>
@@ -72,10 +86,10 @@ const SideBar = () =>{
           <div className="element">
             <div className="element-section">
               <div className="icon-part">
-                <SyncOutlined style={{ fontSize: '25px', color: '#fff' }} />
+                <img src="./icons/import.svg" style={{ height: '22px', color: '#fff' }} />
               </div>
               <div className="text-part">
-                <span>Import Data</span>
+                <span>Import</span>
               </div>
             </div>
           </div>
@@ -90,28 +104,36 @@ export default SideBar;
 
 const Style = styled.div`
   .container{
-    background: #141C25;
+    background: #324851;
     height: calc(100vh - 50px);
     width: 225px;
   }
   .content{
-    padding-top: 20px;
+    padding-top: 50px;
   }
   .element{
-    padding: 7.5px 15px 7.5px 10px;
+    
   }
   .element-section{
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: flex-start;
+    padding-top: 10px;
+    padding-bottom: 10px;
   }
   .text-part{
-    font-size: 18px;
-    padding-left: 20px;
+    font-size: 20px;
+    font-weight: 400;
+    padding-left: 30px;
+  }
+  .icon-part{
+    padding-left: 22.5px;
   }
   .element-section:hover{
     cursor: pointer;
+    background: #425757;
+    border-radius: 10px;
   }
   .file_upload {
     opacity: 0.0;
