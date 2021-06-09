@@ -10,7 +10,7 @@ import { Actor, HttpAgent } from '@dfinity/agent';
 import { idlFactory as icdrive_idl, canisterId as icdrive_id } from 'dfx-generated/icdrive';
 import {useSelector} from 'react-redux';
 import {DownloadOutlined, DeleteOutlined, EditOutlined} from "@ant-design/icons";
-import {Table, Popconfirm} from 'antd';
+import {Table, Popconfirm, Space} from 'antd';
 
 const ListView = () =>{
 
@@ -19,7 +19,8 @@ const ListView = () =>{
   const agent = new HttpAgent();
   const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
 
-  const download = async (fileId, chunk_count, fileName) => {
+  // For large files not working on firefox to be fixed
+  /*const download = async (fileId, chunk_count, fileName) => {
     streamSaver.WritableStream = WritableStream
     streamSaver.mitm = 'http://localhost:8000/mitm.html'
     const fileStream = streamSaver.createWriteStream(fileName);
@@ -31,16 +32,31 @@ const ListView = () =>{
       writer.write(bytesAsBuffer);
     }
     writer.close();
+  };*/
+
+  //Temporary method works well on small files
+  //Works for images, file type storage in backend in next commit
+  const download = async (fileId, chunk_count, fileName) => {
+    const chunkBuffers = [];
+    for(let j=0; j<chunk_count; j++){
+      const bytes = await icdrive.getFileChunk(fileId, j+1);
+      const bytesAsBuffer = Buffer.from(new Uint8Array(bytes));
+      chunkBuffers.push(bytesAsBuffer);
+    }
+    const fileBlob = new Blob([Buffer.concat(chunkBuffers)], {
+      type: "image/jpeg",
+    });
+    const fileURL = URL.createObjectURL(fileBlob);
+    var link = document.createElement('a');
+    link.href = fileURL;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
   };
 
-  const handleDownload = async (fileId, chunk_count, fileName) =>{
-    let k = await download(fileId, chunk_count, fileName)
-  }
-
-  const downloadFile = async () =>{
-    console.log("here")
-    const k = await handleDownload(files[0]["fileId"], files[0]["chunkCount"], files[0]["name"])
-    console.log("here over")
+  const handleDownload = async (record) =>{
+    console.log(record)
+    let k = await download(record["fileId"], record["chunkCount"], record["name"])
   }
 
   const columns = [
@@ -60,24 +76,23 @@ const ListView = () =>{
       key: 'createdAt',
     },
     {
-      title: 'Action',
-      dataIndex: 'operation',
+      title: '',
       key: 'operation',
       render: (_, record) => {
         return (
-        <span>
+        <Space size="middle">
           <a>
-            <DownloadOutlined onClick={downloadFile} />&nbsp;&nbsp;
+            <DownloadOutlined onClick={()=>handleDownload(record)} />
           </a>
           <a>
-            <EditOutlined />&nbsp;&nbsp;
+            <EditOutlined />
           </a>
           <Popconfirm title="Sure to delete?" onConfirm={() => {}}>
           <a>
             <DeleteOutlined />
           </a>
           </Popconfirm>
-        </span>
+        </Space>
         );
       },
     },
@@ -86,7 +101,7 @@ const ListView = () =>{
   return(
     <Style>
       <div>
-        <Table dataSource={files} columns={columns} />
+        <Table dataSource={files} columns={columns} footer={false} />
       </div>
     </Style>
   )
