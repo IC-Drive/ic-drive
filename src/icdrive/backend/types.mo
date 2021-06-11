@@ -50,8 +50,6 @@ module {
   };
 
   public func empty () : State {
-    let equal = (Text.equal, Text.equal);
-    let hash = (Text.hash, Text.hash);
 
     let st : State = {
       chunks = TrieMap.TrieMap<ChunkId, ChunkData>(Text.equal, Text.hash);

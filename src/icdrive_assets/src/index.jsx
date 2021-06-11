@@ -22,4 +22,5 @@ ReactDOM.render(
   document.getElementById('root')
 );
 
+// thanks to https://github.com/jimmywarting/StreamSaver.js
 //registerWorker();
