@@ -7,18 +7,24 @@ import SideBar from './SideBar/SideBar.jsx';
 import CenterPortion from './CenterPortion/CenterPortion.jsx'
 
 // 3rd party imports
-import {useDispatch} from 'react-redux'
-import {filesUpdate} from '../state/actions'
-import { Actor, HttpAgent } from '@dfinity/agent';
 import { idlFactory as icdrive_idl, canisterId as icdrive_id } from 'dfx-generated/icdrive';
+import { Actor, HttpAgent } from '@dfinity/agent';
+import { AuthClient } from "@dfinity/auth-client";
+import {useDispatch} from 'react-redux';
+import {filesUpdate} from '../state/actions';
 
 const Dashboard = () =>{
 
   const dispatch = useDispatch();
-  const agent = new HttpAgent();
-  const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
 
-  React.useEffect(() => {
+  React.useEffect(async () => {
+    const authClient = await AuthClient.create();
+    const identity = await authClient.getIdentity();
+    console.log("identity")
+    console.log({identity})
+    const agent = new HttpAgent({ identity });
+    const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
+
     const get_files = async() =>{
       const file_list = await icdrive.getFiles()
       dispatch(filesUpdate(file_list[0]))

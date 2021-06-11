@@ -1,21 +1,20 @@
-// Make the Connectd app's public methods available locally
-
-import Types "./backend/types";
+import Bool "mo:base/Bool";
+import Buffer "mo:base/Buffer";
 import Database "./backend/database";
 import Debug "mo:base/Debug";
-import Principal "mo:base/Principal";
-import Time "mo:base/Time";
-import Text "mo:base/Text";
 import Int "mo:base/Int";
 import Nat "mo:base/Nat";
 import Nat8 "mo:base/Nat8";
-
 import Prelude "mo:base/Prelude";
+import Principal "mo:base/Principal";
+import Text "mo:base/Text";
+import Time "mo:base/Time";
 import TrieMap "mo:base/TrieMap";
-import Buffer "mo:base/Buffer";
+import Types "./backend/types";
 
-actor icdrive {
+shared (msg) actor class icdrive (){
 
+  let admin = msg.caller;
   type Profile = Types.Profile;
   type UserId = Types.UserId;
   public type FileId = Types.FileId;
@@ -27,7 +26,17 @@ actor icdrive {
   var state = Types.empty();
   var user: Database.User = Database.User();
 
-  public shared query(msg) func getOwnId(): async UserId { msg.caller };
+  public shared query(msg) func getOwnId(): async UserId { Debug.print(Principal.toText(msg.caller)); msg.caller };
+
+  func accessCheck(caller : Principal) : Bool {
+    Debug.print(Principal.toText(caller));
+    Debug.print(Principal.toText(admin));
+    if (admin == caller){
+      return true;
+    } else{
+      return false;
+    }
+  };
 
   func createFile_(i : FileInit) : ?FileId {
     let now = Time.now();
@@ -51,7 +60,11 @@ actor icdrive {
   };
 
   public shared(msg) func createFile(i : FileInit) : async ?FileId {
+    if(msg.caller==admin){
       createFile_(i)
+    } else{
+      null
+    }      
   };
 
   func getFileInfo_ (fileId : FileId) : ?FileInfo {
@@ -102,15 +115,13 @@ actor icdrive {
   };
 
   public query(msg) func getFileChunk(fileId : FileId, chunkNum : Nat) : async ?[Nat8] {
-    Debug.print("File ID GET");
-    Debug.print(fileId);
-    Debug.print("Chunk ID GET");
-    Debug.print(chunkId(fileId, chunkNum));
-    Debug.print("Chunk ID GET Over");
     state.chunks.get(chunkId(fileId, chunkNum));
   };
 
   public query(msg) func getFiles() : async ?[FileInfo] {
+    Debug.print("jfaslkjflsajf;alkj");
+    let k = accessCheck(msg.caller);
+    Debug.print(Bool.toText(k));
     do ? {
       let b = Buffer.Buffer<FileInfo>(0);
       for ((v, _) in state.files.entries()) {

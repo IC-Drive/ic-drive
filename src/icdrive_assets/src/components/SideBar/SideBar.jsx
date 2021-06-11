@@ -21,6 +21,7 @@ const SideBar = () =>{
 
   React.useEffect(async()=>{
     const id = await icdrive.getOwnId();
+    console.log(id)
     setId(id);
   },[])
 
