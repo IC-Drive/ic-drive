@@ -62,7 +62,11 @@ function generateWebpackConfigForCanister(name, info) {
       filename: "[name].js",
       path: path.join(__dirname, "dist", name),
     },
-
+    devServer: {
+      proxy: {
+        "/api": "http://localhost:8000",
+      },
+     },
     // Depending in the language or framework you are using for
     // front-end development, add module loaders to the default
     // webpack configuration. For example, if you are using React

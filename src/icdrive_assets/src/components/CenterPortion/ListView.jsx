@@ -15,10 +15,8 @@ import {Table, Popconfirm, Space} from 'antd';
 const ListView = () =>{
 
   const files = useSelector(state=>state.FileHandler.files)
-
-  const agent = new HttpAgent();
-  const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
-
+  console.log("list view")
+  console.log(files)
   // For large files not working on firefox to be fixed
   /*const download = async (fileId, chunk_count, fileName) => {
     streamSaver.WritableStream = WritableStream
@@ -69,9 +67,10 @@ const ListView = () =>{
       title: 'File Size',
       dataIndex: 'chunkCount',
       key: 'chunkCount',
+      render: text => <div>{text/2}MB</div>,
     },
     {
-      title: 'Last Updated',
+      title: 'Created',
       dataIndex: 'createdAt',
       key: 'createdAt',
     },
@@ -101,7 +100,7 @@ const ListView = () =>{
   return(
     <Style>
       <div>
-        <Table dataSource={files} columns={columns} footer={false} />
+        <Table dataSource={files} columns={columns} />
       </div>
     </Style>
   )
