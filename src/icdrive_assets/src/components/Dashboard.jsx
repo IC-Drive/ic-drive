@@ -20,13 +20,16 @@ const Dashboard = () =>{
   React.useEffect(async () => {
     const authClient = await AuthClient.create();
     const identity = await authClient.getIdentity();
-    console.log("identity")
-    console.log({identity})
     const agent = new HttpAgent({ identity });
     const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
 
     const get_files = async() =>{
       const file_list = await icdrive.getFiles()
+      for(let i=0; i<file_list[0].length; i++){
+        file_list[0][i]["chunkCount"] = file_list[0][i]["chunkCount"].toString()
+        let temp = new Date(parseInt(Number(file_list[0][i]["createdAt"]).toString().slice(0, -6)))
+        file_list[0][i]["createdAt"] = temp.getDate() + "-" + (temp.getMonth()+1) + "-" + temp.getFullYear()
+      }
       dispatch(filesUpdate(file_list[0]))
     }
     get_files();

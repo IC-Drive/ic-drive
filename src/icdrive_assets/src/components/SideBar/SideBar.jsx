@@ -3,6 +3,7 @@ import styled from 'styled-components';
 
 // custom imports
 import {useUploadFile} from './File.jsx';
+import { AuthClient } from "@dfinity/auth-client";
 import { Actor, HttpAgent } from '@dfinity/agent';
 import { idlFactory as icdrive_idl, canisterId as icdrive_id } from 'dfx-generated/icdrive';
 
@@ -13,16 +14,15 @@ import {uploadUpdate, filesUpdate} from '../../state/actions'
 const SideBar = () =>{
 
   const dispatch = useDispatch();
-  const agent = new HttpAgent();
-  const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
+  //const authClient = await AuthClient.create();
+  //const identity = await authClient.getIdentity();
+  //const agent = new HttpAgent({ identity });
+  //const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
 
-  const [id, setId] = React.useState("");
   const files = useSelector(state=>state.FileHandler.files)
 
   React.useEffect(async()=>{
-    const id = await icdrive.getOwnId();
-    console.log(id)
-    setId(id);
+    
   },[])
 
   const onFileSelect = async (evt) => {
@@ -32,7 +32,7 @@ const SideBar = () =>{
     for(let i=0; i<file_list.length; i++){
       const file = file_list[i];
       dispatch(uploadUpdate({file_uploading: file.name, file_count: file_list.length, completed: i+1}))
-      const file_obj = await useUploadFile(id, file);
+      const file_obj = await useUploadFile(file);
       file_array.push(file_obj)
     }
     dispatch(uploadUpdate({file_uploading: "", file_count: 0, completed: 0}))

@@ -1,8 +1,6 @@
 import { Actor, HttpAgent } from '@dfinity/agent';
+import { AuthClient } from "@dfinity/auth-client";
 import { idlFactory as icdrive_idl, canisterId as icdrive_id } from 'dfx-generated/icdrive';
-
-const agent = new HttpAgent();
-const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
 
 const MAX_CHUNK_SIZE = 1024 * 500; // 500kb
 
@@ -12,7 +10,8 @@ async function processAndUploadChunk(
   byteStart,
   fileSize,
   fileId,
-  chunk
+  chunk,
+  icdrive
 ) {
   const fileSlice = fileBuffer.slice(
     byteStart,
@@ -43,10 +42,14 @@ function getFileInit(
 }
 
 // Wraps up the previous functions into one step for the UI to trigger
-async function uploadFile(userId, file) {
+async function uploadFile(file, icdrive) {
   const fileBuffer = (await file.arrayBuffer()) || new ArrayBuffer(0);
+  const userId = await icdrive.getOwnId();
   const fileInit = getFileInit(userId, file);
+  console.log("here");
+  console.log(fileInit);
   let fileId = await icdrive.createFile(fileInit);
+  console.log(fileId);
   fileId = fileId[0]
 
   let file_obj = {
@@ -64,19 +67,26 @@ async function uploadFile(userId, file) {
     byteStart < file.size;
     byteStart += MAX_CHUNK_SIZE, chunk++
   ) {
-    await processAndUploadChunk(fileBuffer, byteStart, file.size, fileId, chunk)
+    await processAndUploadChunk(fileBuffer, byteStart, file.size, fileId, chunk, icdrive)
     if(chunk >= fileInit["chunkCount"]){
       return(file_obj)
     }
   }
 }
 
-export async function useUploadFile(userId, file) {
+export async function useUploadFile(file) {
+  const authClient = await AuthClient.create();
+  const identity = await authClient.getIdentity();
+  const agent = new HttpAgent({ identity });
+  const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
   console.info("Storing File...");
   try {
     console.time("Stored in");
-    const file_obj = await uploadFile(userId, file);
+    const file_obj = await uploadFile(file, icdrive);
     console.timeEnd("Stored in");
+    console.log("k");
+    let k = await icdrive.getFileInfo(file_obj["fileId"]);
+    console.log(k);
     return(file_obj);
   } catch (error) {
     console.error("Failed to store file.", error);

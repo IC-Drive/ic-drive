@@ -14,6 +14,7 @@ module {
 
   public type Profile = {
     id: UserId;
+    userNumber: Int;
     name : Text;
 		img: Text;
     createdAt: Int;

@@ -26,54 +26,43 @@ shared (msg) actor class icdrive (){
   var state = Types.empty();
   var user: Database.User = Database.User();
 
-  public shared query(msg) func getOwnId(): async UserId { Debug.print(Principal.toText(msg.caller)); msg.caller };
+  public shared query(msg) func getOwnId(): async UserId { msg.caller };
 
-  func accessCheck(caller : Principal) : Bool {
-    Debug.print(Principal.toText(caller));
-    Debug.print(Principal.toText(admin));
-    if (admin == caller){
-      return true;
-    } else{
-      return false;
-    }
+  func createProfile(caller: Principal, profile: Profile) : async() {
+    user.createOne(caller, profile);
   };
 
-  func createFile_(i : FileInit) : ?FileId {
+  public shared(msg) func getProfile() : async ?Profile {
+    user.findOne(msg.caller);
+  };
+
+  func createFile_(fileData : FileInit, userId: UserId) : ?FileId {
     let now = Time.now();
-    let fileId = Principal.toText(i.userId) # "-" # i.name # "-" # (Int.toText(now));
+    let fileId = Principal.toText(userId) # "-" # fileData.name # "-" # (Int.toText(now));
     switch (state.files.get(fileId)) {
     case (?_) { /* error -- ID already taken. */ null };
     case null { /* ok, not taken yet. */
            state.files.put(fileId,
                             {
                               fileId = fileId;
-                              userId = i.userId ;
-                              name = i.name ;
-                              createdAt = i.createdAt ;
+                              userId = userId ;
+                              name = fileData.name ;
+                              createdAt = now ;
                               uploadedAt = now ;
-                              chunkCount = i.chunkCount ;
+                              chunkCount = fileData.chunkCount ;
                             });
-           //state.uploaded.put(i.userId, videoId);
            ?fileId
          };
     }
   };
 
   public shared(msg) func createFile(i : FileInit) : async ?FileId {
-    if(msg.caller==admin){
-      createFile_(i)
-    } else{
-      null
-    }      
+    createFile_(i, msg.caller)
   };
 
   func getFileInfo_ (fileId : FileId) : ?FileInfo {
     do ? {
-      Debug.print("here do");
-      Debug.print(fileId);
       let v = state.files.get(fileId)!;
-      Debug.print(v.name);
-      Debug.print(Principal.toText(v.userId));
       {
         fileId = fileId;
         userId = v.userId ;
@@ -119,17 +108,18 @@ shared (msg) actor class icdrive (){
   };
 
   public query(msg) func getFiles() : async ?[FileInfo] {
-    Debug.print("jfaslkjflsajf;alkj");
-    let k = accessCheck(msg.caller);
-    Debug.print(Bool.toText(k));
     do ? {
       let b = Buffer.Buffer<FileInfo>(0);
       for ((v, _) in state.files.entries()) {
-        b.add(getFileInfo_(v)!)
+        let file_info = getFileInfo_(v)!;
+        if(msg.caller==file_info.userId){
+          b.add(file_info);
+        }
       };
       b.toArray()
     }
   };
+
 ///////////////////////////////////////////////////// TEST  //////////////////////////////////////
   public query(msg) func getChunks() : async () {
       Debug.print("chunk printing");
