@@ -11,6 +11,7 @@ module {
   func makeProfile(userId: UserId, profile: Profile): Profile {
     {
       id = userId;
+      userNumber = profile.userNumber;
       name = profile.name;
       img = profile.img;
       createdAt = Time.now();
@@ -27,12 +28,12 @@ module {
       hashMap.put(userId, makeProfile(userId, profile));
     };
 
-    public func updateOne(userId: UserId, profile: Profile) {
-      hashMap.put(userId, profile);
-    };
+//    public func updateOne(userId: UserId, profile: Profile) {
+//      hashMap.put(userId, profile);
+//    };
 
     public func findOne(userId: UserId): ?Profile {
-      hashMap.get(userId)
+      hashMap.get(userId);
     };
   };
 

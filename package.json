@@ -4,7 +4,8 @@
   "description": "",
   "keywords": [],
   "scripts": {
-    "build": "webpack"
+    "build": "webpack",
+    "start": "webpack serve"
   },
   "devDependencies": {
     "@dfinity/agent": "0.8.8",
@@ -34,6 +35,7 @@
     "styled-components": "^5.3.0",
     "ts-loader": "^9.2.2",
     "typescript": "^4.3.2",
-    "web-streams-polyfill": "^3.0.3"
+    "web-streams-polyfill": "^3.0.3",
+    "webpack-dev-server": "^3.11.2"
   }
 }
