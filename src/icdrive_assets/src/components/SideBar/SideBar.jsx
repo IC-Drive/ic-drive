@@ -9,7 +9,7 @@ import { idlFactory as icdrive_idl, canisterId as icdrive_id } from 'dfx-generat
 
 // 3rd party imports
 import {useDispatch, useSelector} from 'react-redux'
-import {uploadUpdate, filesUpdate} from '../../state/actions'
+import {uploadUpdate, refreshFiles} from '../../state/actions'
 
 const SideBar = () =>{
 
@@ -36,7 +36,7 @@ const SideBar = () =>{
       file_array.push(file_obj)
     }
     dispatch(uploadUpdate({file_uploading: "", file_count: 0, completed: 0}))
-    dispatch(filesUpdate(file_array))
+    dispatch(refreshFiles(true))
   }
 
   return(

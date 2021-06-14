@@ -7,6 +7,7 @@ import styled from 'styled-components';
 import * as streamSaver from 'streamsaver';
 import { WritableStream } from 'web-streams-polyfill/ponyfill'
 import { Actor, HttpAgent } from '@dfinity/agent';
+import { AuthClient } from "@dfinity/auth-client";
 import { idlFactory as icdrive_idl, canisterId as icdrive_id } from 'dfx-generated/icdrive';
 import {useSelector} from 'react-redux';
 import {DownloadOutlined, DeleteOutlined, EditOutlined} from "@ant-design/icons";
@@ -15,8 +16,7 @@ import {Table, Popconfirm, Space} from 'antd';
 const ListView = () =>{
 
   const files = useSelector(state=>state.FileHandler.files)
-  console.log("list view")
-  console.log(files)
+  
   // For large files not working on firefox to be fixed
   /*const download = async (fileId, chunk_count, fileName) => {
     streamSaver.WritableStream = WritableStream
@@ -33,16 +33,21 @@ const ListView = () =>{
   };*/
 
   //Temporary method works well on small files
-  //Works for images, file type storage in backend in next commit
-  const download = async (fileId, chunk_count, fileName) => {
+  const download = async (fileId, chunk_count, fileName, mimeType) => {
+    const authClient = await AuthClient.create();
+    const identity = await authClient.getIdentity();
+    const agent = new HttpAgent({ identity });
+    const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
+
     const chunkBuffers = [];
     for(let j=0; j<chunk_count; j++){
       const bytes = await icdrive.getFileChunk(fileId, j+1);
-      const bytesAsBuffer = Buffer.from(new Uint8Array(bytes));
+      const bytesAsBuffer = new Uint8Array(bytes[0]);
       chunkBuffers.push(bytesAsBuffer);
     }
+    
     const fileBlob = new Blob([Buffer.concat(chunkBuffers)], {
-      type: "image/jpeg",
+      type: mimeType,
     });
     const fileURL = URL.createObjectURL(fileBlob);
     var link = document.createElement('a');
@@ -53,8 +58,7 @@ const ListView = () =>{
   };
 
   const handleDownload = async (record) =>{
-    console.log(record)
-    let k = await download(record["fileId"], record["chunkCount"], record["name"])
+    let k = await download(record["fileId"], record["chunkCount"], record["name"], record["mimeType"])
   }
 
   const columns = [
