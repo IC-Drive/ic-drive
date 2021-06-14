@@ -1,6 +1,7 @@
 import Principal "mo:base/Principal";
 import Text "mo:base/Text";
 import Int "mo:base/Int";
+import Bool "mo:base/Int";
 import Nat8 "mo:base/Nat8";
 import TrieMap "mo:base/TrieMap";
 
@@ -14,6 +15,7 @@ module {
 
   public type Profile = {
     id: UserId;
+    userNumber: Int;
     name : Text;
 		img: Text;
     createdAt: Int;
@@ -24,6 +26,8 @@ module {
     name: Text;
     createdAt : Int;
     chunkCount: Nat;
+    mimeType: Text;
+    marked: Bool;
   };
 
   public type FileInfo = {
@@ -32,6 +36,8 @@ module {
     createdAt : Int;
     name: Text;
     chunkCount: Nat;
+    mimeType: Text;
+    marked: Bool;
   };
 
   public type File = {
@@ -40,6 +46,8 @@ module {
     uploadedAt : Int;
     name: Text;
     chunkCount: Nat;
+    mimeType: Text;
+    marked: Bool;
   };
 
   public type State = {
@@ -50,8 +58,6 @@ module {
   };
 
   public func empty () : State {
-    let equal = (Text.equal, Text.equal);
-    let hash = (Text.hash, Text.hash);
 
     let st : State = {
       chunks = TrieMap.TrieMap<ChunkId, ChunkData>(Text.equal, Text.hash);

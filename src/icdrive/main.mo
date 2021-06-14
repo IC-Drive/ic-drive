@@ -1,21 +1,20 @@
-// Make the Connectd app's public methods available locally
-
-import Types "./backend/types";
+import Bool "mo:base/Bool";
+import Buffer "mo:base/Buffer";
 import Database "./backend/database";
 import Debug "mo:base/Debug";
-import Principal "mo:base/Principal";
-import Time "mo:base/Time";
-import Text "mo:base/Text";
 import Int "mo:base/Int";
 import Nat "mo:base/Nat";
 import Nat8 "mo:base/Nat8";
-
 import Prelude "mo:base/Prelude";
+import Principal "mo:base/Principal";
+import Text "mo:base/Text";
+import Time "mo:base/Time";
 import TrieMap "mo:base/TrieMap";
-import Buffer "mo:base/Buffer";
+import Types "./backend/types";
 
-actor icdrive {
+shared (msg) actor class icdrive (){
 
+  let admin = msg.caller;
   type Profile = Types.Profile;
   type UserId = Types.UserId;
   public type FileId = Types.FileId;
@@ -29,44 +28,51 @@ actor icdrive {
 
   public shared query(msg) func getOwnId(): async UserId { msg.caller };
 
-  func createFile_(i : FileInit) : ?FileId {
+  func createProfile(caller: Principal, profile: Profile) : async() {
+    user.createOne(caller, profile);
+  };
+
+  public shared(msg) func getProfile() : async ?Profile {
+    user.findOne(msg.caller);
+  };
+
+  func createFile_(fileData : FileInit, userId: UserId) : ?FileId {
     let now = Time.now();
-    let fileId = Principal.toText(i.userId) # "-" # i.name # "-" # (Int.toText(now));
+    let fileId = Principal.toText(userId) # "-" # fileData.name # "-" # (Int.toText(now));
     switch (state.files.get(fileId)) {
     case (?_) { /* error -- ID already taken. */ null };
     case null { /* ok, not taken yet. */
            state.files.put(fileId,
                             {
                               fileId = fileId;
-                              userId = i.userId ;
-                              name = i.name ;
-                              createdAt = i.createdAt ;
+                              userId = userId ;
+                              name = fileData.name ;
+                              createdAt = now ;
                               uploadedAt = now ;
-                              chunkCount = i.chunkCount ;
+                              chunkCount = fileData.chunkCount ;
+                              mimeType = fileData.mimeType;
+                              marked= fileData.marked;
                             });
-           //state.uploaded.put(i.userId, videoId);
            ?fileId
          };
     }
   };
 
   public shared(msg) func createFile(i : FileInit) : async ?FileId {
-      createFile_(i)
+    createFile_(i, msg.caller)
   };
 
   func getFileInfo_ (fileId : FileId) : ?FileInfo {
     do ? {
-      Debug.print("here do");
-      Debug.print(fileId);
       let v = state.files.get(fileId)!;
-      Debug.print(v.name);
-      Debug.print(Principal.toText(v.userId));
       {
         fileId = fileId;
         userId = v.userId ;
         createdAt = v.createdAt ;
         name = v.name ;
         chunkCount = v.chunkCount ;
+        mimeType = v.mimeType;
+        marked= v.marked;
       }
     }
   };
@@ -88,6 +94,8 @@ actor icdrive {
                         createdAt = i.createdAt ;
                         name = i.name ;
                         chunkCount = i.chunkCount ;
+                        mimeType = i.mimeType ;
+                        marked= i.marked;
                       })
   };
   
@@ -102,11 +110,6 @@ actor icdrive {
   };
 
   public query(msg) func getFileChunk(fileId : FileId, chunkNum : Nat) : async ?[Nat8] {
-    Debug.print("File ID GET");
-    Debug.print(fileId);
-    Debug.print("Chunk ID GET");
-    Debug.print(chunkId(fileId, chunkNum));
-    Debug.print("Chunk ID GET Over");
     state.chunks.get(chunkId(fileId, chunkNum));
   };
 
@@ -114,11 +117,15 @@ actor icdrive {
     do ? {
       let b = Buffer.Buffer<FileInfo>(0);
       for ((v, _) in state.files.entries()) {
-        b.add(getFileInfo_(v)!)
+        let file_info = getFileInfo_(v)!;
+        if(msg.caller==file_info.userId){
+          b.add(file_info);
+        }
       };
       b.toArray()
     }
   };
+
 ///////////////////////////////////////////////////// TEST  //////////////////////////////////////
   public query(msg) func getChunks() : async () {
       Debug.print("chunk printing");

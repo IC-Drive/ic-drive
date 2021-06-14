@@ -4,6 +4,7 @@ import styled from 'styled-components';
 // custom imports
 import ListView from './ListView';
 import GridView from './GridView';
+import ListViewMarked from './Marked/ListViewMarked';
 
 // 3rd party imports
 import {MenuOutlined, AppstoreOutlined} from "@ant-design/icons";
@@ -13,6 +14,7 @@ const CenterPortion = () =>{
 
   const [selectedView, setSelectedView] = React.useState("listView");
   const upload = useSelector(state=>state.FileHandler.upload);
+  const optionSelected = useSelector(state=>state.OptionSelected.option);
 
   return(
     <Style>
@@ -21,7 +23,7 @@ const CenterPortion = () =>{
           {
             upload["file_count"]>0?
             <div className="show-upload">
-              &nbsp;Uploading:&nbsp;{upload["file_uploading"]}&nbsp;&nbsp;{upload["completed"]}/{upload["file_count"]}
+              &nbsp;Uploading:&nbsp;{upload["file_uploading"]}&nbsp;&nbsp;{upload["completed"]}/{upload["file_count"]}&nbsp;...
             </div>
             :
             null
@@ -43,10 +45,19 @@ const CenterPortion = () =>{
         </div>
       </div>
       {
-        selectedView==="listView"?
-        <ListView/>
+        optionSelected==="marked"?
+        <div>
+          <ListViewMarked/>
+        </div>
         :
-        <GridView/>
+        <div>
+          {
+            selectedView==="listView"?
+            <ListView/>
+            :
+            <GridView/>
+          }
+        </div>
       }
     </Style>
   )
@@ -76,7 +87,7 @@ const Style = styled.div`
   }
   .show-upload{
     font-size: 16px;
-    font-weight: 400;
-    color: #fff;
+    font-weight: 500;
+    color: #000;
   }
 `
