@@ -9,7 +9,7 @@ import { idlFactory as icdrive_idl, canisterId as icdrive_id } from 'dfx-generat
 
 // 3rd party imports
 import {useDispatch, useSelector} from 'react-redux'
-import {uploadUpdate, refreshFiles} from '../../state/actions'
+import {uploadUpdate, refreshFiles, switchMarked} from '../../state/actions'
 
 const SideBar = () =>{
 
@@ -27,7 +27,6 @@ const SideBar = () =>{
 
   const onFileSelect = async (evt) => {
     const file_list = evt.target.files
-
     const file_array = [...files]
     for(let i=0; i<file_list.length; i++){
       const file = file_list[i];
@@ -74,7 +73,7 @@ const SideBar = () =>{
           </div>
 
           <div className="element">
-            <div className="element-section">
+            <div className="element-section" onClick={()=>{dispatch(switchMarked("marked"))}}>
               <div className="icon-part">
                 <img src="./icons/mark.svg" style={{ height: '22px', color: '#fff' }} />
               </div>

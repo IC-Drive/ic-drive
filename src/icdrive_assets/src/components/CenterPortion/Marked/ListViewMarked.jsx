@@ -10,14 +10,27 @@ import { Actor, HttpAgent } from '@dfinity/agent';
 import { AuthClient } from "@dfinity/auth-client";
 import { idlFactory as icdrive_idl, canisterId as icdrive_id } from 'dfx-generated/icdrive';
 import {useSelector, useDispatch} from 'react-redux';
-import {filesUpdate} from '../../state/actions'
-import {DownloadOutlined, DeleteOutlined, EditOutlined, BookOutlined} from "@ant-design/icons";
+import {DownloadOutlined, DeleteOutlined, EditOutlined} from "@ant-design/icons";
 import {Table, Popconfirm, Space} from 'antd';
 
-const ListView = () =>{
+const ListViewMarked = () =>{
 
-  const files = useSelector(state=>state.FileHandler.files)
+  const files = useSelector(state=>state.FileHandler.files);
+  const [data, setData] = React.useState("")
+  //const data = useRef([]);
   const dispatch = useDispatch();
+
+  React.useEffect(()=>{
+    let temp = []
+    for(let i=0; i<files.length; i++){
+      if(files[i]["marked"]){
+        temp.push(files[i])
+      }
+    }
+    console.log("here")
+    console.log(temp)
+    setData(temp)
+  },[])
 
   // For large files not working on firefox to be fixed
   /*const download = async (fileId, chunk_count, fileName) => {
@@ -63,18 +76,6 @@ const ListView = () =>{
     let k = await download(record["fileId"], record["chunkCount"], record["name"], record["mimeType"])
   }
 
-  const handleMarked = (record) =>{
-    let temp = [...files]
-    for(let i=0; i<temp.length; i++){
-      if(temp[i]["fileId"]===record["fileId"]){
-        temp[i]["marked"] = true
-      }
-    }
-    console.log("list")
-    console.log(temp)
-    dispatch(filesUpdate(temp));
-  }
-
   const columns = [
     {
       title: 'File Name',
@@ -91,12 +92,6 @@ const ListView = () =>{
       title: 'Created',
       dataIndex: 'createdAt',
       key: 'createdAt',
-    },
-    {
-      title: 'Marked',
-      dataIndex: 'marked',
-      key: 'marked',
-      render: (_, record) => <div>{record.marked?<BookOutlined style={{fontSize: "16px", color: "#edeb51"}} onClick={()=>handleMarked(record)} />:<BookOutlined style={{fontSize: "16px", color: "#000"}} onClick={()=>handleMarked(record)} />}</div>,
     },
     {
       title: '',
@@ -124,13 +119,16 @@ const ListView = () =>{
   return(
     <Style>
       <div>
-        <Table dataSource={files} columns={columns} />
+        {
+          data===""?null:<Table dataSource={data} columns={columns} />
+        }
+        
       </div>
     </Style>
   )
 }
 
-export default ListView;
+export default ListViewMarked;
 
 const Style = styled.div`
 

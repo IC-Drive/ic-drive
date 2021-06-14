@@ -16,3 +16,17 @@ export const refreshFiles = (payload) =>{
       payload
   }
 }
+
+//-------------------------------------Switch Options-----------------------------------------//
+export const switchDefault = (payload) =>{
+  return{
+      type: 'switchDefault',
+      payload
+  }
+}
+export const switchMarked = (payload) =>{
+  return{
+      type: 'switchMarked',
+      payload
+  }
+}
