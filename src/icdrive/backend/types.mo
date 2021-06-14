@@ -1,6 +1,7 @@
 import Principal "mo:base/Principal";
 import Text "mo:base/Text";
 import Int "mo:base/Int";
+import Bool "mo:base/Int";
 import Nat8 "mo:base/Nat8";
 import TrieMap "mo:base/TrieMap";
 
@@ -26,6 +27,7 @@ module {
     createdAt : Int;
     chunkCount: Nat;
     mimeType: Text;
+    marked: Bool;
   };
 
   public type FileInfo = {
@@ -35,6 +37,7 @@ module {
     name: Text;
     chunkCount: Nat;
     mimeType: Text;
+    marked: Bool;
   };
 
   public type File = {
@@ -44,6 +47,7 @@ module {
     name: Text;
     chunkCount: Nat;
     mimeType: Text;
+    marked: Bool;
   };
 
   public type State = {

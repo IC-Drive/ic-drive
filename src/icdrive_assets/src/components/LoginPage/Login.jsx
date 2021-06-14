@@ -44,7 +44,10 @@ const Login = () =>{
         :
         <div className="loginPage">
           <div className = "LHS">
-          
+            <div id="content">
+            <div id="ic-title">IC Drive</div>
+            <div id="ic-footer">Secure and Private Decentralized Storage App</div>
+            </div>
           </div>
           <div className = "RHS">
             {
@@ -116,16 +119,37 @@ const Style = styled.div`
   }
   @media only screen and (min-width: 600px) {
       .loginPage{
-          height: 100vh;
-          display: grid;
-          grid-template-columns: 60vw 40vw;
+        height: 100vh;
+        display: grid;
+        grid-template-columns: 60vw 40vw;
       }
       .LHS{
-          display: block;
-          background: #324851;
+        background: #324851;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
       .RHS{
-          background: #FFFFFF;
+        background: #FFFFFF;
+      }
+      #content{
+        display: flex;
+        flex-flow: column;
+        align-items: center;
+        justify-content: center;
+      }
+      #ic-title{
+        font-size: 72px;
+        font-family: Times New Roman;
+        font-weight: 600;
+        color: #fff;
+        line-height: 90px;
+      }
+      #ic-footer{
+        font-size: 24px;
+        font-family: Times New Roman;
+        font-weight: 400;
+        color: #fff;
       }
   }
 `
