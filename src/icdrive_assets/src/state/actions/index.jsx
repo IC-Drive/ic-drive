@@ -10,3 +10,9 @@ export const uploadUpdate = (payload) =>{
       payload
   }
 }
+export const refreshFiles = (payload) =>{
+  return{
+      type: 'refreshFiles',
+      payload
+  }
+}

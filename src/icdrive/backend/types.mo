@@ -25,6 +25,7 @@ module {
     name: Text;
     createdAt : Int;
     chunkCount: Nat;
+    mimeType: Text;
   };
 
   public type FileInfo = {
@@ -33,6 +34,7 @@ module {
     createdAt : Int;
     name: Text;
     chunkCount: Nat;
+    mimeType: Text;
   };
 
   public type File = {
@@ -41,6 +43,7 @@ module {
     uploadedAt : Int;
     name: Text;
     chunkCount: Nat;
+    mimeType: Text;
   };
 
   public type State = {

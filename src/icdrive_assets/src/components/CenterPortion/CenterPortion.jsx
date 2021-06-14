@@ -77,6 +77,6 @@ const Style = styled.div`
   .show-upload{
     font-size: 16px;
     font-weight: 400;
-    color: #fff;
+    color: #524f49;
   }
 `
