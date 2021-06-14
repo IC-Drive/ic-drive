@@ -38,7 +38,8 @@ function getFileInit(
       createdAt: Number(Date.now() * 1000), // motoko is using nanoseconds
       name: file.name,
       userId: userId,
-      mimeType: file.type
+      mimeType: file.type,
+      marked: false
     };
 }
 
