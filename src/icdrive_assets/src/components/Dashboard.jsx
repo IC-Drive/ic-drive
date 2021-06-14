@@ -10,11 +10,12 @@ import CenterPortion from './CenterPortion/CenterPortion.jsx'
 import { idlFactory as icdrive_idl, canisterId as icdrive_id } from 'dfx-generated/icdrive';
 import { Actor, HttpAgent } from '@dfinity/agent';
 import { AuthClient } from "@dfinity/auth-client";
-import {useDispatch} from 'react-redux';
-import {filesUpdate} from '../state/actions';
+import {useDispatch,useSelector} from 'react-redux';
+import {filesUpdate,refreshFiles} from '../state/actions';
 
 const Dashboard = () =>{
 
+  const refresh_files = useSelector(state=>state.FileHandler.refresh_files);
   const dispatch = useDispatch();
 
   React.useEffect(async () => {
@@ -23,6 +24,7 @@ const Dashboard = () =>{
     const agent = new HttpAgent({ identity });
     const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
 
+    console.log("dashboard")
     const get_files = async() =>{
       const file_list = await icdrive.getFiles()
       for(let i=0; i<file_list[0].length; i++){
@@ -31,9 +33,10 @@ const Dashboard = () =>{
         file_list[0][i]["createdAt"] = temp.getDate() + "-" + (temp.getMonth()+1) + "-" + temp.getFullYear()
       }
       dispatch(filesUpdate(file_list[0]))
+      dispatch(refreshFiles(false))
     }
     get_files();
-  }, [])
+  }, [refresh_files])
 
   return(
     <Style>

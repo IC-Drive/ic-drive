@@ -50,6 +50,7 @@ shared (msg) actor class icdrive (){
                               createdAt = now ;
                               uploadedAt = now ;
                               chunkCount = fileData.chunkCount ;
+                              mimeType = fileData.mimeType;
                             });
            ?fileId
          };
@@ -69,6 +70,7 @@ shared (msg) actor class icdrive (){
         createdAt = v.createdAt ;
         name = v.name ;
         chunkCount = v.chunkCount ;
+        mimeType = v.mimeType;
       }
     }
   };
@@ -90,6 +92,7 @@ shared (msg) actor class icdrive (){
                         createdAt = i.createdAt ;
                         name = i.name ;
                         chunkCount = i.chunkCount ;
+                        mimeType = i.mimeType ;
                       })
   };
   

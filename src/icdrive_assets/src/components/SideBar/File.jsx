@@ -36,8 +36,9 @@ function getFileInit(
     return {
       chunkCount,
       createdAt: Number(Date.now() * 1000), // motoko is using nanoseconds
-      name: file.name.replace(/\.mp4/, ""),
-      userId,
+      name: file.name,
+      userId: userId,
+      mimeType: file.type
     };
 }
 
