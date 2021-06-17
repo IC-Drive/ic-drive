@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import ListView from './ListView';
 import GridView from './GridView';
 import ListViewMarked from './Marked/ListViewMarked';
+import ListViewShared from "./Shared/ListViewShared";
 
 // 3rd party imports
 import {MenuOutlined, AppstoreOutlined} from "@ant-design/icons";
@@ -48,6 +49,11 @@ const CenterPortion = () =>{
         optionSelected==="marked"?
         <div>
           <ListViewMarked/>
+        </div>
+        :
+        optionSelected==="shared"?
+        <div>
+          <ListViewShared/>
         </div>
         :
         <div>

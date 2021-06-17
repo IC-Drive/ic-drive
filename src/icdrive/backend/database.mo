@@ -1,6 +1,7 @@
 import HashMap "mo:base/HashMap";
 import Principal "mo:base/Principal";
 import Time "mo:base/Time";
+import Text "mo:base/Text";
 import Types "./types";
 
 module {
@@ -22,7 +23,7 @@ module {
 
   public class User() {
     
-    let hashMap = HashMap.HashMap<UserId, Profile>(1, isEq, Principal.hash);
+    let hashMap = HashMap.HashMap<UserId, Profile>(1, isEq, Text.hash);
 
     public func createOne(userId: UserId, profile: Profile) {
       hashMap.put(userId, makeProfile(userId, profile));

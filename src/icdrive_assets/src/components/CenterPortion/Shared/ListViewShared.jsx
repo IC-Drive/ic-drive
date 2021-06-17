@@ -10,16 +10,26 @@ import { Actor, HttpAgent } from '@dfinity/agent';
 import { AuthClient } from "@dfinity/auth-client";
 import { idlFactory as icdrive_idl, canisterId as icdrive_id } from 'dfx-generated/icdrive';
 import {useSelector, useDispatch} from 'react-redux';
-import {filesUpdate} from '../../state/actions'
-import {DownloadOutlined, DeleteOutlined, EditOutlined, BookOutlined, ShareAltOutlined} from "@ant-design/icons";
-import {Table, Popconfirm, Space, Modal, Button, Input} from 'antd';
+import {DownloadOutlined, DeleteOutlined, EditOutlined} from "@ant-design/icons";
+import {Table, Popconfirm, Space} from 'antd';
 
-const ListView = () =>{
+const ListViewShared = () =>{
 
-  const files = useSelector(state=>state.FileHandler.files)
+  const files = useSelector(state=>state.FileHandler.files);
+  const [data, setData] = React.useState("")
+  //const data = useRef([]);
   const dispatch = useDispatch();
-  const [modalFlag, setModalFlag] = React.useState(false)
-  const [userId, setUserId] = React.useState("")
+
+  React.useEffect(()=>{
+    let temp = []
+    console.log(files)
+    for(let i=0; i<files.length; i++){
+      if(files[i]["sharedWith"].length>0){
+        temp.push(files[i])
+      }
+    }
+    setData(temp)
+  },[])
 
   // For large files not working on firefox to be fixed
   /*const download = async (fileId, chunk_count, fileName) => {
@@ -65,41 +75,6 @@ const ListView = () =>{
     let k = await download(record["fileId"], record["chunkCount"], record["name"], record["mimeType"])
   }
 
-  const handleMarked = (record) =>{
-    let temp = [...files]
-    for(let i=0; i<temp.length; i++){
-      if(temp[i]["fileId"]===record["fileId"]){
-        temp[i]["marked"] = true
-      }
-    }
-    console.log("list")
-    console.log(temp)
-    dispatch(filesUpdate(temp));
-  }
-
-  const handleOk = async() =>{
-    const authClient = await AuthClient.create();
-    const identity = await authClient.getIdentity();
-    const agent = new HttpAgent({ identity });
-    const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
-    console.log(modalFlag)
-    let k = userId
-    if(k[0]==="\""){
-      k = k.substring(1);
-    }
-    console.log([k])
-
-    let fileInit = {
-      name: modalFlag["name"],
-      chunkCount: parseInt(modalFlag["chunkCount"]),
-      mimeType: modalFlag["mimeType"],
-      marked: modalFlag["marked"],
-      sharedWith: [k]
-    }
-    await icdrive.shareFile(modalFlag["fileId"], fileInit)
-    setModalFlag(false)
-  }
-
   const columns = [
     {
       title: 'File Name',
@@ -118,12 +93,6 @@ const ListView = () =>{
       key: 'createdAt',
     },
     {
-      title: 'Marked',
-      dataIndex: 'marked',
-      key: 'marked',
-      render: (_, record) => <div>{record.marked?<BookOutlined style={{fontSize: "16px", color: "#edeb51"}} onClick={()=>handleMarked(record)} />:<BookOutlined style={{fontSize: "16px", color: "#000"}} onClick={()=>handleMarked(record)} />}</div>,
-    },
-    {
       title: '',
       key: 'operation',
       render: (_, record) => {
@@ -140,9 +109,6 @@ const ListView = () =>{
             <DeleteOutlined />
           </a>
           </Popconfirm>
-          <a>
-            <ShareAltOutlined onClick={()=>setModalFlag(record)} />
-          </a>
         </Space>
         );
       },
@@ -152,16 +118,16 @@ const ListView = () =>{
   return(
     <Style>
       <div>
-        <Table dataSource={files} columns={columns} />
+        {
+          data===""?null:<Table dataSource={data} columns={columns} />
+        }
+        
       </div>
-      <Modal title="Share" visible={modalFlag} onOk={handleOk} onCancel={()=>setModalFlag(false)}>
-        <Input onChange={(e)=>setUserId(e.target.defaultValue.toString())} />
-      </Modal>
     </Style>
   )
 }
 
-export default ListView;
+export default ListViewShared;
 
 const Style = styled.div`
 

@@ -9,7 +9,7 @@ import { idlFactory as icdrive_idl, canisterId as icdrive_id } from 'dfx-generat
 
 // 3rd party imports
 import {useDispatch, useSelector} from 'react-redux'
-import {uploadUpdate, refreshFiles, switchMarked} from '../../state/actions'
+import {uploadUpdate, refreshFiles, switchMarked, switchShared} from '../../state/actions'
 
 const SideBar = () =>{
 
@@ -62,7 +62,7 @@ const SideBar = () =>{
           </div>
 
           <div className="element">
-            <div className="element-section">
+            <div className="element-section" onClick={()=>{dispatch(switchShared("shared"))}}>
               <div className="icon-part">
                 <img src="./icons/share.svg" style={{ height: '22px', color: '#fff' }} />
               </div>
@@ -84,7 +84,7 @@ const SideBar = () =>{
           </div>
 
           <div className="element">
-            <div className="element-section">
+            <div className="element-section" onClick={()=>{dispatch(switchMarked("shared"))}}>
               <div className="icon-part">
                 <img src="./icons/import.svg" style={{ height: '22px', color: '#fff' }} />
               </div>
