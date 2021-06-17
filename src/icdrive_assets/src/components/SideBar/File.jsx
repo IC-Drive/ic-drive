@@ -29,25 +29,23 @@ const encodeArrayBuffer = (file) =>
   Array.from(new Uint8Array(file));
 
 function getFileInit(
-    userId,
     file
   ) {
     const chunkCount = Number(Math.ceil(file.size / MAX_CHUNK_SIZE));
     return {
       chunkCount,
-      createdAt: Number(Date.now() * 1000), // motoko is using nanoseconds
       name: file.name,
-      userId: userId,
       mimeType: file.type,
-      marked: false
+      marked: false,
+      sharedWith: []
     };
 }
 
 // Wraps up the previous functions into one step for the UI to trigger
 async function uploadFile(file, icdrive) {
   const fileBuffer = (await file.arrayBuffer()) || new ArrayBuffer(0);
-  const userId = await icdrive.getOwnId();
-  const fileInit = getFileInit(userId, file);
+  //const userId = await icdrive.getOwnId();
+  const fileInit = getFileInit(file);
   console.log("here");
   console.log(fileInit);
   let fileId = await icdrive.createFile(fileInit);
@@ -56,10 +54,11 @@ async function uploadFile(file, icdrive) {
 
   let file_obj = {
     chunkCount: fileInit["chunkCount"],
-    createdAt: fileInit["createdAt"],
     fileId: fileId,
     name: file.name,
-    userId: userId
+    marked: false,
+    sharedWith: [],
+    mimeType: fileInit["mimeType"]
   }
 
   let chunk = 1;

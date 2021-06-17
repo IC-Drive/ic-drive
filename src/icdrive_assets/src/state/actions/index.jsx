@@ -30,3 +30,9 @@ export const switchMarked = (payload) =>{
       payload
   }
 }
+export const switchShared = (payload) =>{
+  return{
+      type: 'switchShared',
+      payload
+  }
+}

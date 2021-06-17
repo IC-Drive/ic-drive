@@ -32,7 +32,7 @@ const Login = () =>{
       onSuccess: async () => {
         handleAuthenticated(authClient);
       },
-      identityProvider: "http://localhost:8000/?canisterId=rkp4c-7iaaa-aaaaa-aaaca-cai"
+      identityProvider: "http://localhost:8000/?canisterId=rwlgt-iiaaa-aaaaa-aaaaa-cai"
     })
   };
 

@@ -1,4 +1,3 @@
-import Principal "mo:base/Principal";
 import Text "mo:base/Text";
 import Int "mo:base/Int";
 import Bool "mo:base/Int";
@@ -7,7 +6,7 @@ import TrieMap "mo:base/TrieMap";
 
 module {
   
-  public type UserId = Principal;
+  public type UserId = Text;
   public type FileId = Text; // chosen by createFile
   public type ChunkId = Text; // FileId # (toText(ChunkNum))
   public type ChunkData = [Nat8]; // encoded as ???
@@ -22,12 +21,11 @@ module {
   };
 
   public type FileInit = {
-    userId : UserId;
     name: Text;
-    createdAt : Int;
     chunkCount: Nat;
     mimeType: Text;
     marked: Bool;
+    sharedWith: [UserId];
   };
 
   public type FileInfo = {
@@ -38,16 +36,17 @@ module {
     chunkCount: Nat;
     mimeType: Text;
     marked: Bool;
+    sharedWith: [UserId];
   };
 
   public type File = {
     userId : UserId;
     createdAt : Int;
-    uploadedAt : Int;
     name: Text;
     chunkCount: Nat;
     mimeType: Text;
     marked: Bool;
+    sharedWith: [UserId];
   };
 
   public type State = {
