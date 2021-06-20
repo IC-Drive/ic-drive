@@ -3,39 +3,50 @@ import styled from 'styled-components';
 
 // custom imports
 import {useUploadFile} from './File.jsx';
-import { AuthClient } from "@dfinity/auth-client";
-import { Actor, HttpAgent } from '@dfinity/agent';
-import { idlFactory as icdrive_idl, canisterId as icdrive_id } from 'dfx-generated/icdrive';
+import {httpAgent} from '../../httpAgent'
 
 // 3rd party imports
 import {useDispatch, useSelector} from 'react-redux'
-import {uploadUpdate, refreshFiles, switchMarked, switchShared} from '../../state/actions'
+import {uploadUpdate, refreshFiles, switchHome, switchMarked, switchShared, uploadProgress, uploadFileId} from '../../state/actions'
 
 const SideBar = () =>{
 
   const dispatch = useDispatch();
-  //const authClient = await AuthClient.create();
-  //const identity = await authClient.getIdentity();
-  //const agent = new HttpAgent({ identity });
-  //const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
-
+  const [uploadFlag, setUploadFlag] = React.useState(false)
   const files = useSelector(state=>state.FileHandler.files)
 
-  React.useEffect(async()=>{
-    
-  },[])
+  const handleTabClosing = () => {
+    if(upload_file_id!=""){
+      //icdrive.deleteCorruptFile(upload_file_id);
+    }
+  }
+  
+  const alertUser = (event) => {
+    const upload_file_id = useSelector(state=>state.FileHandler.upload_file_id)
+    console.log("close")
+    console.log(upload_file_id)
+    event.preventDefault()
+    return event.returnValue = 'Upload in progress, still close tab?';
+  }
+
+  React.useEffect(()=>{
+    window.addEventListener('beforeunload', alertUser)
+    window.addEventListener('unload', handleTabClosing)
+  }, [uploadFlag])
 
   const onFileSelect = async (evt) => {
+    setUploadFlag(true)
     const file_list = evt.target.files
     const file_array = [...files]
     for(let i=0; i<file_list.length; i++){
       const file = file_list[i];
       dispatch(uploadUpdate({file_uploading: file.name, file_count: file_list.length, completed: i+1}))
-      const file_obj = await useUploadFile(file);
+      const file_obj = await useUploadFile(file, dispatch, uploadProgress, uploadFileId);
       file_array.push(file_obj)
     }
     dispatch(uploadUpdate({file_uploading: "", file_count: 0, completed: 0}))
     dispatch(refreshFiles(true))
+    setUploadFlag(false)
   }
 
   return(

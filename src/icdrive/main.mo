@@ -5,6 +5,7 @@ import Debug "mo:base/Debug";
 import Int "mo:base/Int";
 import Nat "mo:base/Nat";
 import Nat8 "mo:base/Nat8";
+import Iter "mo:base/Iter";
 import Prelude "mo:base/Prelude";
 import Principal "mo:base/Principal";
 import Text "mo:base/Text";
@@ -28,8 +29,8 @@ shared (msg) actor class icdrive (){
 
   public shared query(msg) func getOwnId(): async UserId { Principal.toText(msg.caller) };
 
-  func createProfile(caller: Principal, profile: Profile) : async() {
-    user.createOne(Principal.toText(caller), profile);
+  public shared(msg) func createProfile(userNumber: Int) : async() {
+    user.createOne(Principal.toText(msg.caller), userNumber);
   };
 
   public shared(msg) func getProfile() : async ?Profile {
@@ -49,6 +50,7 @@ shared (msg) actor class icdrive (){
                               name = fileData.name ;
                               createdAt = now ;
                               chunkCount = fileData.chunkCount ;
+                              fileSize = fileData.fileSize;
                               mimeType = fileData.mimeType;
                               marked = fileData.marked;
                               sharedWith = [];
@@ -71,6 +73,7 @@ shared (msg) actor class icdrive (){
         createdAt = v.createdAt ;
         name = v.name ;
         chunkCount = v.chunkCount ;
+        fileSize = v.fileSize;
         mimeType = v.mimeType;
         marked= v.marked;
         sharedWith = v.sharedWith;
@@ -82,33 +85,22 @@ shared (msg) actor class icdrive (){
     getFileInfo_(fileId)
   };
 
-  public shared(msg) func shareFile(fileId : FileId, fileInit : FileInit) : async ?() {
+  public shared(msg) func shareFile(fileId : FileId, userNumber : Int) : async ?() {
     do ? {
-      let i = fileInit ;
-      let v = state.files.get(fileId)!;
-      
+      let shareId = user.getUserId(userNumber)!;
+      let fileInfo = state.files.get(fileId)!;
+
       state.files.put(fileId,
                         {
-                          userId = v.userId ;
-                          createdAt = v.createdAt ;
+                          userId = fileInfo.userId ;
+                          createdAt = fileInfo.createdAt ;
                           fileId = fileId ;
-                          name = v.name ;
-                          chunkCount = v.chunkCount ;
-                          mimeType = v.mimeType ;
-                          marked= v.marked ;
-                          sharedWith = i.sharedWith ;
-                        });
-      
-      state.files.put(fileId,
-                        {
-                          userId = i.sharedWith[0] ;
-                          createdAt = v.createdAt ;
-                          fileId = fileId ;
-                          name = v.name ;
-                          chunkCount = v.chunkCount ;
-                          mimeType = v.mimeType ;
-                          marked= v.marked ;
-                          sharedWith = [v.userId] ;
+                          name = fileInfo.name ;
+                          chunkCount = fileInfo.chunkCount ;
+                          fileSize = fileInfo.fileSize;
+                          mimeType = fileInfo.mimeType ;
+                          marked= fileInfo.marked ;
+                          sharedWith = [shareId];
                         });
     }
   };
@@ -132,11 +124,64 @@ shared (msg) actor class icdrive (){
       let b = Buffer.Buffer<FileInfo>(0);
       for ((v, _) in state.files.entries()) {
         let file_info = getFileInfo_(v)!;
-        if(Principal.toText(msg.caller)==file_info.userId){
+        if(Principal.toText(msg.caller)==file_info.userId or Principal.toText(msg.caller)==file_info.sharedWith[0]){
           b.add(file_info);
         }
       };
       b.toArray()
+    }
+  };
+
+  public shared(msg) func markFile(fileId : FileId) : async ?() {
+    do ? {
+      let file_info = getFileInfo_(fileId)!;
+      if(Principal.toText(msg.caller)==file_info.userId){
+        state.files.put(fileId,
+                        {
+                          userId = file_info.userId ;
+                          createdAt = file_info.createdAt ;
+                          fileId = fileId ;
+                          name = file_info.name ;
+                          chunkCount = file_info.chunkCount ;
+                          fileSize = file_info.fileSize;
+                          mimeType = file_info.mimeType ;
+                          marked= not(file_info.marked) ;
+                          sharedWith = file_info.sharedWith ;
+                        });
+      }
+    }
+  };
+
+  func deleteFile_(file_info : FileInfo) : () {
+    for (j in Iter.range(1, file_info.chunkCount)) {
+      state.chunks.delete(chunkId(file_info.fileId, j));
+    };
+    state.files.delete(file_info.fileId);
+  };
+
+  public query(msg) func deleteFile(fileId : FileId) : async ?() {
+    do ? {
+      let file_info = getFileInfo_(fileId)!;
+      if(Principal.toText(msg.caller)==file_info.userId){
+        deleteFile_(file_info);
+      }
+    }
+  };
+
+  func deleteCorruptFile_(file_info : FileInfo) : () {
+    Debug.print(file_info.fileId);
+    //for (j in Iter.range(1, file_info.chunkCount)) {
+    //  state.chunks.delete(chunkId(file_info.fileId, j));
+    //};
+    //state.files.delete(file_info.fileId);
+  };
+
+  public query(msg) func deleteCorruptFile(fileId : FileId) : async ?() {
+    do ? {
+      let file_info = getFileInfo_(fileId)!;
+      if(Principal.toText(msg.caller)==file_info.userId){
+        deleteCorruptFile_(file_info);
+      }
     }
   };
 

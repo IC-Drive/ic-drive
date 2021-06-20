@@ -16,6 +16,7 @@ const CenterPortion = () =>{
   const [selectedView, setSelectedView] = React.useState("listView");
   const upload = useSelector(state=>state.FileHandler.upload);
   const optionSelected = useSelector(state=>state.OptionSelected.option);
+  const uploadProgress = useSelector(state=>state.UploadProgress.progress);
 
   return(
     <Style>
@@ -24,7 +25,7 @@ const CenterPortion = () =>{
           {
             upload["file_count"]>0?
             <div className="show-upload">
-              &nbsp;Uploading:&nbsp;{upload["file_uploading"]}&nbsp;&nbsp;{upload["completed"]}/{upload["file_count"]}&nbsp;...
+              &nbsp;Uploading:&nbsp;{upload["file_uploading"]}&nbsp;&nbsp;{uploadProgress}%&nbsp;&nbsp;{upload["completed"]}/{upload["file_count"]}&nbsp;...
             </div>
             :
             null
@@ -35,11 +36,11 @@ const CenterPortion = () =>{
             selectedView==="listView"?
             <span>
               <MenuOutlined onClick={()=>{setSelectedView("listView")}} className="list-view" style={{fontSize:"20px", color: "#fff"}} />&nbsp;&nbsp;
-              <AppstoreOutlined onClick={()=>{setSelectedView("gridView")}} className="grid-view" style={{fontSize:"20px"}} />
+              <AppstoreOutlined onClick={()=>{setSelectedView("gridView")}} className="grid-view" style={{fontSize:"20px", color: "#21353E"}} />
             </span>
             :
             <span>
-              <MenuOutlined onClick={()=>{setSelectedView("listView")}} className="list-view" style={{fontSize:"20px"}} />&nbsp;&nbsp;
+              <MenuOutlined onClick={()=>{setSelectedView("listView")}} className="list-view" style={{fontSize:"20px", color: "#21353E"}} />&nbsp;&nbsp;
               <AppstoreOutlined onClick={()=>{setSelectedView("gridView")}} className="grid-view" style={{fontSize:"20px", color: "#fff"}} />
             </span>
           }
@@ -56,6 +57,7 @@ const CenterPortion = () =>{
           <ListViewShared/>
         </div>
         :
+        optionSelected==="home"?
         <div>
           {
             selectedView==="listView"?
@@ -64,6 +66,8 @@ const CenterPortion = () =>{
             <GridView/>
           }
         </div>
+        :
+        null
       }
     </Style>
   )

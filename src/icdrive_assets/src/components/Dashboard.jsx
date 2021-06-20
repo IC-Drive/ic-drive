@@ -5,11 +5,9 @@ import styled from 'styled-components';
 import TopBar from './TopBar/TopBar.jsx';
 import SideBar from './SideBar/SideBar.jsx';
 import CenterPortion from './CenterPortion/CenterPortion.jsx'
+import {httpAgent} from '../httpAgent'
 
 // 3rd party imports
-import { idlFactory as icdrive_idl, canisterId as icdrive_id } from 'dfx-generated/icdrive';
-import { Actor, HttpAgent } from '@dfinity/agent';
-import { AuthClient } from "@dfinity/auth-client";
 import {useDispatch,useSelector} from 'react-redux';
 import {filesUpdate,refreshFiles} from '../state/actions';
 
@@ -19,12 +17,17 @@ const Dashboard = () =>{
   const dispatch = useDispatch();
 
   React.useEffect(async () => {
-    const authClient = await AuthClient.create();
-    const identity = await authClient.getIdentity();
-    const agent = new HttpAgent({ identity });
-    const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
+    const icdrive = await httpAgent()
+    let profile = await icdrive.getProfile()
+    console.log("profile")
+    console.log(profile)
+    if(profile.length===0){
+      icdrive.createProfile(parseInt(localStorage.getItem('userNumber')))
+    }
+  }, [])
 
-    console.log("dashboard")
+  React.useEffect(async () => {
+    const icdrive = await httpAgent()
     const get_files = async() =>{
       const file_list = await icdrive.getFiles()
       for(let i=0; i<file_list[0].length; i++){
