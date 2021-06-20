@@ -2,18 +2,22 @@ import React from 'react';
 import styled from 'styled-components';
 
 // custom imports
+import {switchHome} from '../../state/actions'
 
 // 3rd party imports
 import {Input} from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
+import {useDispatch} from 'react-redux'
 
 const TopBar = () =>{
 
+  const dispatch = useDispatch();
+  
   return(
     <Style>
       <div className="container">
         <div className="left-section">
-          <span>IC Drive</span>
+          <span id="icdrive_top" onClick={()=>{dispatch(switchHome("home"))}}>IC Drive</span>
         </div>
         <div className="right-section">
           <span><Input placeholder="Search Files" /></span>
@@ -32,7 +36,7 @@ const Style = styled.div`
   .container {
     height: 50px;
     width: 100vw;
-    background: #2A3132;
+    background: #21353E;
     color: #fff;
     display: flex;
     justify-content: space-between;
@@ -56,8 +60,11 @@ const Style = styled.div`
   .dot {
     height: 25px;
     width: 25px;
-    background-color: #e5e5e5;
+    background-color: #01579D;
     border-radius: 50%;
     display: inline-block;
+  }
+  #icdrive_top:hover{
+    cursor: pointer;
   }
 `

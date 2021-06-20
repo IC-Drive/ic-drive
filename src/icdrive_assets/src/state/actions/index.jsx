@@ -16,11 +16,16 @@ export const refreshFiles = (payload) =>{
       payload
   }
 }
-
-//-------------------------------------Switch Options-----------------------------------------//
-export const switchDefault = (payload) =>{
+export const uploadFileId = (payload) =>{
   return{
-      type: 'switchDefault',
+      type: 'uploadFileId',
+      payload
+  }
+}
+//-------------------------------------Switch Options-----------------------------------------//
+export const switchHome = (payload) =>{
+  return{
+      type: 'switchHome',
       payload
   }
 }
@@ -33,6 +38,14 @@ export const switchMarked = (payload) =>{
 export const switchShared = (payload) =>{
   return{
       type: 'switchShared',
+      payload
+  }
+}
+
+//-------------------------------------Upload Progress-----------------------------------------//
+export const uploadProgress = (payload) =>{
+  return{
+      type: 'progressUpdate',
       payload
   }
 }

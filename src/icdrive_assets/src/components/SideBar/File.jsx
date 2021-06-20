@@ -1,29 +1,6 @@
-import { Actor, HttpAgent } from '@dfinity/agent';
-import { AuthClient } from "@dfinity/auth-client";
-import { idlFactory as icdrive_idl, canisterId as icdrive_id } from 'dfx-generated/icdrive';
+import {httpAgent} from '../../httpAgent'
 
 const MAX_CHUNK_SIZE = 1024 * 500; // 500kb
-
-// Divides the file into chunks and uploads them to the canister in sequence
-async function processAndUploadChunk(
-  fileBuffer,
-  byteStart,
-  fileSize,
-  fileId,
-  chunk,
-  icdrive
-) {
-  const fileSlice = fileBuffer.slice(
-    byteStart,
-    Math.min(fileSize, byteStart + MAX_CHUNK_SIZE)
-  );
-  const sliceToNat = encodeArrayBuffer(fileSlice);
-  //console.log("slice")
-  //console.log(sliceToNat)
-  icdrive.putFileChunk(fileId, chunk, sliceToNat);
-  //console.log("done")
-  return 1;
-}
 
 const encodeArrayBuffer = (file) =>
   Array.from(new Uint8Array(file));
@@ -34,6 +11,7 @@ function getFileInit(
     const chunkCount = Number(Math.ceil(file.size / MAX_CHUNK_SIZE));
     return {
       chunkCount,
+      fileSize: file.size,
       name: file.name,
       mimeType: file.type,
       marked: false,
@@ -42,52 +20,52 @@ function getFileInit(
 }
 
 // Wraps up the previous functions into one step for the UI to trigger
-async function uploadFile(file, icdrive) {
-  const fileBuffer = (await file.arrayBuffer()) || new ArrayBuffer(0);
-  //const userId = await icdrive.getOwnId();
+async function uploadFile(file, icdrive, dispatch, uploadProgress, uploadFileId) {
   const fileInit = getFileInit(file);
-  console.log("here");
-  console.log(fileInit);
   let fileId = await icdrive.createFile(fileInit);
-  console.log(fileId);
   fileId = fileId[0]
-
+  dispatch(uploadFileId(fileId.toString()));
+  console.log("file id")
   let file_obj = {
     chunkCount: fileInit["chunkCount"],
+    fileSize: file.size,
     fileId: fileId,
     name: file.name,
     marked: false,
     sharedWith: [],
     mimeType: fileInit["mimeType"]
   }
-
-  let chunk = 1;
   
+  let chunk = 1;
+
   for (
     let byteStart = 0;
     byteStart < file.size;
     byteStart += MAX_CHUNK_SIZE, chunk++
   ) {
-    await processAndUploadChunk(fileBuffer, byteStart, file.size, fileId, chunk, icdrive)
+    let fileSlice = file.slice(byteStart, Math.min(file.size, byteStart + MAX_CHUNK_SIZE))
+    let fileSliceBuffer = (await fileSlice.arrayBuffer()) || new ArrayBuffer(0);
+    const sliceToNat = encodeArrayBuffer(fileSliceBuffer);
+    await icdrive.putFileChunk(fileId, chunk, sliceToNat);
+    
+    dispatch(uploadProgress(100*(chunk/file_obj["chunkCount"]).toFixed(2)));
+
     if(chunk >= fileInit["chunkCount"]){
+      dispatch(uploadFileId(""));
+      dispatch(uploadProgress(0))
       return(file_obj)
     }
   }
 }
 
-export async function useUploadFile(file) {
-  const authClient = await AuthClient.create();
-  const identity = await authClient.getIdentity();
-  const agent = new HttpAgent({ identity });
-  const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
+export async function useUploadFile(file, dispatch, uploadProgress, uploadFileId) {
+  const icdrive = await httpAgent();
   console.info("Storing File...");
   try {
     console.time("Stored in");
-    const file_obj = await uploadFile(file, icdrive);
+    const file_obj = await uploadFile(file, icdrive, dispatch, uploadProgress, uploadFileId);
     console.timeEnd("Stored in");
-    console.log("k");
-    let k = await icdrive.getFileInfo(file_obj["fileId"]);
-    console.log(k);
+    console.log(file_obj);
     return(file_obj);
   } catch (error) {
     console.error("Failed to store file.", error);
