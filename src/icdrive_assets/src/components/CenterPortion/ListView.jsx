@@ -2,24 +2,23 @@ import React from "react";
 import styled from 'styled-components';
 
 // custom imports
+import {httpAgent} from '../../httpAgent'
 
 // 3rd party imports
 import * as streamSaver from 'streamsaver';
 import { WritableStream } from 'web-streams-polyfill/ponyfill'
-import { Actor, HttpAgent } from '@dfinity/agent';
-import { AuthClient } from "@dfinity/auth-client";
-import { idlFactory as icdrive_idl, canisterId as icdrive_id } from 'dfx-generated/icdrive';
 import {useSelector, useDispatch} from 'react-redux';
-import {filesUpdate} from '../../state/actions'
+import {filesUpdate, refreshFiles} from '../../state/actions'
 import {DownloadOutlined, DeleteOutlined, EditOutlined, BookOutlined, ShareAltOutlined} from "@ant-design/icons";
-import {Table, Popconfirm, Space, Modal, Button, Input} from 'antd';
+import {Table, Popconfirm, Space, Modal, message, Input} from 'antd';
 
 const ListView = () =>{
 
   const files = useSelector(state=>state.FileHandler.files)
+  console.log(files)
   const dispatch = useDispatch();
   const [modalFlag, setModalFlag] = React.useState(false)
-  const [userId, setUserId] = React.useState("")
+  const userNumber = React.useRef("")
 
   // For large files not working on firefox to be fixed
   /*const download = async (fileId, chunk_count, fileName) => {
@@ -38,11 +37,7 @@ const ListView = () =>{
 
   //Temporary method works well on small files
   const download = async (fileId, chunk_count, fileName, mimeType) => {
-    const authClient = await AuthClient.create();
-    const identity = await authClient.getIdentity();
-    const agent = new HttpAgent({ identity });
-    const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
-
+    const icdrive = await httpAgent();
     const chunkBuffers = [];
     for(let j=0; j<chunk_count; j++){
       const bytes = await icdrive.getFileChunk(fileId, j+1);
@@ -65,38 +60,28 @@ const ListView = () =>{
     let k = await download(record["fileId"], record["chunkCount"], record["name"], record["mimeType"])
   }
 
-  const handleMarked = (record) =>{
+  const handleMarked = async(record) =>{
     let temp = [...files]
     for(let i=0; i<temp.length; i++){
       if(temp[i]["fileId"]===record["fileId"]){
-        temp[i]["marked"] = true
+        temp[i]["marked"] = !temp[i]["marked"]
       }
     }
-    console.log("list")
-    console.log(temp)
     dispatch(filesUpdate(temp));
+    const icdrive = await httpAgent();
+    await icdrive.markFile(record["fileId"]);
   }
 
-  const handleOk = async() =>{
-    const authClient = await AuthClient.create();
-    const identity = await authClient.getIdentity();
-    const agent = new HttpAgent({ identity });
-    const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
-    console.log(modalFlag)
-    let k = userId
-    if(k[0]==="\""){
-      k = k.substring(1);
-    }
-    console.log([k])
+  const handleDelete = async(record) =>{
+    const icdrive = await httpAgent();
+    await icdrive.deleteFile(record["fileId"]);
+    dispatch(refreshFiles(true));
+  }
 
-    let fileInit = {
-      name: modalFlag["name"],
-      chunkCount: parseInt(modalFlag["chunkCount"]),
-      mimeType: modalFlag["mimeType"],
-      marked: modalFlag["marked"],
-      sharedWith: [k]
-    }
-    await icdrive.shareFile(modalFlag["fileId"], fileInit)
+  const handleShare = async() =>{
+    const icdrive = await httpAgent();
+    let userNumberInt = parseInt(userNumber.current.state.value)
+    await icdrive.shareFile(modalFlag["fileId"], userNumberInt)
     setModalFlag(false)
   }
 
@@ -105,12 +90,13 @@ const ListView = () =>{
       title: 'File Name',
       dataIndex: 'name',
       key: 'name',
+      editable: true,
     },
     {
       title: 'File Size',
-      dataIndex: 'chunkCount',
-      key: 'chunkCount',
-      render: text => <div>{text/2}MB</div>,
+      dataIndex: 'fileSize',
+      key: 'fileSize',
+      render: text => <div>{(Number(text)/(1024*1024)).toFixed(2)}&nbsp;MB</div>,
     },
     {
       title: 'Created',
@@ -118,10 +104,10 @@ const ListView = () =>{
       key: 'createdAt',
     },
     {
-      title: 'Marked',
+      title: 'Mark',
       dataIndex: 'marked',
       key: 'marked',
-      render: (_, record) => <div>{record.marked?<BookOutlined style={{fontSize: "16px", color: "#edeb51"}} onClick={()=>handleMarked(record)} />:<BookOutlined style={{fontSize: "16px", color: "#000"}} onClick={()=>handleMarked(record)} />}</div>,
+      render: (_, record) => <div>{record.marked?<BookOutlined style={{ height: '14px', color: '#1890ff' }} onClick={()=>handleMarked(record)} />:<BookOutlined style={{ height: '14px', color: '#000' }} onClick={()=>handleMarked(record)} />}</div>,
     },
     {
       title: '',
@@ -135,7 +121,7 @@ const ListView = () =>{
           <a>
             <EditOutlined />
           </a>
-          <Popconfirm title="Sure to delete?" onConfirm={() => {}}>
+          <Popconfirm title="Sure to delete?" onConfirm={() => {handleDelete(record)}}>
           <a>
             <DeleteOutlined />
           </a>
@@ -154,8 +140,8 @@ const ListView = () =>{
       <div>
         <Table dataSource={files} columns={columns} />
       </div>
-      <Modal title="Share" visible={modalFlag} onOk={handleOk} onCancel={()=>setModalFlag(false)}>
-        <Input onChange={(e)=>setUserId(e.target.defaultValue.toString())} />
+      <Modal title={false} visible={modalFlag} onOk={handleShare} onCancel={()=>setModalFlag(false)}>
+        <span>User Number:&nbsp;<Input ref={userNumber} /></span>
       </Modal>
     </Style>
   )
