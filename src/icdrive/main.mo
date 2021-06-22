@@ -114,6 +114,9 @@ shared (msg) actor class icdrive (){
       if(Principal.toText(msg.caller)!=fileInfo.userId){  // User cant reshare other users file
         return(?"Unauthorized");
       };
+      if(Principal.toText(msg.caller)==shareId){  // User cant share file to yourself
+        return(?"Unauthorized");
+      };
 
       var user_list_buffer = Buffer.Buffer<Int>(0); // Adding new userNumber to shared list
       for (u in fileInfo.sharedWith.vals()) {

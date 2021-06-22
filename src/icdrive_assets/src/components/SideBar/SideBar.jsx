@@ -34,21 +34,33 @@ const SideBar = () =>{
         <div className="content">
           
           <div className="element">
-            <label id="label-file" for="upload-file">
-            <div className="element-section">
-              <div className="icon-part">
-              <img src="./icons/upload.svg" style={{ height: '22px', color: '#fff' }} />
+            {
+              uploadFlag?
+              <div className="element-section">
+                <div className="icon-part">
+                  <img src="./icons/upload.svg" style={{ height: '22px', color: '#fff' }} />
+                </div>
+                <div className="text-part">
+                  <span>Upload</span>
+                </div>
               </div>
-              <div className="text-part">
-                <span>
-                  <div>
-                    Upload
-                    <input type="file" id="upload-file" onChange={onFileSelect} className="file_upload" multiple/>
+              :
+              <label id="label-file" for="upload-file">
+                <div className="element-section">
+                  <div className="icon-part">
+                  <img src="./icons/upload.svg" style={{ height: '22px', color: '#fff' }} />
                   </div>
-                </span>
-              </div>
-            </div>
-            </label>
+                  <div className="text-part">
+                    <span>
+                      <div>
+                        Upload
+                        <input type="file" id="upload-file" onChange={onFileSelect} className="file_upload" multiple/>
+                      </div>
+                    </span>
+                  </div>
+                </div>
+              </label>
+            }
           </div>
 
           <div className="element">
