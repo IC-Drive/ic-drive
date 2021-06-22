@@ -17,7 +17,9 @@ const ListView = () =>{
   const files = useSelector(state=>state.FileHandler.files)
   const dispatch = useDispatch();
   const [modalFlag, setModalFlag] = React.useState(false)
+  const [viewFlag, setViewFlag] = React.useState(false)
   const [loadingFlag, setLoadingFlag] = React.useState(false)
+  const [image, setImage] = React.useState("")
   const userNumber = React.useRef("")
 
   // For large files not working on firefox to be fixed
@@ -92,15 +94,32 @@ const ListView = () =>{
         }
         else{
           message.error("Unauthorized")
-          setModalFlag(false)
           setLoadingFlag(false)
         }
+      }else{
+        message.error("Something Went Wrong! Check User Number")
+        setLoadingFlag(false)
       }
     } catch{
-      message.error("Something Went Wrong!")
-      setModalFlag(false)
+      message.error("Something Went Wrong! Check User Number")
       setLoadingFlag(false)
     }
+  }
+
+  const handleView = async(record) =>{
+    setViewFlag(true)
+    const icdrive = await httpAgent();
+    const chunkBuffers = [];
+    for(let j=0; j<record["chunkCount"]; j++){
+      const bytes = await icdrive.getFileChunk(record["fileId"], j+1);
+      const bytesAsBuffer = new Uint8Array(bytes[0]);
+      chunkBuffers.push(bytesAsBuffer);
+    }
+    const fileBlob = new Blob([Buffer.concat(chunkBuffers)], {
+      type: record["mimeType"],
+    });
+    const fileURL = URL.createObjectURL(fileBlob);
+    setImage(fileURL)
   }
 
   const columns = [
@@ -109,6 +128,7 @@ const ListView = () =>{
       dataIndex: 'name',
       key: 'name',
       editable: true,
+      render: (text, record) => <div onDoubleClick={()=>handleView(record)}>{text}</div>,
     },
     {
       title: 'File Size',
@@ -159,8 +179,23 @@ const ListView = () =>{
         <Table dataSource={files} columns={columns} />
       </div>
       <Modal footer={null} title={false} visible={modalFlag} onCancel={()=>setModalFlag(false)}>
+        <div>
         <span>User Number:&nbsp;<Input ref={userNumber} /></span>
-        <Button style={{float:"right"}} loading={loadingFlag} onClick={handleShare}>Share</Button>
+        <Button type="primary" style={{float:"right", marginTop:"10px"}} loading={loadingFlag} onClick={handleShare}>Share</Button>
+        <br/><br/><br/>
+        </div>
+      </Modal>
+
+      <Modal
+        footer={null}
+        width="600px"
+        visible={viewFlag}
+        destroyOnClose = {true}
+        centered = {true}
+        onCancel={()=>setViewFlag(false)}
+        closeIcon = {}
+      >
+        <img src={image} width="500px" />
       </Modal>
     </Style>
   )
