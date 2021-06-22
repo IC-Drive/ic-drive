@@ -10,14 +10,14 @@ import { WritableStream } from 'web-streams-polyfill/ponyfill'
 import {useSelector, useDispatch} from 'react-redux';
 import {filesUpdate, refreshFiles} from '../../state/actions'
 import {DownloadOutlined, DeleteOutlined, EditOutlined, BookOutlined, ShareAltOutlined} from "@ant-design/icons";
-import {Table, Popconfirm, Space, Modal, message, Input} from 'antd';
+import {Table, Popconfirm, Space, Modal, message, Button, Input} from 'antd';
 
 const ListView = () =>{
 
   const files = useSelector(state=>state.FileHandler.files)
-  console.log(files)
   const dispatch = useDispatch();
   const [modalFlag, setModalFlag] = React.useState(false)
+  const [loadingFlag, setLoadingFlag] = React.useState(false)
   const userNumber = React.useRef("")
 
   // For large files not working on firefox to be fixed
@@ -79,10 +79,28 @@ const ListView = () =>{
   }
 
   const handleShare = async() =>{
+    setLoadingFlag(true)
     const icdrive = await httpAgent();
     let userNumberInt = parseInt(userNumber.current.state.value)
-    await icdrive.shareFile(modalFlag["fileId"], userNumberInt)
-    setModalFlag(false)
+    let response = await icdrive.shareFile(modalFlag["fileId"], userNumberInt)
+    try{
+      if(response.length>0){
+        if(response[0]=="success"){
+          message.success("File Shared")
+          setModalFlag(false)
+          setLoadingFlag(false)
+        }
+        else{
+          message.error("Unauthorized")
+          setModalFlag(false)
+          setLoadingFlag(false)
+        }
+      }
+    } catch{
+      message.error("Something Went Wrong!")
+      setModalFlag(false)
+      setLoadingFlag(false)
+    }
   }
 
   const columns = [
@@ -140,8 +158,9 @@ const ListView = () =>{
       <div>
         <Table dataSource={files} columns={columns} />
       </div>
-      <Modal title={false} visible={modalFlag} onOk={handleShare} onCancel={()=>setModalFlag(false)}>
+      <Modal footer={null} title={false} visible={modalFlag} onCancel={()=>setModalFlag(false)}>
         <span>User Number:&nbsp;<Input ref={userNumber} /></span>
+        <Button style={{float:"right"}} loading={loadingFlag} onClick={handleShare}>Share</Button>
       </Modal>
     </Style>
   )

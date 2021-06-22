@@ -9,7 +9,7 @@ module {
   
   type Profile = Types.Profile;
   type UserId = Types.UserId;
-  type userNumber = Types.userNumber;
+  type userNumber = Types.UserNumber;
 
   func makeProfile(userId: UserId, userNumber: Int): Profile {
     {
