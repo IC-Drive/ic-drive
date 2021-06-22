@@ -1,6 +1,6 @@
 import {httpAgent} from '../../httpAgent'
 
-const MAX_CHUNK_SIZE = 1024 * 500; // 500kb
+const MAX_CHUNK_SIZE = 1024 * 1024 * 2; // 4MB
 
 const encodeArrayBuffer = (file) =>
   Array.from(new Uint8Array(file));
@@ -24,6 +24,8 @@ async function uploadFile(file, icdrive, dispatch, uploadProgress, uploadFileId)
   const fileInit = getFileInit(file);
   let fileId = await icdrive.createFile(fileInit);
   fileId = fileId[0]
+  console.log("id")
+  console.log(fileId)
   dispatch(uploadFileId(fileId.toString()));
   console.log("file id")
   let file_obj = {

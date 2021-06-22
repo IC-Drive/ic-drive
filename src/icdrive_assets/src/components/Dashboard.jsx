@@ -19,26 +19,26 @@ const Dashboard = () =>{
   React.useEffect(async () => {
     const icdrive = await httpAgent()
     let profile = await icdrive.getProfile()
-    console.log("profile")
-    console.log(profile)
     if(profile.length===0){
       icdrive.createProfile(parseInt(localStorage.getItem('userNumber')))
     }
   }, [])
 
   React.useEffect(async () => {
+    dispatch(refreshFiles(false))
     const icdrive = await httpAgent()
-    const get_files = async() =>{
-      const file_list = await icdrive.getFiles()
+    const file_list = await icdrive.getFiles()
+    console.log("list")
+    console.log(file_list)
+    if(file_list.length>0){
       for(let i=0; i<file_list[0].length; i++){
         file_list[0][i]["chunkCount"] = file_list[0][i]["chunkCount"].toString()
         let temp = new Date(parseInt(Number(file_list[0][i]["createdAt"]).toString().slice(0, -6)))
         file_list[0][i]["createdAt"] = temp.getDate() + "-" + (temp.getMonth()+1) + "-" + temp.getFullYear()
       }
       dispatch(filesUpdate(file_list[0]))
-      dispatch(refreshFiles(false))
     }
-    get_files();
+    console.log("over")
   }, [refresh_files])
 
   return(

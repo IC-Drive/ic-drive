@@ -15,34 +15,13 @@ const SideBar = () =>{
   const [uploadFlag, setUploadFlag] = React.useState(false)
   const files = useSelector(state=>state.FileHandler.files)
 
-  const handleTabClosing = () => {
-    if(upload_file_id!=""){
-      //icdrive.deleteCorruptFile(upload_file_id);
-    }
-  }
-  
-  const alertUser = (event) => {
-    const upload_file_id = useSelector(state=>state.FileHandler.upload_file_id)
-    console.log("close")
-    console.log(upload_file_id)
-    event.preventDefault()
-    return event.returnValue = 'Upload in progress, still close tab?';
-  }
-
-  React.useEffect(()=>{
-    window.addEventListener('beforeunload', alertUser)
-    window.addEventListener('unload', handleTabClosing)
-  }, [uploadFlag])
-
   const onFileSelect = async (evt) => {
     setUploadFlag(true)
     const file_list = evt.target.files
-    const file_array = [...files]
     for(let i=0; i<file_list.length; i++){
       const file = file_list[i];
       dispatch(uploadUpdate({file_uploading: file.name, file_count: file_list.length, completed: i+1}))
       const file_obj = await useUploadFile(file, dispatch, uploadProgress, uploadFileId);
-      file_array.push(file_obj)
     }
     dispatch(uploadUpdate({file_uploading: "", file_count: 0, completed: 0}))
     dispatch(refreshFiles(true))

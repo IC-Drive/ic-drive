@@ -1,3 +1,4 @@
+import Array "mo:base/Array"; 
 import Bool "mo:base/Bool";
 import Buffer "mo:base/Buffer";
 import Database "./backend/database";
@@ -6,6 +7,7 @@ import Int "mo:base/Int";
 import Nat "mo:base/Nat";
 import Nat8 "mo:base/Nat8";
 import Iter "mo:base/Iter";
+import Option "mo:base/Option";
 import Prelude "mo:base/Prelude";
 import Principal "mo:base/Principal";
 import Text "mo:base/Text";
@@ -37,31 +39,50 @@ shared (msg) actor class icdrive (){
     user.findOne(Principal.toText(msg.caller));
   };
 
-  func createFile_(fileData : FileInit, userId: UserId) : ?FileId {
+  func getFileList(userId: UserId) : async [FileId]{
+    var file_list = state.user_file_rel.get(userId);
+    switch (file_list) {
+      case (?file_list) { file_list };
+      case null { [] };
+    };
+  };
+
+  func createFile_(fileData : FileInit, userId: UserId) : async ?FileId {
     let now = Time.now();
     let fileId = userId # "-" # fileData.name # "-" # (Int.toText(now));
-    switch (state.files.get(fileId)) {
-    case (?_) { /* error -- ID already taken. */ null };
-    case null { /* ok, not taken yet. */
-           state.files.put(fileId,
-                            {
-                              fileId = fileId;
-                              userId = userId ;
-                              name = fileData.name ;
-                              createdAt = now ;
-                              chunkCount = fileData.chunkCount ;
-                              fileSize = fileData.fileSize;
-                              mimeType = fileData.mimeType;
-                              marked = fileData.marked;
-                              sharedWith = [];
-                            });
-           ?fileId
-         };
-    }
+    do ?{
+      
+      var file_list = await getFileList(userId);
+      var file_list_buffer = Buffer.Buffer<FileId>(0);
+      for (f in file_list.vals()) {
+        file_list_buffer.add(f);
+      };
+      file_list_buffer.add(fileId);
+
+      switch (state.files.get(fileId)) {
+      case (?_) { /* error -- ID already taken. */ "null" };
+      case null { /* ok, not taken yet. */
+              state.files.put(fileId,
+                              {
+                                fileId = fileId;
+                                userId = userId ;
+                                name = fileData.name ;
+                                createdAt = now ;
+                                chunkCount = fileData.chunkCount ;
+                                fileSize = fileData.fileSize;
+                                mimeType = fileData.mimeType;
+                                marked = fileData.marked;
+                                sharedWith = [];
+                              });
+            state.user_file_rel.put(userId, file_list_buffer.toArray());
+            fileId
+          };
+      }
+    };
   };
 
   public shared(msg) func createFile(i : FileInit) : async ?FileId {
-    createFile_(i, Principal.toText(msg.caller))
+    await createFile_(i, Principal.toText(msg.caller))
   };
 
   func getFileInfo_ (fileId : FileId) : ?FileInfo {
@@ -85,10 +106,29 @@ shared (msg) actor class icdrive (){
     getFileInfo_(fileId)
   };
 
-  public shared(msg) func shareFile(fileId : FileId, userNumber : Int) : async ?() {
+  public shared(msg) func shareFile(fileId : FileId, userNumber : Int) : async ?(Text) {
     do ? {
-      let shareId = user.getUserId(userNumber)!;
-      let fileInfo = state.files.get(fileId)!;
+      let shareId = user.getUserId(userNumber)!;    // Principal to userNumber
+      let fileInfo = state.files.get(fileId)!;      // Info of File
+
+      if(Principal.toText(msg.caller)!=fileInfo.userId){  // User cant reshare other users file
+        return(?"Unauthorized");
+      };
+
+      var user_list_buffer = Buffer.Buffer<Int>(0); // Adding new userNumber to shared list
+      for (u in fileInfo.sharedWith.vals()) {
+        user_list_buffer.add(u);
+      };
+      user_list_buffer.add(userNumber);
+
+      var file_list = await getFileList(shareId);    // Adding File Metadata to shared user
+      var file_list_buffer = Buffer.Buffer<FileId>(0);
+      for (f in file_list.vals()) {
+        file_list_buffer.add(f);
+      };
+      file_list_buffer.add(fileId);
+
+      state.user_file_rel.put(shareId, file_list_buffer.toArray());
 
       state.files.put(fileId,
                         {
@@ -100,8 +140,9 @@ shared (msg) actor class icdrive (){
                           fileSize = fileInfo.fileSize;
                           mimeType = fileInfo.mimeType ;
                           marked= fileInfo.marked ;
-                          sharedWith = [shareId];
+                          sharedWith = user_list_buffer.toArray();
                         });
+      return(?"success");
     }
   };
   
@@ -121,12 +162,10 @@ shared (msg) actor class icdrive (){
 
   public query(msg) func getFiles() : async ?[FileInfo] {
     do ? {
+      let file_list = state.user_file_rel.get(Principal.toText(msg.caller))!;
       let b = Buffer.Buffer<FileInfo>(0);
-      for ((v, _) in state.files.entries()) {
-        let file_info = getFileInfo_(v)!;
-        if(Principal.toText(msg.caller)==file_info.userId or Principal.toText(msg.caller)==file_info.sharedWith[0]){
-          b.add(file_info);
-        }
+      for (f in file_list.vals()) {
+          b.add(getFileInfo_(f)!);
       };
       b.toArray()
     }
