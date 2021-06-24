@@ -108,7 +108,7 @@ shared (msg) actor class icdrive (){
 
   public shared(msg) func shareFile(fileId : FileId, userNumber : Int) : async ?(Text) {
     do ? {
-      let shareId = user.getUserId(userNumber)!;    // Principal to userNumber
+      let shareId = user.getUserId(userNumber)!;    // userNumber to Principal
       let fileInfo = state.files.get(fileId)!;      // Info of File
 
       if(Principal.toText(msg.caller)!=fileInfo.userId){  // User cant reshare other users file

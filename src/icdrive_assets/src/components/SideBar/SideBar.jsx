@@ -64,6 +64,17 @@ const SideBar = () =>{
           </div>
 
           <div className="element">
+            <div className="element-section" onClick={()=>{dispatch(switchHome("home"))}}>
+              <div className="icon-part">
+                <img src="./icons/home.svg" style={{ height: '22px', color: '#fff' }} />
+              </div>
+              <div className="text-part">
+                <span>Home</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="element">
             <div className="element-section" onClick={()=>{dispatch(switchShared("shared"))}}>
               <div className="icon-part">
                 <img src="./icons/share.svg" style={{ height: '22px', color: '#fff' }} />
@@ -81,17 +92,6 @@ const SideBar = () =>{
               </div>
               <div className="text-part">
                 <span>Marked</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="element">
-            <div className="element-section" onClick={()=>{dispatch(switchMarked("shared"))}}>
-              <div className="icon-part">
-                <img src="./icons/import.svg" style={{ height: '22px', color: '#fff' }} />
-              </div>
-              <div className="text-part">
-                <span>Import</span>
               </div>
             </div>
           </div>
