@@ -9,7 +9,8 @@ import ListViewShared from "./Shared/ListViewShared";
 
 // 3rd party imports
 import {MenuOutlined, AppstoreOutlined} from "@ant-design/icons";
-import {useSelector} from 'react-redux'
+import {useSelector} from 'react-redux';
+import { Progress } from 'antd';
 
 const CenterPortion = () =>{
 
@@ -69,6 +70,21 @@ const CenterPortion = () =>{
         :
         null
       }
+      {
+        upload["file_count"]>0?
+        <div className="upload-container">
+          <div className="upload-top-bar">
+            <span id="top-bar-text">Uploading&nbsp;&nbsp;{upload["completed"]}/{upload["file_count"]}&nbsp;...</span>
+          </div>
+          <div className="upload-bottom-bar">
+          <span id="bottom-bar-text">
+            {upload["file_uploading"]}&nbsp;&nbsp;<Progress type="circle" percent={uploadProgress} width="32px" />
+          </span>
+          </div>
+        </div>
+        :
+        null
+      }
     </Style>
   )
 }
@@ -98,6 +114,35 @@ const Style = styled.div`
   .show-upload{
     font-size: 16px;
     font-weight: 500;
+    color: #000;
+  }
+
+  .upload-container{
+    position: fixed;
+    bottom: 0;
+    right: 0;
+  }
+  .upload-top-bar{
+    height: 36px;
+    width: 350px;
+    font-size: 18px;
+    background: #324851;
+    display: flex;
+    align-items: center;
+  }
+  .upload-bottom-bar{
+    height: 80px;
+    width: 350px;
+    background: #fafafa;
+    font-size: 18px;
+  }
+  #top-bar-text{
+    margin-left: 5px;
+    color: #fff;
+  }
+  #bottom-bar-text{
+    margin-top: 5px;
+    margin-left: 5px;
     color: #000;
   }
 `
