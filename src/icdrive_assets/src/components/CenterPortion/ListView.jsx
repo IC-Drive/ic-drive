@@ -193,7 +193,7 @@ const ListView = () =>{
         destroyOnClose = {true}
         centered = {true}
         onCancel={()=>setViewFlag(false)}
-        closeIcon = {}
+        closeIcon = {null}
       >
         <img src={image} width="500px" />
       </Modal>
