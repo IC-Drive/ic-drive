@@ -31,37 +31,38 @@ const SideBar = () =>{
   return(
     <Style>
       <div className="container">
-        <div className="content">
-          
-          <div className="element">
-            {
-              uploadFlag?
-              <div className="element-section">
-                <div className="icon-part">
+        {
+          uploadFlag?
+            <div className="upload-button">
+              <div className="upload-element-section">
+                <div className="upload-icon-part">
                   <img src="./icons/upload.svg" style={{ height: '22px', color: '#fff' }} />
                 </div>
-                <div className="text-part">
+                <div className="upload-text-part">
                   <span>Upload</span>
                 </div>
               </div>
-              :
-              <label id="label-file" for="upload-file">
-                <div className="element-section">
-                  <div className="icon-part">
+            </div>
+          :
+          <label id="label-file" for="upload-file">
+            <div className="upload-button">
+              <div className="upload-element-section">
+                <div className="upload-icon-part">
                   <img src="./icons/upload.svg" style={{ height: '22px', color: '#fff' }} />
-                  </div>
-                  <div className="text-part">
-                    <span>
-                      <div>
-                        Upload
-                        <input type="file" id="upload-file" onChange={onFileSelect} className="file_upload" multiple/>
-                      </div>
-                    </span>
-                  </div>
                 </div>
-              </label>
-            }
-          </div>
+                <div className="upload-text-part">
+                  <span>
+                    <div>
+                      Upload
+                      <input type="file" id="upload-file" onChange={onFileSelect} className="file_upload" multiple/>
+                    </div>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </label>
+          }
+        <div className="content">
 
           <div className="element">
             <div className="element-section" onClick={()=>{dispatch(switchHome("home"))}}>
@@ -96,6 +97,17 @@ const SideBar = () =>{
             </div>
           </div>
 
+          <div className="element">
+            <div className="element-section">
+              <div className="icon-part">
+                <img src="./icons/import.svg" style={{ height: '22px', color: '#fff' }} />
+              </div>
+              <div className="text-part">
+                <span>Import</span>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </Style>
@@ -111,7 +123,7 @@ const Style = styled.div`
     width: 225px;
   }
   .content{
-    padding-top: 50px;
+    padding-top: 20px;
   }
   .element{
     
@@ -151,5 +163,28 @@ const Style = styled.div`
   }
   #label-file:hover {
     cursor: pointer;
+  }
+
+  .upload-button{
+    padding-top: 25px;
+    padding-left: 22.5px;
+  }
+  .upload-element-section{
+    border-radius: 20px;
+    background: #7DA3A1;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 170px;
+    height: 50px;
+  }
+  .upload-text-part{
+    font-size: 20px;
+    font-weight: 400;
+    padding-left: 20px;
+  }
+  .upload-icon-part{
+    padding-left: 22.5px;
   }
 `
