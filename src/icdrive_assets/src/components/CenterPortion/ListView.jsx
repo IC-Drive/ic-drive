@@ -2,22 +2,25 @@ import React from "react";
 import styled from 'styled-components';
 
 // custom imports
+import {httpAgent} from '../../httpAgent'
 
 // 3rd party imports
 import * as streamSaver from 'streamsaver';
 import { WritableStream } from 'web-streams-polyfill/ponyfill'
-import { Actor, HttpAgent } from '@dfinity/agent';
-import { AuthClient } from "@dfinity/auth-client";
-import { idlFactory as icdrive_idl, canisterId as icdrive_id } from 'dfx-generated/icdrive';
 import {useSelector, useDispatch} from 'react-redux';
-import {filesUpdate} from '../../state/actions'
-import {DownloadOutlined, DeleteOutlined, EditOutlined, BookOutlined} from "@ant-design/icons";
-import {Table, Popconfirm, Space} from 'antd';
+import {filesUpdate, refreshFiles} from '../../state/actions'
+import {DownloadOutlined, DeleteOutlined, EditOutlined, BookOutlined, ShareAltOutlined} from "@ant-design/icons";
+import {Table, Popconfirm, Space, Modal, message, Button, Input} from 'antd';
 
 const ListView = () =>{
 
   const files = useSelector(state=>state.FileHandler.files)
   const dispatch = useDispatch();
+  const [modalFlag, setModalFlag] = React.useState(false)
+  const [viewFlag, setViewFlag] = React.useState(false)
+  const [loadingFlag, setLoadingFlag] = React.useState(false)
+  const [image, setImage] = React.useState("")
+  const userNumber = React.useRef("")
 
   // For large files not working on firefox to be fixed
   /*const download = async (fileId, chunk_count, fileName) => {
@@ -36,11 +39,7 @@ const ListView = () =>{
 
   //Temporary method works well on small files
   const download = async (fileId, chunk_count, fileName, mimeType) => {
-    const authClient = await AuthClient.create();
-    const identity = await authClient.getIdentity();
-    const agent = new HttpAgent({ identity });
-    const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
-
+    const icdrive = await httpAgent();
     const chunkBuffers = [];
     for(let j=0; j<chunk_count; j++){
       const bytes = await icdrive.getFileChunk(fileId, j+1);
@@ -63,16 +62,64 @@ const ListView = () =>{
     let k = await download(record["fileId"], record["chunkCount"], record["name"], record["mimeType"])
   }
 
-  const handleMarked = (record) =>{
+  const handleMarked = async(record) =>{
     let temp = [...files]
     for(let i=0; i<temp.length; i++){
       if(temp[i]["fileId"]===record["fileId"]){
-        temp[i]["marked"] = true
+        temp[i]["marked"] = !temp[i]["marked"]
       }
     }
-    console.log("list")
-    console.log(temp)
     dispatch(filesUpdate(temp));
+    const icdrive = await httpAgent();
+    await icdrive.markFile(record["fileId"]);
+  }
+
+  const handleDelete = async(record) =>{
+    const icdrive = await httpAgent();
+    await icdrive.deleteFile(record["fileId"]);
+    dispatch(refreshFiles(true));
+  }
+
+  const handleShare = async() =>{
+    setLoadingFlag(true)
+    const icdrive = await httpAgent();
+    let userNumberInt = parseInt(userNumber.current.state.value)
+    let response = await icdrive.shareFile(modalFlag["fileId"], userNumberInt)
+    try{
+      if(response.length>0){
+        if(response[0]=="success"){
+          message.success("File Shared")
+          setModalFlag(false)
+          setLoadingFlag(false)
+        }
+        else{
+          message.error("Unauthorized")
+          setLoadingFlag(false)
+        }
+      }else{
+        message.error("Something Went Wrong! Check User Number")
+        setLoadingFlag(false)
+      }
+    } catch{
+      message.error("Something Went Wrong! Check User Number")
+      setLoadingFlag(false)
+    }
+  }
+
+  const handleView = async(record) =>{
+    setViewFlag(true)
+    const icdrive = await httpAgent();
+    const chunkBuffers = [];
+    for(let j=0; j<record["chunkCount"]; j++){
+      const bytes = await icdrive.getFileChunk(record["fileId"], j+1);
+      const bytesAsBuffer = new Uint8Array(bytes[0]);
+      chunkBuffers.push(bytesAsBuffer);
+    }
+    const fileBlob = new Blob([Buffer.concat(chunkBuffers)], {
+      type: record["mimeType"],
+    });
+    const fileURL = URL.createObjectURL(fileBlob);
+    setImage(fileURL)
   }
 
   const columns = [
@@ -80,12 +127,14 @@ const ListView = () =>{
       title: 'File Name',
       dataIndex: 'name',
       key: 'name',
+      editable: true,
+      render: (text, record) => <div onDoubleClick={()=>handleView(record)}>{text}</div>,
     },
     {
       title: 'File Size',
-      dataIndex: 'chunkCount',
-      key: 'chunkCount',
-      render: text => <div>{text/2}MB</div>,
+      dataIndex: 'fileSize',
+      key: 'fileSize',
+      render: text => <div>{(Number(text)/(1024*1024)).toFixed(2)}&nbsp;MB</div>,
     },
     {
       title: 'Created',
@@ -93,10 +142,10 @@ const ListView = () =>{
       key: 'createdAt',
     },
     {
-      title: 'Marked',
+      title: 'Mark',
       dataIndex: 'marked',
       key: 'marked',
-      render: (_, record) => <div>{record.marked?<BookOutlined style={{fontSize: "16px", color: "#edeb51"}} onClick={()=>handleMarked(record)} />:<BookOutlined style={{fontSize: "16px", color: "#000"}} onClick={()=>handleMarked(record)} />}</div>,
+      render: (_, record) => <div>{record.marked?<BookOutlined style={{ height: '14px', color: '#1890ff' }} onClick={()=>handleMarked(record)} />:<BookOutlined style={{ height: '14px', color: '#000' }} onClick={()=>handleMarked(record)} />}</div>,
     },
     {
       title: '',
@@ -110,11 +159,14 @@ const ListView = () =>{
           <a>
             <EditOutlined />
           </a>
-          <Popconfirm title="Sure to delete?" onConfirm={() => {}}>
+          <Popconfirm title="Sure to delete?" onConfirm={() => {handleDelete(record)}}>
           <a>
             <DeleteOutlined />
           </a>
           </Popconfirm>
+          <a>
+            <ShareAltOutlined onClick={()=>setModalFlag(record)} />
+          </a>
         </Space>
         );
       },
@@ -126,6 +178,25 @@ const ListView = () =>{
       <div>
         <Table dataSource={files} columns={columns} />
       </div>
+      <Modal footer={null} title={false} visible={modalFlag} onCancel={()=>setModalFlag(false)}>
+        <div>
+        <span>User Number:&nbsp;<Input ref={userNumber} /></span>
+        <Button type="primary" style={{float:"right", marginTop:"10px"}} loading={loadingFlag} onClick={handleShare}>Share</Button>
+        <br/><br/><br/>
+        </div>
+      </Modal>
+
+      <Modal
+        footer={null}
+        width="600px"
+        visible={viewFlag}
+        destroyOnClose = {true}
+        centered = {true}
+        onCancel={()=>setViewFlag(false)}
+        closeIcon = {null}
+      >
+        <img src={image} width="500px" />
+      </Modal>
     </Style>
   )
 }

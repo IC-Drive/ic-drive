@@ -3,66 +3,80 @@ import styled from 'styled-components';
 
 // custom imports
 import {useUploadFile} from './File.jsx';
-import { AuthClient } from "@dfinity/auth-client";
-import { Actor, HttpAgent } from '@dfinity/agent';
-import { idlFactory as icdrive_idl, canisterId as icdrive_id } from 'dfx-generated/icdrive';
+import {httpAgent} from '../../httpAgent'
 
 // 3rd party imports
 import {useDispatch, useSelector} from 'react-redux'
-import {uploadUpdate, refreshFiles, switchMarked} from '../../state/actions'
+import {uploadUpdate, refreshFiles, switchHome, switchMarked, switchShared, uploadProgress, uploadFileId} from '../../state/actions'
 
 const SideBar = () =>{
 
   const dispatch = useDispatch();
-  //const authClient = await AuthClient.create();
-  //const identity = await authClient.getIdentity();
-  //const agent = new HttpAgent({ identity });
-  //const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
-
+  const [uploadFlag, setUploadFlag] = React.useState(false)
   const files = useSelector(state=>state.FileHandler.files)
 
-  React.useEffect(async()=>{
-    
-  },[])
-
   const onFileSelect = async (evt) => {
+    setUploadFlag(true)
     const file_list = evt.target.files
-    const file_array = [...files]
     for(let i=0; i<file_list.length; i++){
       const file = file_list[i];
       dispatch(uploadUpdate({file_uploading: file.name, file_count: file_list.length, completed: i+1}))
-      const file_obj = await useUploadFile(file);
-      file_array.push(file_obj)
+      const file_obj = await useUploadFile(file, dispatch, uploadProgress, uploadFileId);
     }
     dispatch(uploadUpdate({file_uploading: "", file_count: 0, completed: 0}))
     dispatch(refreshFiles(true))
+    setUploadFlag(false)
   }
 
   return(
     <Style>
       <div className="container">
-        <div className="content">
-          
-          <div className="element">
-            <label id="label-file" for="upload-file">
-            <div className="element-section">
-              <div className="icon-part">
-              <img src="./icons/upload.svg" style={{ height: '22px', color: '#fff' }} />
-              </div>
-              <div className="text-part">
-                <span>
-                  <div>
-                    Upload
-                    <input type="file" id="upload-file" onChange={onFileSelect} className="file_upload" multiple/>
-                  </div>
-                </span>
+        {
+          uploadFlag?
+            <div className="upload-button">
+              <div className="upload-element-section">
+                <div className="upload-icon-part">
+                  <img src="./icons/upload.svg" style={{ height: '22px', color: '#fff' }} />
+                </div>
+                <div className="upload-text-part">
+                  <span>Upload</span>
+                </div>
               </div>
             </div>
-            </label>
-          </div>
+          :
+          <label id="label-file" for="upload-file">
+            <div className="upload-button">
+              <div className="upload-element-section">
+                <div className="upload-icon-part">
+                  <img src="./icons/upload.svg" style={{ height: '22px', color: '#fff' }} />
+                </div>
+                <div className="upload-text-part">
+                  <span>
+                    <div>
+                      Upload
+                      <input type="file" id="upload-file" onChange={onFileSelect} className="file_upload" multiple/>
+                    </div>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </label>
+          }
+        <div className="content">
 
           <div className="element">
-            <div className="element-section">
+            <div className="element-section" onClick={()=>{dispatch(switchHome("home"))}}>
+              <div className="icon-part">
+                <img src="./icons/home.svg" style={{ height: '22px', color: '#fff' }} />
+              </div>
+              <div className="text-part">
+                <span>Home</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="element">
+            <div className="element-section" onClick={()=>{dispatch(switchShared("shared"))}}>
               <div className="icon-part">
                 <img src="./icons/share.svg" style={{ height: '22px', color: '#fff' }} />
               </div>
@@ -109,7 +123,7 @@ const Style = styled.div`
     width: 225px;
   }
   .content{
-    padding-top: 50px;
+    padding-top: 20px;
   }
   .element{
     
@@ -149,5 +163,28 @@ const Style = styled.div`
   }
   #label-file:hover {
     cursor: pointer;
+  }
+
+  .upload-button{
+    padding-top: 25px;
+    padding-left: 22.5px;
+  }
+  .upload-element-section{
+    border-radius: 20px;
+    background: #7DA3A1;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 170px;
+    height: 50px;
+  }
+  .upload-text-part{
+    font-size: 20px;
+    font-weight: 400;
+    padding-left: 20px;
+  }
+  .upload-icon-part{
+    padding-left: 22.5px;
   }
 `
