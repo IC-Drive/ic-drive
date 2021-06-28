@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import TopBar from './TopBar/TopBar.jsx';
 import SideBar from './SideBar/SideBar.jsx';
 import CenterPortion from './CenterPortion/CenterPortion.jsx'
-import {httpAgent} from '../httpAgent'
+import {canisterHttpAgent} from '../httpAgent'
 
 // 3rd party imports
 import {useDispatch,useSelector} from 'react-redux';
@@ -17,17 +17,9 @@ const Dashboard = () =>{
   const dispatch = useDispatch();
 
   React.useEffect(async () => {
-    const icdrive = await httpAgent()
-    let profile = await icdrive.getProfile()
-    if(profile.length===0){
-      icdrive.createProfile(parseInt(localStorage.getItem('userNumber')))
-    }
-  }, [])
-
-  React.useEffect(async () => {
     dispatch(refreshFiles(false))
-    const icdrive = await httpAgent()
-    const file_list = await icdrive.getFiles()
+    const userAgent = await canisterHttpAgent()
+    const file_list = await userAgent.getFiles()
     console.log("list")
     console.log(file_list)
     if(file_list.length>0){

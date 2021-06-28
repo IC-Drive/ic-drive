@@ -3,7 +3,6 @@ import styled from 'styled-components';
 
 // custom imports
 import {useUploadFile} from './File.jsx';
-import {httpAgent} from '../../httpAgent'
 
 // 3rd party imports
 import {useDispatch, useSelector} from 'react-redux'

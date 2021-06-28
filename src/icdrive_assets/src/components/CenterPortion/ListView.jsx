@@ -2,7 +2,7 @@ import React from "react";
 import styled from 'styled-components';
 
 // custom imports
-import {httpAgent} from '../../httpAgent'
+import {httpAgent, canisterHttpAgent} from '../../httpAgent'
 
 // 3rd party imports
 import * as streamSaver from 'streamsaver';
@@ -29,7 +29,7 @@ const ListView = () =>{
     const fileStream = streamSaver.createWriteStream(fileName);
     const writer = fileStream.getWriter();
     for(let j=0; j<chunk_count; j++){
-      const bytes = await icdrive.getFileChunk(fileId, j+1);
+      const bytes = await userAgent.getFileChunk(fileId, j+1);
       //const bytesAsBuffer = Buffer.from(new Uint8Array(bytes[0]));
       const bytesAsBuffer = new Uint8Array(bytes[0]);
       writer.write(bytesAsBuffer);
@@ -39,10 +39,10 @@ const ListView = () =>{
 
   //Temporary method works well on small files
   const download = async (fileId, chunk_count, fileName, mimeType) => {
-    const icdrive = await httpAgent();
+    const userAgent = await canisterHttpAgent();
     const chunkBuffers = [];
     for(let j=0; j<chunk_count; j++){
-      const bytes = await icdrive.getFileChunk(fileId, j+1);
+      const bytes = await userAgent.getFileChunk(fileId, j+1);
       const bytesAsBuffer = new Uint8Array(bytes[0]);
       chunkBuffers.push(bytesAsBuffer);
     }
@@ -70,21 +70,21 @@ const ListView = () =>{
       }
     }
     dispatch(filesUpdate(temp));
-    const icdrive = await httpAgent();
-    await icdrive.markFile(record["fileId"]);
+    const userAgent = await canisterHttpAgent();
+    await userAgent.markFile(record["fileId"]);
   }
 
   const handleDelete = async(record) =>{
-    const icdrive = await httpAgent();
-    await icdrive.deleteFile(record["fileId"]);
+    const userAgent = await canisterHttpAgent();
+    await userAgent.deleteFile(record["fileId"]);
     dispatch(refreshFiles(true));
   }
 
   const handleShare = async() =>{
     setLoadingFlag(true)
-    const icdrive = await httpAgent();
+    const userAgent = await canisterHttpAgent();
     let userNumberInt = parseInt(userNumber.current.state.value)
-    let response = await icdrive.shareFile(modalFlag["fileId"], userNumberInt)
+    let response = await userAgent.shareFile(modalFlag["fileId"], userNumberInt)
     try{
       if(response.length>0){
         if(response[0]=="success"){
@@ -108,10 +108,10 @@ const ListView = () =>{
 
   const handleView = async(record) =>{
     setViewFlag(true)
-    const icdrive = await httpAgent();
+    const userAgent = await canisterHttpAgent();
     const chunkBuffers = [];
     for(let j=0; j<record["chunkCount"]; j++){
-      const bytes = await icdrive.getFileChunk(record["fileId"], j+1);
+      const bytes = await userAgent.getFileChunk(record["fileId"], j+1);
       const bytesAsBuffer = new Uint8Array(bytes[0]);
       chunkBuffers.push(bytesAsBuffer);
     }

@@ -11,10 +11,11 @@ module {
   type UserId = Types.UserId;
   type userNumber = Types.UserNumber;
 
-  func makeProfile(userId: UserId, userNumber: Int): Profile {
+  func makeProfile(userId: UserId, userNumber: Int, userCanisterId: Text): Profile {
     {
       id = userId;
       userNumber = userNumber;
+      userCanisterId = userCanisterId;
       name = "";
       img = "";
       createdAt = Time.now();
@@ -29,8 +30,8 @@ module {
     let hashMap = HashMap.HashMap<UserId, Profile>(1, isEq, Text.hash);
     let hashMapUserNumber = HashMap.HashMap<userNumber, UserId>(1, isEqUserNumber, Int.hash);
 
-    public func createOne(userId: UserId, userNumber: Int) {
-      hashMap.put(userId, makeProfile(userId, userNumber));
+    public func createOne(userId: UserId, userNumber: Int, userCanisterId: Text) {
+      hashMap.put(userId, makeProfile(userId, userNumber, userCanisterId));
       hashMapUserNumber.put(userNumber, userId);
     };
 

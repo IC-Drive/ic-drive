@@ -6,6 +6,16 @@ export const httpAgent = async() =>{
   const authClient = await AuthClient.create();
   const identity = await authClient.getIdentity();
   const agent = new HttpAgent({ identity });
-  const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
-  return icdrive
+  const icdriveAgent = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
+  return icdriveAgent
+}
+
+export const canisterHttpAgent = async() =>{
+  const authClient = await AuthClient.create();
+  const identity = await authClient.getIdentity();
+  const agent = new HttpAgent({ identity });
+  const userCanisterId = localStorage.getItem('userCanisterId');
+  const userAgent = Actor.createActor(icdrive_idl, { agent, canisterId: userCanisterId });
+  console.log(userAgent)
+  return userAgent
 }

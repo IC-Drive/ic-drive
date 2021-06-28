@@ -31,8 +31,8 @@ shared (msg) actor class icdrive (){
 
   public shared query(msg) func getOwnId(): async UserId { Principal.toText(msg.caller) };
 
-  public shared(msg) func createProfile(userNumber: Int) : async() {
-    user.createOne(Principal.toText(msg.caller), userNumber);
+  public shared(msg) func createProfile(userNumber: Int, userCanisterId: Text) : async() {
+    user.createOne(Principal.toText(msg.caller), userNumber, userCanisterId);
   };
 
   public shared(msg) func getProfile() : async ?Profile {

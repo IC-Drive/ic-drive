@@ -2,7 +2,7 @@ import React from "react";
 import styled from 'styled-components';
 
 // custom imports
-import {httpAgent} from '../../httpAgent'
+import {httpAgent, canisterHttpAgent} from '../../httpAgent'
 
 // 3rd party imports
 import {useSelector, useDispatch} from 'react-redux';
@@ -23,10 +23,10 @@ const GridView = () =>{
 
   const download = async () => {
     console.log(record)
-    const icdrive = await httpAgent();
+    const userAgent = await canisterHttpAgent();
     const chunkBuffers = [];
     for(let j=0; j<record["chunkCount"]; j++){
-      const bytes = await icdrive.getFileChunk(record["fileId"], j+1);
+      const bytes = await userAgent.getFileChunk(record["fileId"], j+1);
       const bytesAsBuffer = new Uint8Array(bytes[0]);
       chunkBuffers.push(bytesAsBuffer);
     }
@@ -44,10 +44,10 @@ const GridView = () =>{
 
   const handleView = async() =>{
     setViewFlag(true)
-    const icdrive = await httpAgent();
+    const userAgent = await canisterHttpAgent();
     const chunkBuffers = [];
     for(let j=0; j<record["chunkCount"]; j++){
-      const bytes = await icdrive.getFileChunk(record["fileId"], j+1);
+      const bytes = await userAgent.getFileChunk(record["fileId"], j+1);
       const bytesAsBuffer = new Uint8Array(bytes[0]);
       chunkBuffers.push(bytesAsBuffer);
     }
@@ -60,9 +60,9 @@ const GridView = () =>{
 
   const handleShare = async() =>{
     setLoadingFlag(true)
-    const icdrive = await httpAgent();
+    const userAgent = await canisterHttpAgent();
     let userNumberInt = parseInt(userNumber.current.state.value)
-    let response = await icdrive.shareFile(record["fileId"], userNumberInt)
+    let response = await userAgent.shareFile(record["fileId"], userNumberInt)
     try{
       if(response.length>0){
         if(response[0]=="success"){
@@ -92,13 +92,13 @@ const GridView = () =>{
       }
     }
     dispatch(filesUpdate(temp));
-    const icdrive = await httpAgent();
-    await icdrive.markFile(record["fileId"]);
+    const userAgent = await canisterHttpAgent();
+    await userAgent.markFile(record["fileId"]);
   }
 
   const handleDelete = async(record) =>{
-    const icdrive = await httpAgent();
-    await icdrive.deleteFile(record["fileId"]);
+    const userAgent = await canisterHttpAgent();
+    await userAgent.deleteFile(record["fileId"]);
     dispatch(refreshFiles(true));
   }
 

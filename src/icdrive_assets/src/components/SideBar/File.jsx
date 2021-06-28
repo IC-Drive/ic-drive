@@ -1,4 +1,4 @@
-import {httpAgent} from '../../httpAgent'
+import {canisterHttpAgent} from '../../httpAgent'
 
 const MAX_CHUNK_SIZE = 1024 * 1024 * 2; // 4MB
 
@@ -20,9 +20,9 @@ function getFileInit(
 }
 
 // Wraps up the previous functions into one step for the UI to trigger
-async function uploadFile(file, icdrive, dispatch, uploadProgress, uploadFileId) {
+async function uploadFile(file, userAgent, dispatch, uploadProgress, uploadFileId) {
   const fileInit = getFileInit(file);
-  let fileId = await icdrive.createFile(fileInit);
+  let fileId = await userAgent.createFile(fileInit);
   fileId = fileId[0]
   console.log("id")
   console.log(fileId)
@@ -48,7 +48,7 @@ async function uploadFile(file, icdrive, dispatch, uploadProgress, uploadFileId)
     let fileSlice = file.slice(byteStart, Math.min(file.size, byteStart + MAX_CHUNK_SIZE))
     let fileSliceBuffer = (await fileSlice.arrayBuffer()) || new ArrayBuffer(0);
     const sliceToNat = encodeArrayBuffer(fileSliceBuffer);
-    await icdrive.putFileChunk(fileId, chunk, sliceToNat);
+    await userAgent.putFileChunk(fileId, chunk, sliceToNat);
     
     dispatch(uploadProgress(100*(chunk/file_obj["chunkCount"]).toFixed(2)));
 
@@ -61,11 +61,11 @@ async function uploadFile(file, icdrive, dispatch, uploadProgress, uploadFileId)
 }
 
 export async function useUploadFile(file, dispatch, uploadProgress, uploadFileId) {
-  const icdrive = await httpAgent();
+  const userAgent = await canisterHttpAgent();
   console.info("Storing File...");
   try {
     console.time("Stored in");
-    const file_obj = await uploadFile(file, icdrive, dispatch, uploadProgress, uploadFileId);
+    const file_obj = await uploadFile(file, userAgent, dispatch, uploadProgress, uploadFileId);
     console.timeEnd("Stored in");
     console.log(file_obj);
     return(file_obj);
