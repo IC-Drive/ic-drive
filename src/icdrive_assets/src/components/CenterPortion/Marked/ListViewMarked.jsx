@@ -131,5 +131,7 @@ const ListViewMarked = () =>{
 export default ListViewMarked;
 
 const Style = styled.div`
-
+  thead[class*="ant-table-thead"] th{
+    font-weight: bold !important;
+  }
 `
