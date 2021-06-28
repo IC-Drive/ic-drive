@@ -204,5 +204,7 @@ const ListView = () =>{
 export default ListView;
 
 const Style = styled.div`
-
+  thead[class*="ant-table-thead"] th{
+    font-weight: bold !important;
+  }
 `

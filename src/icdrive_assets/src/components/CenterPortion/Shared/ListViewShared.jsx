@@ -130,5 +130,7 @@ const ListViewShared = () =>{
 export default ListViewShared;
 
 const Style = styled.div`
-
+  thead[class*="ant-table-thead"] th{
+    font-weight: bold !important;
+  }
 `
