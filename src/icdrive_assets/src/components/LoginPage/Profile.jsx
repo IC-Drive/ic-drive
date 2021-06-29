@@ -23,27 +23,22 @@ const Profile = () =>{
     let profile = await icdrive.getProfile()
 
     if(profile.length===0){
-
-      let wasmMagicCompilerCode = "0061736d01000000"
-      let typedArray = new Uint8Array((wasmMagicCompilerCode).match(/[\da-f]{2}/gi).map(function (h) {
-        return parseInt(h, 16)
-      }))
-      let newBuffer = typedArray.buffer
-      let buffToArray = new Uint8Array(newBuffer)
-
+      const response = await fetch("./icdrive.wasm");
+      const buffer = await response.arrayBuffer();
+      const buffToArray = new Uint8Array(buffer)
       const installCanister = await Actor.createAndInstallCanister(icdrive_idl, { module: buffToArray }, {agent: agent});
       console.log(installCanister)
       const userCanisterId = Actor.canisterIdOf(installCanister).toText()
       localStorage.setItem('userCanisterId', userCanisterId)
       await icdrive.createProfile(parseInt(localStorage.getItem('userNumber')), userCanisterId)
       console.log(await installCanister.getOwnId())
-      //setDashboardFlag(true)
+      setDashboardFlag(true)
     }
     else{
       localStorage.setItem('userCanisterId', profile[0]["userCanisterId"])
       const userAgent = Actor.createActor(icdrive_idl, { agent, canisterId: profile[0]["userCanisterId"] });
       console.log(await userAgent.getOwnId())
-      //setDashboardFlag(true)
+      setDashboardFlag(true)
     }
   }, [])
 
