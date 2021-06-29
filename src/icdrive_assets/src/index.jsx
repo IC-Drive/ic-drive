@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 
-import {registerWorker} from './mitm.jsx'
+//import {registerWorker} from './mitm.jsx'
 
 import {Provider} from 'react-redux';
 import {createStore} from 'redux';

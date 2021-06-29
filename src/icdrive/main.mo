@@ -29,35 +29,21 @@ shared (msg) actor class icdrive (){
   var state = Types.empty();
   var user: Database.User = Database.User();
 
-  public shared query(msg) func getOwnId(): async UserId { Principal.toText(msg.caller) };
+  public shared query(msg) func getOwnId(): async UserId { msg.caller };
 
   public shared(msg) func createProfile(userNumber: Int) : async() {
-    user.createOne(Principal.toText(msg.caller), userNumber);
+    user.createOne(msg.caller, userNumber);
   };
 
   public shared(msg) func getProfile() : async ?Profile {
-    user.findOne(Principal.toText(msg.caller));
-  };
-
-  func getFileList(userId: UserId) : async [FileId]{
-    var file_list = state.user_file_rel.get(userId);
-    switch (file_list) {
-      case (?file_list) { file_list };
-      case null { [] };
-    };
+    user.findOne(msg.caller);
   };
 
   func createFile_(fileData : FileInit, userId: UserId) : async ?FileId {
     let now = Time.now();
-    let fileId = userId # "-" # fileData.name # "-" # (Int.toText(now));
+    let fileId = Principal.toText(userId) # "-" # fileData.name # "-" # (Int.toText(now));
     do ?{
-      
-      var file_list = await getFileList(userId);
-      var file_list_buffer = Buffer.Buffer<FileId>(0);
-      for (f in file_list.vals()) {
-        file_list_buffer.add(f);
-      };
-      file_list_buffer.add(fileId);
+      let fileList = Option.get(state.user_file_rel.get(userId), []);
 
       switch (state.files.get(fileId)) {
       case (?_) { /* error -- ID already taken. */ "null" };
@@ -74,7 +60,9 @@ shared (msg) actor class icdrive (){
                                 marked = fileData.marked;
                                 sharedWith = [];
                               });
-            state.user_file_rel.put(userId, file_list_buffer.toArray());
+
+              state.user_file_rel.put(userId, Array.append<Text>(fileList, [fileId]));
+
             fileId
           };
       }
@@ -82,10 +70,10 @@ shared (msg) actor class icdrive (){
   };
 
   public shared(msg) func createFile(i : FileInit) : async ?FileId {
-    await createFile_(i, Principal.toText(msg.caller))
+    await createFile_(i, msg.caller)
   };
 
-  func getFileInfo_ (fileId : FileId) : ?FileInfo {
+  func getFileInfo_(fileId : FileId) : ?FileInfo {
     do ? {
       let v = state.files.get(fileId)!;
       {
@@ -111,27 +99,14 @@ shared (msg) actor class icdrive (){
       let shareId = user.getUserId(userNumber)!;    // userNumber to Principal
       let fileInfo = state.files.get(fileId)!;      // Info of File
 
-      if(Principal.toText(msg.caller)!=fileInfo.userId){  // User cant reshare other users file
+      if(msg.caller!=fileInfo.userId){  // User cant reshare other users file
         return(?"Unauthorized");
       };
-      if(Principal.toText(msg.caller)==shareId){  // User cant share file to yourself
+      if(msg.caller==shareId){  // User cant share file to himself
         return(?"Unauthorized");
       };
 
-      var user_list_buffer = Buffer.Buffer<Int>(0); // Adding new userNumber to shared list
-      for (u in fileInfo.sharedWith.vals()) {
-        user_list_buffer.add(u);
-      };
-      user_list_buffer.add(userNumber);
-
-      var file_list = await getFileList(shareId);    // Adding File Metadata to shared user
-      var file_list_buffer = Buffer.Buffer<FileId>(0);
-      for (f in file_list.vals()) {
-        file_list_buffer.add(f);
-      };
-      file_list_buffer.add(fileId);
-
-      state.user_file_rel.put(shareId, file_list_buffer.toArray());
+      let fileList = Option.get(state.user_file_rel.get(shareId), []);
 
       state.files.put(fileId,
                         {
@@ -142,9 +117,12 @@ shared (msg) actor class icdrive (){
                           chunkCount = fileInfo.chunkCount ;
                           fileSize = fileInfo.fileSize;
                           mimeType = fileInfo.mimeType ;
-                          marked= fileInfo.marked ;
-                          sharedWith = user_list_buffer.toArray();
+                          marked = fileInfo.marked ;
+                          sharedWith = Array.append<Int>(fileInfo.sharedWith, [userNumber]);
                         });
+
+      state.user_file_rel.put(shareId, Array.append<Text>(fileList, [fileId]));
+
       return(?"success");
     }
   };
@@ -165,7 +143,7 @@ shared (msg) actor class icdrive (){
 
   public query(msg) func getFiles() : async ?[FileInfo] {
     do ? {
-      let file_list = state.user_file_rel.get(Principal.toText(msg.caller))!;
+      let file_list = state.user_file_rel.get(msg.caller)!;
       let b = Buffer.Buffer<FileInfo>(0);
       for (f in file_list.vals()) {
           b.add(getFileInfo_(f)!);
@@ -177,7 +155,7 @@ shared (msg) actor class icdrive (){
   public shared(msg) func markFile(fileId : FileId) : async ?() {
     do ? {
       let file_info = getFileInfo_(fileId)!;
-      if(Principal.toText(msg.caller)==file_info.userId){
+      if(msg.caller==file_info.userId){
         state.files.put(fileId,
                         {
                           userId = file_info.userId ;
@@ -204,7 +182,7 @@ shared (msg) actor class icdrive (){
   public query(msg) func deleteFile(fileId : FileId) : async ?() {
     do ? {
       let file_info = getFileInfo_(fileId)!;
-      if(Principal.toText(msg.caller)==file_info.userId){
+      if(msg.caller==file_info.userId){
         deleteFile_(file_info);
       }
     }
@@ -221,7 +199,7 @@ shared (msg) actor class icdrive (){
   public query(msg) func deleteCorruptFile(fileId : FileId) : async ?() {
     do ? {
       let file_info = getFileInfo_(fileId)!;
-      if(Principal.toText(msg.caller)==file_info.userId){
+      if(msg.caller==file_info.userId){
         deleteCorruptFile_(file_info);
       }
     }

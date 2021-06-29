@@ -145,7 +145,7 @@ const ListView = () =>{
       title: 'Mark',
       dataIndex: 'marked',
       key: 'marked',
-      render: (_, record) => <div>{record.marked?<BookOutlined style={{ height: '14px', color: '#1890ff' }} onClick={()=>handleMarked(record)} />:<BookOutlined style={{ height: '14px', color: '#000' }} onClick={()=>handleMarked(record)} />}</div>,
+      render: (_, record) => <div>{record.marked?<img src="./icons/mark-blue.svg" style={{ height: '14px' }} onClick={()=>handleMarked(record)} />:<img src="./icons/mark-gray.svg" style={{ height: '14px' }} onClick={()=>handleMarked(record)} />}</div>,
     },
     {
       title: '',
