@@ -1,12 +1,13 @@
+import Principal "mo:base/Principal";
+import TrieMap "mo:base/TrieMap";
 import Text "mo:base/Text";
 import Int "mo:base/Int";
 import Bool "mo:base/Int";
 import Nat8 "mo:base/Nat8";
-import TrieMap "mo:base/TrieMap";
 
 module {
   
-  public type UserId = Text;
+  public type UserId = Principal;
   public type UserNumber = Int;
   public type FileId = Text; // chosen by createFile
   public type ChunkId = Text; // FileId # (toText(ChunkNum))
@@ -18,7 +19,7 @@ module {
     userNumber: UserNumber;
     userCanisterId: Text;
     name : Text;
-		img: Text;
+    img: Text;
     createdAt: Int;
   };
 
@@ -60,7 +61,7 @@ module {
     /// all chunks.
     chunks : Map<ChunkId, ChunkData>;
     /// users with file
-    user_file_rel : Map<UserId, [FileId]>;
+    user_file_rel : Map<UserId, [Text]>;
   };
 
   public func empty () : State {
@@ -68,7 +69,7 @@ module {
     let st : State = {
       chunks = TrieMap.TrieMap<ChunkId, ChunkData>(Text.equal, Text.hash);
       files = TrieMap.TrieMap<FileId, File>(Text.equal, Text.hash);
-      user_file_rel = TrieMap.TrieMap<UserId, [FileId]>(Text.equal, Text.hash);
+      user_file_rel = TrieMap.TrieMap<UserId, [FileId]>(Principal.equal, Principal.hash);
     };
     st
   };

@@ -9,7 +9,7 @@ module {
   
   type Profile = Types.Profile;
   type UserId = Types.UserId;
-  type userNumber = Types.UserNumber;
+  type UserNumber = Types.UserNumber;
 
   func makeProfile(userId: UserId, userNumber: Int, userCanisterId: Text): Profile {
     {
@@ -23,12 +23,12 @@ module {
   };
 
   func isEq(x: UserId, y: UserId): Bool { x == y };
-  func isEqUserNumber(x: userNumber, y: userNumber): Bool { x == y };
+  func isEqUserNumber(x: UserNumber, y: UserNumber): Bool { x == y };
 
   public class User() {
     
-    let hashMap = HashMap.HashMap<UserId, Profile>(1, isEq, Text.hash);
-    let hashMapUserNumber = HashMap.HashMap<userNumber, UserId>(1, isEqUserNumber, Int.hash);
+    let hashMap = HashMap.HashMap<UserId, Profile>(1, isEq, Principal.hash);
+    let hashMapUserNumber = HashMap.HashMap<UserNumber, UserId>(1, isEqUserNumber, Int.hash);
 
     public func createOne(userId: UserId, userNumber: Int, userCanisterId: Text) {
       hashMap.put(userId, makeProfile(userId, userNumber, userCanisterId));

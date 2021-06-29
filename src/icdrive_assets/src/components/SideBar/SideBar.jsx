@@ -33,7 +33,7 @@ const SideBar = () =>{
         {
           uploadFlag?
             <div className="upload-button">
-              <div className="upload-element-section">
+              <div className="upload-element-section active">
                 <div className="upload-icon-part">
                   <img src="./icons/upload.svg" style={{ height: '22px', color: '#fff' }} />
                 </div>
@@ -45,7 +45,7 @@ const SideBar = () =>{
           :
           <label id="label-file" for="upload-file">
             <div className="upload-button">
-              <div className="upload-element-section">
+              <div className="upload-element-section inactive">
                 <div className="upload-icon-part">
                   <img src="./icons/upload.svg" style={{ height: '22px', color: '#fff' }} />
                 </div>
@@ -170,13 +170,18 @@ const Style = styled.div`
   }
   .upload-element-section{
     border-radius: 20px;
-    background: #7DA3A1;
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: flex-start;
     width: 170px;
     height: 50px;
+  }
+  .active{
+    background: #eaeaea;
+  }
+  .inactive{
+    background: #7DA3A1;
   }
   .upload-text-part{
     font-size: 20px;
