@@ -130,9 +130,9 @@ const GridView = () =>{
               <ContextMenuTrigger id="same_unique_identifier">
                 <div className="file-div" onContextMenu={()=>setRecord(value)}>
                   <div className="icon-part">
-                    <img src="./icons/file-icon.svg" style={{ width: '56px' }}/>
+                    <img src="./icons/file-icon.svg" style={{ width: '60px' }}/>
                   </div>
-                  <div className="text-part">
+                  <div className="text-part truncate-overflow">
                     {value.name}
                   </div>
                 </div>
@@ -140,7 +140,8 @@ const GridView = () =>{
             )
           })
         }
-
+      </div>
+      
       <ContextMenu id="same_unique_identifier">
         <MenuItem data={{selected: 'download'}} onClick={handleClick}>
           <div id="context-download">
@@ -194,7 +195,6 @@ const GridView = () =>{
       >
         <img src={image} width="500px" />
       </Modal>
-      </div>
     </Style>
   )
 }
@@ -204,19 +204,18 @@ export default GridView;
 const Style = styled.div`
 
   .grid-container{
-      
+    display: flex;
+    flex-flow: row wrap;
   }
   .file-div{
-    margin-top: 20px;
-    margin-left: 20px;
-    display: flex;
-    flex-flow: column;
-    width: 44px;
+    margin-top: 30px;
+    margin-left: 30px;
+    width: 60px;
+    height: 60px;
     justify-content: center;  
     align-items: center;
   }
   .text-part{
-    display: flex;
     font-size: 12px;
     word-wrap: break-word;
   }
@@ -232,5 +231,12 @@ const Style = styled.div`
   }
   #context-download: hover, #context-edit: hover, #context-view: hover, #context-share: hover, #context-mark: hover, #context-delete: hover{
     background: #425757;
+  }
+  .truncate-overflow{
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow:hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
   }
 `
