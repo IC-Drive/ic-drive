@@ -27,17 +27,23 @@ const Profile = () =>{
       const buffer = await response.arrayBuffer();
       const buffToArray = new Uint8Array(buffer)
       const installCanister = await Actor.createAndInstallCanister(icdrive_idl, { module: buffToArray }, {agent: agent});
-      console.log(installCanister)
+      //console.log(installCanister)
       const userCanisterId = Actor.canisterIdOf(installCanister).toText()
       localStorage.setItem('userCanisterId', userCanisterId)
       await icdrive.createProfile(parseInt(localStorage.getItem('userNumber')), userCanisterId)
-      console.log(await installCanister.getOwnId())
+      //console.log("icd owner")
+      //let pr1 = await icdrive.getOwner()
+      //console.log(pr1.toText())
+      //console.log("new owner")
+      //let pr2 = await installCanister.getOwner()
+      //console.log(pr2.toText())
+      //console.log(await installCanister.getOwnId())
       setDashboardFlag(true)
     }
     else{
       localStorage.setItem('userCanisterId', profile[0]["userCanisterId"])
       const userAgent = Actor.createActor(icdrive_idl, { agent, canisterId: profile[0]["userCanisterId"] });
-      console.log(await userAgent.getOwnId())
+      //console.log(await userAgent.getOwnId())
       setDashboardFlag(true)
     }
   }, [])
@@ -50,7 +56,7 @@ const Profile = () =>{
         :
         <div className="waiting">
           <Spin size="large"/>
-          <p id="text">Loading</p>
+          <p id="text">Loading...</p>
         </div>
       }
     </Style>

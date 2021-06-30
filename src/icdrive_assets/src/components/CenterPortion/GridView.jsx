@@ -60,28 +60,40 @@ const GridView = () =>{
 
   const handleShare = async() =>{
     setLoadingFlag(true)
-    const userAgent = await canisterHttpAgent();
+    const icdriveAgent = await httpAgent();
     let userNumberInt = parseInt(userNumber.current.state.value)
-    let response = await userAgent.shareFile(record["fileId"], userNumberInt)
-    try{
-      if(response.length>0){
-        if(response[0]=="success"){
-          message.success("File Shared")
-          setModalFlag(false)
-          setLoadingFlag(false)
+    const canisterId = await icdriveAgent.getCanisterId(userNumberInt);
+    console.log(canisterId)
+    if(canisterId.length>0){
+      if(canisterId[0]==="Unauthorized"){
+        message.error("Cant Share File to Yourself")
+      } else{
+        const authClient = await AuthClient.create();
+        const identity = await authClient.getIdentity();
+        const agent = new HttpAgent({ identity });
+        const shareAgent = Actor.createActor(icdrive_idl, { agent, canisterId: canisterId[0] });
+        const fileObj = {
+          userId: modalFlag["userId"],
+          createdAt: parseInt(modalFlag["createdAt"]),
+          fileId: modalFlag["fileId"],
+          name: modalFlag["name"],
+          chunkCount: parseInt(modalFlag["chunkCount"]),
+          fileSize: parseInt(modalFlag["fileSize"]),
+          mimeType: modalFlag["mimeType"],
+          marked: false,
+          sharedWith: []
         }
-        else{
-          message.error("Unauthorized")
-          setLoadingFlag(false)
+        const resp = shareAgent.shareFile(fileObj);
+        if(resp[0]==="Unauthorized"){
+          message.error("You are not owner of this file")
+        } else{
+          message.success("File Shared Successfully")
         }
-      }else{
-        message.error("Something Went Wrong! Check User Number")
-        setLoadingFlag(false)
       }
-    } catch{
-      message.error("Something Went Wrong! Check User Number")
-      setLoadingFlag(false)
+    } else{
+      message.error("User does not exist")
     }
+    setLoadingFlag(false)
   }
 
   const handleMarked = async() =>{
@@ -128,7 +140,7 @@ const GridView = () =>{
           files.map((value, index)=>{
             return(
               <ContextMenuTrigger id="same_unique_identifier">
-                <div className="file-div" onContextMenu={()=>setRecord(value)}>
+                <div className="file-div" onDoubleClick={()=>{setRecord(value);handleView()}} onContextMenu={()=>setRecord(value)}>
                   <div className="icon-part">
                     <img src="./icons/file-icon.svg" style={{ width: '60px' }}/>
                   </div>

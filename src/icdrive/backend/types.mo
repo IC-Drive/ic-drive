@@ -9,6 +9,7 @@ module {
   
   public type UserId = Principal;
   public type UserNumber = Int;
+  public type CanisterId = Text;
   public type FileId = Text; // chosen by createFile
   public type ChunkId = Text; // FileId # (toText(ChunkNum))
   public type ChunkData = [Nat8]; // encoded as ??
@@ -17,7 +18,7 @@ module {
   public type Profile = {
     id: UserId;
     userNumber: UserNumber;
-    userCanisterId: Text;
+    userCanisterId: CanisterId;
     name : Text;
     img: Text;
     createdAt: Int;

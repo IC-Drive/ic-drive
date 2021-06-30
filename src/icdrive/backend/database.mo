@@ -9,9 +9,10 @@ module {
   
   type Profile = Types.Profile;
   type UserId = Types.UserId;
+  type CanisterId = Types.CanisterId;
   type UserNumber = Types.UserNumber;
 
-  func makeProfile(userId: UserId, userNumber: Int, userCanisterId: Text): Profile {
+  func makeProfile(userId: UserId, userNumber: Int, userCanisterId: CanisterId): Profile {
     {
       id = userId;
       userNumber = userNumber;
@@ -30,7 +31,7 @@ module {
     let hashMap = HashMap.HashMap<UserId, Profile>(1, isEq, Principal.hash);
     let hashMapUserNumber = HashMap.HashMap<UserNumber, UserId>(1, isEqUserNumber, Int.hash);
 
-    public func createOne(userId: UserId, userNumber: Int, userCanisterId: Text) {
+    public func createOne(userId: UserId, userNumber: Int, userCanisterId: CanisterId) {
       hashMap.put(userId, makeProfile(userId, userNumber, userCanisterId));
       hashMapUserNumber.put(userNumber, userId);
     };

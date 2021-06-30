@@ -20,6 +20,7 @@ shared (msg) actor class icdrive (){
   let admin = msg.caller;
   type Profile = Types.Profile;
   type UserId = Types.UserId;
+  type CanisterId = Types.CanisterId;
   public type FileId = Types.FileId;
   public type ChunkId = Types.ChunkId;
   public type ChunkData = Types.ChunkData;
@@ -29,9 +30,9 @@ shared (msg) actor class icdrive (){
   var state = Types.empty();
   var user: Database.User = Database.User();
 
-  public shared query(msg) func getOwnId(): async UserId { msg.caller };
+  public shared query(msg) func getOwner(): async Principal { admin };
 
-  public shared(msg) func createProfile(userNumber: Int, userCanisterId: Text) : async() {
+  public shared(msg) func createProfile(userNumber: Int, userCanisterId: CanisterId) : async() {
     user.createOne(msg.caller, userNumber, userCanisterId);
   };
 
@@ -94,7 +95,28 @@ shared (msg) actor class icdrive (){
     getFileInfo_(fileId)
   };
 
-  public shared(msg) func shareFile(fileId : FileId, userNumber : Int) : async ?(Text) {
+  public query(msg) func getCanisterId (userNumber : Int) : async ?CanisterId {
+    do?{
+      let shareId = user.getUserId(userNumber)!;    // userNumber to Principal
+      let profile = user.findOne(shareId)!;
+      if(msg.caller==shareId){                      // User cant share file to himself
+        return(?"Unauthorized");
+      };
+      profile.userCanisterId;
+    }
+  };
+
+  public shared(msg) func shareFile(fileInfo : FileInfo) : async Text {
+    if(msg.caller!=fileInfo.userId){                // User cant reshare other users file
+      return("Unauthorized");
+    };
+    let fileList = Option.get(state.user_file_rel.get(admin), []);
+    state.files.put(fileInfo.fileId, fileInfo);
+    state.user_file_rel.put(admin, Array.append<Text>(fileList, [fileInfo.fileId]));
+    return("Success");
+  };
+
+  /*public shared(msg) func shareFile(fileId : FileId, userNumber : Int) : async ?(Text) {
     do ? {
       let shareId = user.getUserId(userNumber)!;    // userNumber to Principal
       let fileInfo = state.files.get(fileId)!;      // Info of File
@@ -125,7 +147,7 @@ shared (msg) actor class icdrive (){
 
       return(?"success");
     }
-  };
+  };*/
   
   func chunkId(fileId : FileId, chunkNum : Nat) : ChunkId {
     fileId # (Nat.toText(chunkNum));
@@ -188,23 +210,6 @@ shared (msg) actor class icdrive (){
     }
   };
 
-  func deleteCorruptFile_(file_info : FileInfo) : () {
-    Debug.print(file_info.fileId);
-    //for (j in Iter.range(1, file_info.chunkCount)) {
-    //  state.chunks.delete(chunkId(file_info.fileId, j));
-    //};
-    //state.files.delete(file_info.fileId);
-  };
-
-  public query(msg) func deleteCorruptFile(fileId : FileId) : async ?() {
-    do ? {
-      let file_info = getFileInfo_(fileId)!;
-      if(msg.caller==file_info.userId){
-        deleteCorruptFile_(file_info);
-      }
-    }
-  };
-
 ///////////////////////////////////////////////////// TEST  //////////////////////////////////////
 
   type HeaderField = (Text, Text);
@@ -223,6 +228,23 @@ shared (msg) actor class icdrive (){
           headers = [("Content-Type", "application/octet-stream; charset=utf-8"),("Content-Disposition", "attachment; filename*=UTF-8''abc.txt")];
           body = Text.encodeUtf8("<b>Hello World!</b>");
       };
+  };
+
+  func deleteCorruptFile_(file_info : FileInfo) : () {
+    Debug.print(file_info.fileId);
+    //for (j in Iter.range(1, file_info.chunkCount)) {
+    //  state.chunks.delete(chunkId(file_info.fileId, j));
+    //};
+    //state.files.delete(file_info.fileId);
+  };
+
+  public query(msg) func deleteCorruptFile(fileId : FileId) : async ?() {
+    do ? {
+      let file_info = getFileInfo_(fileId)!;
+      if(msg.caller==file_info.userId){
+        deleteCorruptFile_(file_info);
+      }
+    }
   };
 
 };
