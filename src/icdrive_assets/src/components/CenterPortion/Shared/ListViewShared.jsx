@@ -6,30 +6,19 @@ import styled from 'styled-components';
 // 3rd party imports
 import * as streamSaver from 'streamsaver';
 import { WritableStream } from 'web-streams-polyfill/ponyfill'
-import { Actor, HttpAgent } from '@dfinity/agent';
-import { AuthClient } from "@dfinity/auth-client";
-import { idlFactory as icdrive_idl, canisterId as icdrive_id } from 'dfx-generated/icdrive';
+import { Actor } from '@dfinity/agent';
+import {httpAgent, canisterHttpAgent, httpAgentIdentity} from '../../../httpAgent'
+import { idlFactory as FileHandle_idl } from 'dfx-generated/FileHandle';
 import {useSelector, useDispatch} from 'react-redux';
 import {DownloadOutlined, DeleteOutlined, EditOutlined} from "@ant-design/icons";
 import {Table, Popconfirm, Space} from 'antd';
 
 const ListViewShared = () =>{
 
-  const files = useSelector(state=>state.FileHandler.files);
+  const shared = useSelector(state=>state.FileHandler.shared);
   const [data, setData] = React.useState("")
   //const data = useRef([]);
   const dispatch = useDispatch();
-
-  React.useEffect(()=>{
-    let temp = []
-    console.log(files)
-    for(let i=0; i<files.length; i++){
-      if(files[i]["sharedWith"].length>0){
-        temp.push(files[i])
-      }
-    }
-    setData(temp)
-  },[])
 
   // For large files not working on firefox to be fixed
   /*const download = async (fileId, chunk_count, fileName) => {
@@ -47,32 +36,27 @@ const ListViewShared = () =>{
   };*/
 
   //Temporary method works well on small files
-  const download = async (fileId, chunk_count, fileName, mimeType) => {
-    const authClient = await AuthClient.create();
-    const identity = await authClient.getIdentity();
-    const agent = new HttpAgent({ identity });
-    const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
-
+  const handleDownload = async (record) =>{
+    const icdrive = await httpAgent();
+    const canisterIdShared = await icdrive.getUser(record["userNumber"]);
+    const identityAgent = await httpAgentIdentity();
+    const userAgentShare = Actor.createActor(FileHandle_idl, { agent: identityAgent, canisterId: canisterIdShared[0] });
     const chunkBuffers = [];
-    for(let j=0; j<chunk_count; j++){
-      const bytes = await icdrive.getFileChunk(fileId, j+1);
+    for(let j=0; j<record["chunkCount"]; j++){
+      const bytes = await userAgentShare.getSharedFileChunk(record["fileId"], j+1);
       const bytesAsBuffer = new Uint8Array(bytes[0]);
       chunkBuffers.push(bytesAsBuffer);
     }
     
     const fileBlob = new Blob([Buffer.concat(chunkBuffers)], {
-      type: mimeType,
+      type: record["mimeType"],
     });
     const fileURL = URL.createObjectURL(fileBlob);
     var link = document.createElement('a');
     link.href = fileURL;
-    link.download = fileName;
+    link.download = record["name"];
     document.body.appendChild(link);
     link.click();
-  };
-
-  const handleDownload = async (record) =>{
-    let k = await download(record["fileId"], record["chunkCount"], record["name"], record["mimeType"])
   }
 
   const columns = [
@@ -83,9 +67,9 @@ const ListViewShared = () =>{
     },
     {
       title: 'File Size',
-      dataIndex: 'chunkCount',
-      key: 'chunkCount',
-      render: text => <div>{text/2}MB</div>,
+      dataIndex: 'fileSize',
+      key: 'fileSize',
+      render: text => <div>{(Number(text)/(1024*1024)).toFixed(2)}&nbsp;MB</div>,
     },
     {
       title: 'Created',
@@ -119,7 +103,7 @@ const ListViewShared = () =>{
     <Style>
       <div>
         {
-          data===""?null:<Table dataSource={data} columns={columns} />
+          shared===""?null:<Table dataSource={shared} columns={columns} />
         }
         
       </div>

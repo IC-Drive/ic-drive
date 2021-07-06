@@ -14,14 +14,6 @@ module {
   public type ChunkData = [Nat8]; // encoded as ??
   public type Map<X, Y> = TrieMap.TrieMap<X, Y>;
 
-  public type Profile = {
-    id: UserId;
-    userNumber: UserNumber;
-    name : Text;
-		img: Text;
-    createdAt: Int;
-  };
-
   public type FileInit = {
     name: Text;
     chunkCount: Nat;
@@ -33,7 +25,7 @@ module {
 
   public type FileInfo = {
     fileId : FileId;
-    userId : UserId;
+    userNumber: UserNumber;
     createdAt : Int;
     name: Text;
     chunkCount: Nat;
@@ -41,34 +33,22 @@ module {
     mimeType: Text;
     marked: Bool;
     sharedWith: [Int];
-  };
-
-  public type File = {
-    userId : UserId;
-    createdAt : Int;
-    name: Text;
-    chunkCount: Nat;
-    fileSize: Nat;
-    mimeType: Text;
-    marked: Bool;
-    sharedWith: [Int];
+    deleted: Bool;
   };
 
   public type State = {
     /// all files.
-    files : Map<FileId, File>;
+    files : Map<FileId, FileInfo>;
     /// all chunks.
     chunks : Map<ChunkId, ChunkData>;
-    /// users with file
-    user_file_rel : Map<UserId, [Text]>;
+
   };
 
   public func empty () : State {
 
     let st : State = {
       chunks = TrieMap.TrieMap<ChunkId, ChunkData>(Text.equal, Text.hash);
-      files = TrieMap.TrieMap<FileId, File>(Text.equal, Text.hash);
-      user_file_rel = TrieMap.TrieMap<UserId, [FileId]>(Principal.equal, Principal.hash);
+      files = TrieMap.TrieMap<FileId, FileInfo>(Text.equal, Text.hash);
     };
     st
   };

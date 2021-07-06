@@ -4,9 +4,14 @@
       "main": "src/icdrive/main.mo",
       "type": "motoko"
     },
+    "FileHandle": {
+      "main": "src/icdrive/FileHandle.mo",
+      "type": "motoko"
+    },
     "icdrive_assets": {
       "dependencies": [
-        "icdrive"
+        "icdrive",
+        "FileHandle"
       ],
       "frontend": {
         "entrypoint": "src/icdrive_assets/src/index.html"
