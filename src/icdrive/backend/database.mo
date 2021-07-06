@@ -1,22 +1,23 @@
+import ProfileTypes "profileTypes";
 import HashMap "mo:base/HashMap";
 import Principal "mo:base/Principal";
 import Time "mo:base/Time";
 import Text "mo:base/Text";
 import Int "mo:base/Int";
-import Types "./types";
 
 module {
   
-  type Profile = Types.Profile;
-  type UserId = Types.UserId;
-  type UserNumber = Types.UserNumber;
+  type Profile = ProfileTypes.Profile;
+  type UserId = ProfileTypes.UserId;
+  type FileCanister = ProfileTypes.FileCanister;
+  type UserNumber = ProfileTypes.UserNumber;
 
-  func makeProfile(userId: UserId, userNumber: Int): Profile {
+  func makeProfile(userId: UserId, userNumber: Int, fileCanister: FileCanister): Profile {
     {
       id = userId;
+      fileCanister = fileCanister;
       userNumber = userNumber;
-      name = "";
-      img = "";
+      name = "Anonymous";
       createdAt = Time.now();
     }
   };
@@ -29,8 +30,8 @@ module {
     let hashMap = HashMap.HashMap<UserId, Profile>(1, isEq, Principal.hash);
     let hashMapUserNumber = HashMap.HashMap<UserNumber, UserId>(1, isEqUserNumber, Int.hash);
 
-    public func createOne(userId: UserId, userNumber: Int) {
-      hashMap.put(userId, makeProfile(userId, userNumber));
+    public func createOne(userId: UserId, userNumber: Int, fileCanister: FileCanister) {
+      hashMap.put(userId, makeProfile(userId, userNumber, fileCanister));
       hashMapUserNumber.put(userNumber, userId);
     };
 

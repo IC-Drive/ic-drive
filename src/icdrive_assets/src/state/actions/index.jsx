@@ -4,6 +4,12 @@ export const filesUpdate = (payload) =>{
       payload
   }
 }
+export const sharedUpdate = (payload) =>{
+  return{
+      type: 'sharedUpdate',
+      payload
+  }
+}
 export const uploadUpdate = (payload) =>{
   return{
       type: 'uploadUpdate',

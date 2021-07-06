@@ -60,7 +60,7 @@ const Style = styled.div`
   .dot {
     height: 25px;
     width: 25px;
-    background-color: #01579D;
+    background-color: #324851;
     border-radius: 50%;
     display: inline-block;
   }
