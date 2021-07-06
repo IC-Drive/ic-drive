@@ -55,3 +55,10 @@ export const uploadProgress = (payload) =>{
       payload
   }
 }
+
+//---------------------------------------Side Bar----------------------------------------------//
+export const updateState = () =>{
+  return{
+      type: 'updateState',
+  }
+}

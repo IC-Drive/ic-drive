@@ -18,7 +18,7 @@ const ListView = () =>{
 
   const files = useSelector(state=>state.FileHandler.files)
   const dispatch = useDispatch();
-  const [fileObj, setFileObj] = React.useState({name:""})
+  const fileObj = React.useRef({})
   const [shareModal, setShareModal] = React.useState(false)
   const [viewFlag, setViewFlag] = React.useState(false)
   const [loadingFlag, setLoadingFlag] = React.useState(false)
@@ -33,7 +33,7 @@ const ListView = () =>{
         "image/pipeg", "image/svg+xml", "image/tiff", "image/tiff", "image/x-cmu-raster",
         "image/x-cmx", "image/x-icon", "image/x-portable-anymap", "image/x-portable-bitmap",
         "image/x-portable-graymap", "image/x-portable-pixmap", "image/x-rgb", "image/x-xbitmap",
-        "image/x-xpixmap", "image/x-xwindowdump"]
+        "image/x-xpixmap", "image/x-xwindowdump", "image/png"]
   // For large files not working on firefox to be fixed
   /*const download = async (fileId, chunk_count, fileName) => {
     streamSaver.WritableStream = WritableStream
@@ -88,6 +88,7 @@ const ListView = () =>{
     dispatch(refreshFiles(true));
   }
 
+  //Temporary, relook the logic
   const handleShare = async() =>{
     setLoadingFlag(true)
     const icdrive = await httpAgent();
@@ -98,18 +99,18 @@ const ListView = () =>{
 
     try{
       if(canisterIdShared.length===1){
-        let resp_share = await userAgent.shareFile(fileObj["fileId"], userNumberInt, parseInt(localStorage.getItem("userNumber")))
+        let resp_share = await userAgent.shareFile(fileObj["current"]["fileId"], userNumberInt, parseInt(localStorage.getItem("userNumber")))
         if(resp_share[0]==="Success"){
           const identityAgent = await httpAgentIdentity()
           const userAgentShare = Actor.createActor(FileHandle_idl, { agent: identityAgent, canisterId: canisterIdShared[0] });
           let fileInfo = {
-            fileId: fileObj["fileId"],
-            userNumber: fileObj["userNumber"],
+            fileId: fileObj["current"]["fileId"],
+            userNumber: fileObj["current"]["userNumber"],
             createdAt: Date.now(),
-            name: fileObj["name"],
-            chunkCount: fileObj["chunkCount"],
-            fileSize: fileObj["fileSize"],
-            mimeType: fileObj["mimeType"],
+            name: fileObj["current"]["name"],
+            chunkCount: fileObj["current"]["chunkCount"],
+            fileSize: fileObj["current"]["fileSize"],
+            mimeType: fileObj["current"]["mimeType"],
             marked: false,
             sharedWith: [],
             deleted: false
@@ -131,30 +132,30 @@ const ListView = () =>{
 
   const handleView = async() =>{
     let flag = 0
-    console.log(fileObj["mimeType"])
+    console.log(fileObj["current"]["mimeType"])
     for(let i=0; i<image_types.length;i++){
-      if(fileObj["mimeType"]===image_types[i]){
+      if(fileObj["current"]["mimeType"]===image_types[i]){
         flag=1
         setType("image")
         break
       }
     }
-    if(fileObj["mimeType"].toString()==="application/pdf"){
+    if(fileObj["current"]["mimeType"].toString()==="application/pdf"){
       setType("pdf")
       flag=1
     }
-    setName(fileObj["name"])
+    setName(fileObj["current"]["name"])
     if(flag){
       //setViewFlag(true)
       const userAgent = await canisterHttpAgent();
       const chunkBuffers = [];
-      for(let j=0; j<fileObj["chunkCount"]; j++){
-        const bytes = await userAgent.getFileChunk(fileObj["fileId"], j+1);
+      for(let j=0; j<fileObj["current"]["chunkCount"]; j++){
+        const bytes = await userAgent.getFileChunk(fileObj["current"]["fileId"], j+1);
         const bytesAsBuffer = new Uint8Array(bytes[0]);
         chunkBuffers.push(bytesAsBuffer);
       }
       const fileBlob = new Blob([Buffer.concat(chunkBuffers)], {
-        type: fileObj["mimeType"],
+        type: fileObj["current"]["mimeType"],
       });
       const fileURL = URL.createObjectURL(fileBlob);
       window.open(fileURL, '_blank');
@@ -162,7 +163,7 @@ const ListView = () =>{
     } else{
       message.info("Only PDF and Images can be viewed")
     }
-    setFileObj({name:""})
+    fileObj.current = {};
   }
 
   const columns = [
@@ -171,7 +172,7 @@ const ListView = () =>{
       dataIndex: 'name',
       key: 'name',
       editable: true,
-      render: (text, record) => <div onDoubleClick={()=>{setFileObj(record);handleView()}}>{text}</div>,
+      render: (text, record) => <div onDoubleClick={()=>{fileObj.current = record;handleView()}}>{text}</div>,
     },
     {
       title: 'File Size',
@@ -208,7 +209,7 @@ const ListView = () =>{
           </a>
           </Popconfirm>
           <a>
-            <ShareAltOutlined onClick={()=>{setShareModal(true);setFileObj(record)}} />
+            <ShareAltOutlined onClick={()=>{setShareModal(true);fileObj.current = record}} />
           </a>
         </Space>
         );
@@ -221,7 +222,7 @@ const ListView = () =>{
       <div>
         <Table dataSource={files} columns={columns} />
       </div>
-      <Modal footer={null} title={false} visible={shareModal} onCancel={()=>{setShareModal(false);setFileObj({name:""})}}>
+      <Modal footer={null} title={false} visible={shareModal} onCancel={()=>{setShareModal(false); fileObj.current = {} }}>
         <div>
         <span>User Number:&nbsp;<Input ref={userNumber} /></span>
         <Button type="primary" style={{float:"right", marginTop:"10px"}} loading={loadingFlag} onClick={handleShare}>Share</Button>
@@ -235,7 +236,7 @@ const ListView = () =>{
         visible={viewFlag}
         destroyOnClose = {true}
         centered = {true}
-        onCancel={()=>{setImage("");setFileObj({name:""});setViewFlag(false)}}
+        onCancel={()=>{setImage("");fileObj.current = {};setViewFlag(false)}}
         closeIcon = {null}
       >
         {
@@ -245,7 +246,6 @@ const ListView = () =>{
           <img src={image} width="500px" height="650px" />
         }
       </Modal>
-      <div style={{display:"none"}}>{fileObj["name"]}</div>
     </Style>
   )
 }

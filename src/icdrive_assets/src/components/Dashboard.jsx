@@ -14,6 +14,7 @@ import {filesUpdate,sharedUpdate,refreshFiles} from '../state/actions';
 const Dashboard = () =>{
 
   const refresh_files = useSelector(state=>state.FileHandler.refresh_files);
+  const sidebar = useSelector(state=>state.SideBarShow.state);
   const dispatch = useDispatch();
 
   React.useEffect(async () => {
@@ -51,6 +52,14 @@ const Dashboard = () =>{
         <SideBar />
         <CenterPortion/>
       </div>
+      <div className="side-center-mobile">
+        {
+          sidebar?
+          <SideBar />
+          :
+          <CenterPortion/>
+        }
+      </div>
     </Style>
   )
 }
@@ -61,5 +70,16 @@ const Style = styled.div`
   font-style: sans-serif;
   .side-center{
     display: flex;
+  }
+  .side-center-mobile{
+    display: none;
+  }
+  @media only screen and (max-width: 600px){
+    .side-center{
+      display: none;
+    }
+    .side-center-mobile{
+      display: block;
+    }
   }
 `

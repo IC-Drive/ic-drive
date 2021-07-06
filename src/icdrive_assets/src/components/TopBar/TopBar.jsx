@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 // custom imports
-import {switchHome} from '../../state/actions'
+import {updateState} from '../../state/actions'
 
 // 3rd party imports
 import {Input} from 'antd';
@@ -17,7 +17,7 @@ const TopBar = () =>{
     <Style>
       <div className="container">
         <div className="left-section">
-          <span id="icdrive_top" onClick={()=>{dispatch(switchHome("home"))}}>IC Drive</span>
+          <span id="icdrive_top" onClick={()=>{dispatch(updateState())}}>IC Drive</span>
         </div>
         <div className="right-section">
           <span><Input placeholder="Search Files" /></span>
@@ -53,10 +53,6 @@ const Style = styled.div`
     justify-content: space-evenly;
     align-items: center;
   }
-  .ant-input {
-    height: 25px;
-    width: 250px;
-  }
   .dot {
     height: 25px;
     width: 25px;
@@ -66,5 +62,28 @@ const Style = styled.div`
   }
   #icdrive_top:hover{
     cursor: pointer;
+  }
+  .icdrive_top{
+    
+  }
+
+  @media only screen and (min-width: 600px){
+    .ant-input {
+      height: 25px;
+      width: 250px;
+    }
+  }
+
+  @media only screen and (max-width: 600px){
+    .ant-input {
+      height: 25px;
+      width: 100px;
+    }
+    .right-section{
+      width: 250px;
+      display: flex;
+      justify-content: space-evenly;
+      align-items: center;
+    }
   }
 `

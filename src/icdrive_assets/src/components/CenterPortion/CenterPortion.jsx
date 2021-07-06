@@ -25,6 +25,11 @@ const CenterPortion = () =>{
       <div className="top-bar">
         <div>
           {
+            optionSelected==="home"?
+            <div className="show-section">
+              &nbsp;&nbsp;Home
+            </div>
+            :
             optionSelected==="marked"?
             <div className="show-section">
               &nbsp;&nbsp;Marked
@@ -33,11 +38,6 @@ const CenterPortion = () =>{
             optionSelected==="shared"?
             <div className="show-section">
               &nbsp;&nbsp;Shared
-            </div>
-            :
-            optionSelected==="home"?
-            <div className="show-section">
-              &nbsp;&nbsp;Home
             </div>
             :
             null
@@ -120,19 +120,32 @@ const CenterPortion = () =>{
 export default CenterPortion;
 
 const Style = styled.div`
-  width: calc(100vw - 225px);
   height: calc(100vh - 50px);
   box-sizing: border-box;
   overflow-x: auto;
   overflow-y: auto;
 
-  .top-bar{
+  @media only screen and (max-width: 600px){
+    width: calc(100vw);
+    .top-bar{
+      width: calc(100vw);
+      height: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #C9D1C8;
+    }
+  }
+  @media only screen and (min-width: 600px){
     width: calc(100vw - 225px);
-    height: 32px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #C9D1C8;
+    .top-bar{
+      width: calc(100vw - 225px);
+      height: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #C9D1C8;
+    }
   }
   .list-grid-view{
     display: flex;
