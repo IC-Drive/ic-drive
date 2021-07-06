@@ -33,7 +33,6 @@ module {
     mimeType: Text;
     marked: Bool;
     sharedWith: [Int];
-    deleted: Bool;
   };
 
   public type State = {
