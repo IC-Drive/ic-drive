@@ -12,7 +12,6 @@ const SideBar = () =>{
 
   const dispatch = useDispatch();
   const [uploadFlag, setUploadFlag] = React.useState(false)
-  const files = useSelector(state=>state.FileHandler.files)
 
   const onFileSelect = async (evt) => {
     setUploadFlag(true)

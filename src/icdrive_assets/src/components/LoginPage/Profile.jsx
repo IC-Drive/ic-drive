@@ -19,16 +19,12 @@ const Profile = () =>{
     if(profile.length===0){
       let create = await icdrive.createProfile(parseInt(localStorage.getItem('userNumber')))
       if(create.length===1){
-        console.log("canister")
-        console.log(create[0])
         localStorage.setItem("fileCanister", create[0].toText())
         setDashboardFlag(true)
       } else{
         message.error("Something Went Wrong!!!")
       }
     } else{
-      console.log("canister")
-      console.log(profile[0]["fileCanister"])
       localStorage.setItem("fileCanister", profile[0]["fileCanister"].toText())
       setDashboardFlag(true)
     }
