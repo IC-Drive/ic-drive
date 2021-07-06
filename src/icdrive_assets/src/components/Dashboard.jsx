@@ -29,9 +29,13 @@ const Dashboard = () =>{
         let temp = new Date(parseInt(Number(file_list[0][i]["createdAt"]).toString().slice(0, -6)))
         file_list[0][i]["createdAt"] = temp.getDate() + "-" + (temp.getMonth()+1) + "-" + temp.getFullYear()
         if(localStorage.getItem("userNumber").toString()===file_list[0][i]["userNumber"].toString()){
-          files.push(file_list[0][i])
+          if(!file_list[0][i]["deleted"]){
+            files.push(file_list[0][i])
+          }
         } else{
-          sharedFiles.push(file_list[0][i])
+          if(!file_list[0][i]["deleted"]){
+            files.push(file_list[0][i])
+          }
         }
       }
       dispatch(filesUpdate(files))

@@ -11,7 +11,7 @@ import { Actor } from '@dfinity/agent';
 import { idlFactory as FileHandle_idl } from 'dfx-generated/FileHandle';
 import {useSelector, useDispatch} from 'react-redux';
 import {filesUpdate, refreshFiles} from '../../state/actions'
-import {DownloadOutlined, DeleteOutlined, EditOutlined, BookOutlined, ShareAltOutlined} from "@ant-design/icons";
+import {DownloadOutlined, DeleteOutlined, EditOutlined, ShareAltOutlined} from "@ant-design/icons";
 import {Table, Popconfirm, Space, Modal, message, Button, Input} from 'antd';
 
 const ListView = () =>{

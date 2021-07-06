@@ -55,7 +55,6 @@ shared ({caller = admin}) actor class FileHandle (){
                               mimeType = fileData.mimeType;
                               marked = fileData.marked;
                               sharedWith = [];
-                              deleted = false;
                             });
 
           ?fileId
@@ -89,13 +88,13 @@ shared ({caller = admin}) actor class FileHandle (){
   };
 
   // Mark File
-  public shared(msg) func markFile(fileId : FileId, userNumber: UserNumber) : async ?() {
+  public shared(msg) func markFile(fileId : FileId) : async ?() {
     do ? {
       assert(msg.caller==owner);
       var file_info = getFileInfo(fileId)!;
       state.files.put(fileId,
                       {
-                        userNumber = userNumber;
+                        userNumber = file_info.userNumber;
                         createdAt = file_info.createdAt ;
                         fileId = fileId ;
                         name = file_info.name ;
@@ -104,7 +103,6 @@ shared ({caller = admin}) actor class FileHandle (){
                         mimeType = file_info.mimeType ;
                         marked= not(file_info.marked) ;
                         sharedWith = file_info.sharedWith ;
-                        deleted = false;
                       });
     }
   };
@@ -149,7 +147,6 @@ shared ({caller = admin}) actor class FileHandle (){
         mimeType = fileInfo.mimeType ;
         marked = fileInfo.marked ;
         sharedWith = Array.append<Int>(fileInfo.sharedWith, [userNumberShared]);
-        deleted = false;
       });
       return(?"Success")
     }
@@ -163,40 +160,39 @@ shared ({caller = admin}) actor class FileHandle (){
     state.chunks.get(chunkId(fileId, chunkNum));
   };
   
-/*
-  func deleteFile_(file_info : FileInfo) : () {
-    for (j in Iter.range(1, file_info.chunkCount)) {
-      state.chunks.delete(chunkId(file_info.fileId, j));
+  // Delete File
+  func deleteFile_(fileInfo : FileInfo) : () {
+    for (j in Iter.range(1, fileInfo.chunkCount)) {
+      state.chunks.delete(chunkId(fileInfo.fileId, j));
     };
-    state.files.delete(file_info.fileId);
+    state.files.delete(fileInfo.fileId);
   };
 
-  public query(msg) func deleteFile(fileId : FileId) : async ?() {
+  public shared(msg) func deleteFile(fileId : FileId) : async ?() {
     do ? {
-      let file_info = getFileInfo_(fileId)!;
-      if(msg.caller==file_info.userId){
-        deleteFile_(file_info);
-      }
+      assert(msg.caller==owner);
+      let file_info = state.files.get(fileId)!;
+      deleteFile_(file_info);
     }
   };
 
-  func deleteCorruptFile_(file_info : FileInfo) : () {
-    Debug.print(file_info.fileId);
+  //func deleteCorruptFile_(file_info : FileInfo) : () {
+  //  Debug.print(file_info.fileId);
     //for (j in Iter.range(1, file_info.chunkCount)) {
     //  state.chunks.delete(chunkId(file_info.fileId, j));
     //};
     //state.files.delete(file_info.fileId);
-  };
+  //};
 
-  public query(msg) func deleteCorruptFile(fileId : FileId) : async ?() {
+  /*public query(msg) func deleteCorruptFile(fileId : FileId) : async ?() {
     do ? {
       let file_info = getFileInfo_(fileId)!;
       if(msg.caller==file_info.userId){
         deleteCorruptFile_(file_info);
       }
     }
-  };
-*/
+  };*/
+
 ///////////////////////////////////////////////////// TEST  //////////////////////////////////////
 
   type HeaderField = (Text, Text);
