@@ -1,16 +1,19 @@
-import React from "react";
-import styled from 'styled-components';
+import React from 'react'
+import styled from 'styled-components'
 
 // custom imports
-import ListView from './ListView';
-import GridView from './GridView';
-import ListViewMarked from './Marked/ListViewMarked';
-import ListViewShared from "./Shared/ListViewShared";
+import ListView from './ListView'
+import GridView from './GridView'
+import ListViewMarked from './Marked/ListViewMarked'
+import ListViewShared from './Shared/ListViewShared'
+import GridViewMarked from './Marked/GridViewMarked'
+import GridViewShared from './Shared/GridViewShared'
+
 
 // 3rd party imports
-import {MenuOutlined, AppstoreOutlined, CaretDownOutlined, CaretUpOutlined} from "@ant-design/icons";
-import {useSelector} from 'react-redux';
-import { Progress } from 'antd';
+import { Progress } from 'antd'
+import {useSelector} from 'react-redux'
+import {MenuOutlined, AppstoreOutlined, CaretDownOutlined, CaretUpOutlined} from "@ant-design/icons"
 
 const CenterPortion = () =>{
 
@@ -61,12 +64,22 @@ const CenterPortion = () =>{
       {
         optionSelected==="marked"?
         <div>
-          <ListViewMarked/>
+          {
+            selectedView==="listView"?
+            <ListViewMarked/>
+            :
+            <GridViewMarked/>
+          }
         </div>
         :
         optionSelected==="shared"?
         <div>
-          <ListViewShared/>
+          {
+            selectedView==="listView"?
+            <ListViewShared/>
+            :
+            <GridViewShared/>
+          }
         </div>
         :
         optionSelected==="home"?

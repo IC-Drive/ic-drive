@@ -1,12 +1,12 @@
-import React from "react";
-import styled from 'styled-components';
+import React from 'react'
+import styled from 'styled-components'
 
 // custom imports
-import Dashboard from '../Dashboard';
-import {httpAgent} from '../../httpAgent'
+import Dashboard from '../Dashboard'
+import { httpAgent } from '../../httpAgent'
 
 // 3rd party imports
-import { Spin, message } from 'antd';
+import { Spin, message } from 'antd'
 
 const Profile = () =>{
 
@@ -16,6 +16,7 @@ const Profile = () =>{
     const icdrive = await httpAgent()
     let profile = await icdrive.getProfile()
 
+    //Check if user already exist else create his canister
     if(profile.length===0){
       let create = await icdrive.createProfile(parseInt(localStorage.getItem('userNumber')))
       if(create.length===1){

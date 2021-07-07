@@ -1,19 +1,9 @@
-import Array "mo:base/Array";
-import Bool "mo:base/Bool";
-import Buffer "mo:base/Buffer";
 import Database "./backend/database";
 import Debug "mo:base/Debug";
 import Int "mo:base/Int";
 import Nat "mo:base/Nat";
-import Nat8 "mo:base/Nat8";
-import Iter "mo:base/Iter";
-import Option "mo:base/Option";
-import Prelude "mo:base/Prelude";
-import Principal "mo:base/Principal";
-import Text "mo:base/Text";
-import Time "mo:base/Time";
-import TrieMap "mo:base/TrieMap";
 import Cycles "mo:base/ExperimentalCycles";
+
 import ProfileTypes "./backend/profileTypes";
 import FileTypes "./backend/fileTypes";
 import FileHandle "FileHandle";
@@ -49,7 +39,7 @@ shared (msg) actor class icdrive (){
     user.findOne(msg.caller);
   };
 
-  public query(msg) func getUser(userNumber: Int) : async ?FileCanister {
+  public query(msg) func getUserCanister(userNumber: Int) : async ?FileCanister {
     do?{
       let userId = user.getUserId(userNumber)!;
       let profile = user.findOne(userId)!;

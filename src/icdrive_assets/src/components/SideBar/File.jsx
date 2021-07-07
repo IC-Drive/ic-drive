@@ -1,4 +1,4 @@
-import {canisterHttpAgent} from '../../httpAgent'
+import { canisterHttpAgent } from '../../httpAgent'
 
 const MAX_CHUNK_SIZE = 1024 * 1024 * 2; // 4MB
 

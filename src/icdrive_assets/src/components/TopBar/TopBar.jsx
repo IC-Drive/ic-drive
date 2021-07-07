@@ -1,13 +1,13 @@
-import React from 'react';
-import styled from 'styled-components';
+import React from 'react'
+import styled from 'styled-components'
 
 // custom imports
 import {updateState} from '../../state/actions'
 
 // 3rd party imports
-import {Input} from 'antd';
-import { QuestionCircleOutlined } from '@ant-design/icons';
+import {Input} from 'antd'
 import {useDispatch} from 'react-redux'
+import { QuestionCircleOutlined } from '@ant-design/icons'
 
 const TopBar = () =>{
 

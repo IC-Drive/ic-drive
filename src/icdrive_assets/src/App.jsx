@@ -1,6 +1,6 @@
-import React from 'react';
-import Login from './components/LoginPage/Login';
-import 'antd/dist/antd.css';
+import React from 'react'
+import Login from './components/LoginPage/Login'
+import 'antd/dist/antd.css'
 
 const App = () => {
   return (

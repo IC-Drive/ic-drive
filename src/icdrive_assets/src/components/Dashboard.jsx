@@ -1,15 +1,15 @@
-import React from "react";
-import styled from 'styled-components';
+import React from 'react'
+import styled from 'styled-components'
 
 // custom imports
-import TopBar from './TopBar/TopBar.jsx';
-import SideBar from './SideBar/SideBar.jsx';
+import TopBar from './TopBar/TopBar.jsx'
+import SideBar from './SideBar/SideBar.jsx'
+import { canisterHttpAgent } from '../httpAgent'
 import CenterPortion from './CenterPortion/CenterPortion.jsx'
-import {httpAgent, canisterHttpAgent} from '../httpAgent'
 
 // 3rd party imports
-import {useDispatch,useSelector} from 'react-redux';
-import {filesUpdate,sharedUpdate,refreshFiles} from '../state/actions';
+import { useDispatch, useSelector } from 'react-redux'
+import { filesUpdate, sharedUpdate, refreshFiles } from '../state/actions'
 
 const Dashboard = () =>{
 
@@ -29,14 +29,11 @@ const Dashboard = () =>{
         file_list[0][i]["chunkCount"] = file_list[0][i]["chunkCount"]
         let temp = new Date(parseInt(Number(file_list[0][i]["createdAt"]).toString().slice(0, -6)))
         file_list[0][i]["createdAt"] = temp.getDate() + "-" + (temp.getMonth()+1) + "-" + temp.getFullYear()
+        console.log(localStorage.getItem("userNumber"), file_list[0][i]["userNumber"])
         if(localStorage.getItem("userNumber").toString()===file_list[0][i]["userNumber"].toString()){
-          if(!file_list[0][i]["deleted"]){
-            files.push(file_list[0][i])
-          }
+          files.push(file_list[0][i])
         } else{
-          if(!file_list[0][i]["deleted"]){
-            files.push(file_list[0][i])
-          }
+          sharedFiles.push(file_list[0][i])
         }
       }
       dispatch(filesUpdate(files))

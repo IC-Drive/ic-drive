@@ -6,12 +6,9 @@ import Int "mo:base/Int";
 import Nat "mo:base/Nat";
 import Nat8 "mo:base/Nat8";
 import Iter "mo:base/Iter";
-import Option "mo:base/Option";
-import Prelude "mo:base/Prelude";
 import Principal "mo:base/Principal";
 import Text "mo:base/Text";
 import Time "mo:base/Time";
-import TrieMap "mo:base/TrieMap";
 import FileTypes "./backend/fileTypes";
 
 shared ({caller = admin}) actor class FileHandle (){
@@ -44,18 +41,17 @@ shared ({caller = admin}) actor class FileHandle (){
     switch (state.files.get(fileId)) {
     case (?_) { /* error -- ID already taken. */ null };
     case null { /* ok, not taken yet. */
-            state.files.put(fileId,
-                            {
-                              fileId = fileId;
-                              userNumber = userNumber;
-                              name = fileData.name;
-                              createdAt = now;
-                              chunkCount = fileData.chunkCount;
-                              fileSize = fileData.fileSize;
-                              mimeType = fileData.mimeType;
-                              marked = fileData.marked;
-                              sharedWith = [];
-                            });
+            state.files.put(fileId, {
+              fileId = fileId;
+              userNumber = userNumber;
+              name = fileData.name;
+              createdAt = now;
+              chunkCount = fileData.chunkCount;
+              fileSize = fileData.fileSize;
+              mimeType = fileData.mimeType;
+              marked = fileData.marked;
+              sharedWith = [];
+            });
 
           ?fileId
         };
@@ -82,28 +78,22 @@ shared ({caller = admin}) actor class FileHandle (){
     }
   };
 
-  // Get Specific file detail
-  func getFileInfo(fileId : FileId) : ?FileInfo {
-    state.files.get(fileId);
-  };
-
   // Mark File
   public shared(msg) func markFile(fileId : FileId) : async ?() {
     do ? {
       assert(msg.caller==owner);
-      var file_info = getFileInfo(fileId)!;
-      state.files.put(fileId,
-                      {
-                        userNumber = file_info.userNumber;
-                        createdAt = file_info.createdAt ;
-                        fileId = fileId ;
-                        name = file_info.name ;
-                        chunkCount = file_info.chunkCount ;
-                        fileSize = file_info.fileSize;
-                        mimeType = file_info.mimeType ;
-                        marked= not(file_info.marked) ;
-                        sharedWith = file_info.sharedWith ;
-                      });
+      var file_info = state.files.get(fileId)!;
+      state.files.put(fileId, {
+        userNumber = file_info.userNumber;
+        createdAt = file_info.createdAt ;
+        fileId = fileId ;
+        name = file_info.name ;
+        chunkCount = file_info.chunkCount ;
+        fileSize = file_info.fileSize;
+        mimeType = file_info.mimeType ;
+        marked= not(file_info.marked) ;
+        sharedWith = file_info.sharedWith ;
+      });
     }
   };
 
@@ -123,6 +113,22 @@ shared ({caller = admin}) actor class FileHandle (){
   public query(msg) func getFileChunk(fileId : FileId, chunkNum : Nat) : async ?[Nat8] {
     assert(msg.caller==owner);
     state.chunks.get(chunkId(fileId, chunkNum));
+  };
+
+  // Delete File
+  func deleteFile_(fileInfo : FileInfo) : () {
+    for (j in Iter.range(1, fileInfo.chunkCount)) {
+      state.chunks.delete(chunkId(fileInfo.fileId, j));
+    };
+    state.files.delete(fileInfo.fileId);
+  };
+
+  public shared(msg) func deleteFile(fileId : FileId) : async ?() {
+    do ? {
+      assert(msg.caller==owner);
+      let file_info = state.files.get(fileId)!;
+      deleteFile_(file_info);
+    }
   };
 
   // Share File
@@ -151,28 +157,31 @@ shared ({caller = admin}) actor class FileHandle (){
       return(?"Success")
     }
   };
-
+  
+  //Authorization for sharing to be added
   public shared(msg) func addSharedFile(fileInfo : FileInfo) : async () {
     state.files.put(fileInfo.fileId, fileInfo)
   };
 
-  public query(msg) func getSharedFileChunk(fileId : FileId, chunkNum : Nat) : async ?[Nat8] {
-    state.chunks.get(chunkId(fileId, chunkNum));
-  };
-  
-  // Delete File
-  func deleteFile_(fileInfo : FileInfo) : () {
-    for (j in Iter.range(1, fileInfo.chunkCount)) {
-      state.chunks.delete(chunkId(fileInfo.fileId, j));
+  public query(msg) func getSharedFileChunk(fileId : FileId, chunkNum : Nat, userNumber: UserNumber) : async ?[Nat8] {
+    do?{
+      let fileInfo = state.files.get(fileId)!;
+      var flag = 0;
+      for (j in fileInfo.sharedWith.vals()) {
+        if(userNumber==j){
+          flag := 1;
+        };
+      };
+      assert(flag==1);
+      state.chunks.get(chunkId(fileId, chunkNum))!;
     };
-    state.files.delete(fileInfo.fileId);
   };
 
-  public shared(msg) func deleteFile(fileId : FileId) : async ?() {
+  public shared(msg) func deleteSharedFile(fileId : FileId) : async ?() {
     do ? {
       assert(msg.caller==owner);
       let file_info = state.files.get(fileId)!;
-      deleteFile_(file_info);
+      state.files.delete(file_info.fileId);
     }
   };
 
