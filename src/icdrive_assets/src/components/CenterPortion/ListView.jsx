@@ -1,73 +1,28 @@
-import React from "react";
-import styled from 'styled-components';
+import React from 'react'
+import styled from 'styled-components'
 
 // custom imports
-import {httpAgent, canisterHttpAgent, httpAgentIdentity} from '../../httpAgent'
+import { filesUpdate, refreshFiles } from '../../state/actions'
+import { downloadFile, viewFile, markFile, deleteFile, shareFile } from './Methods'
 
 // 3rd party imports
-import * as streamSaver from 'streamsaver';
-import { WritableStream } from 'web-streams-polyfill/ponyfill'
-import { Actor } from '@dfinity/agent';
-import { idlFactory as FileHandle_idl } from 'dfx-generated/FileHandle';
-import {useSelector, useDispatch} from 'react-redux';
-import {filesUpdate, refreshFiles} from '../../state/actions'
-import {DownloadOutlined, DeleteOutlined, EditOutlined, ShareAltOutlined} from "@ant-design/icons";
-import {Table, Popconfirm, Space, Modal, message, Button, Input} from 'antd';
+import { useSelector, useDispatch } from 'react-redux'
+import { Table, Popconfirm, Space, Modal, message, Button, Input } from 'antd'
+import { DownloadOutlined, DeleteOutlined, EditOutlined, ShareAltOutlined } from '@ant-design/icons'
 
 const ListView = () =>{
 
   const files = useSelector(state=>state.FileHandler.files)
   const dispatch = useDispatch();
+
   const fileObj = React.useRef({})
   const [shareModal, setShareModal] = React.useState(false)
-  const [viewFlag, setViewFlag] = React.useState(false)
   const [loadingFlag, setLoadingFlag] = React.useState(false)
-  
-  const [image, setImage] = React.useState("")
-  const [type, setType] = React.useState("")
-  const [name, setName] = React.useState("")
-
   const userNumber = React.useRef("")
 
-  const image_types = ["image/bmp", "image/cis-cod", "image/gif", "image/ief", "image/jpeg",
-        "image/pipeg", "image/svg+xml", "image/tiff", "image/tiff", "image/x-cmu-raster",
-        "image/x-cmx", "image/x-icon", "image/x-portable-anymap", "image/x-portable-bitmap",
-        "image/x-portable-graymap", "image/x-portable-pixmap", "image/x-rgb", "image/x-xbitmap",
-        "image/x-xpixmap", "image/x-xwindowdump", "image/png"]
-  // For large files not working on firefox to be fixed
-  /*const download = async (fileId, chunk_count, fileName) => {
-    streamSaver.WritableStream = WritableStream
-    streamSaver.mitm = 'http://localhost:8000/mitm.html'
-    const fileStream = streamSaver.createWriteStream(fileName);
-    const writer = fileStream.getWriter();
-    for(let j=0; j<chunk_count; j++){
-      const bytes = await icdrive.getFileChunk(fileId, j+1);
-      //const bytesAsBuffer = Buffer.from(new Uint8Array(bytes[0]));
-      const bytesAsBuffer = new Uint8Array(bytes[0]);
-      writer.write(bytesAsBuffer);
-    }
-    writer.close();
-  };*/
-
-  //Temporary method works well on small files
+  //Functions
   const handleDownload = async (record) =>{
-    const userAgent = await canisterHttpAgent();
-    const chunkBuffers = [];
-    for(let j=0; j<record["chunkCount"]; j++){
-      const bytes = await userAgent.getFileChunk(record["fileId"], j+1);
-      const bytesAsBuffer = new Uint8Array(bytes[0]);
-      chunkBuffers.push(bytesAsBuffer);
-    }
-    
-    const fileBlob = new Blob([Buffer.concat(chunkBuffers)], {
-      type: record["mimeType"],
-    });
-    const fileURL = URL.createObjectURL(fileBlob);
-    var link = document.createElement('a');
-    link.href = fileURL;
-    link.download = record["name"];
-    document.body.appendChild(link);
-    link.click();
+    await downloadFile(record)
   }
 
   const handleMarked = async(record) =>{
@@ -78,101 +33,40 @@ const ListView = () =>{
       }
     }
     dispatch(filesUpdate(temp));
-    const userAgent = await canisterHttpAgent();
-    await userAgent.markFile(record["fileId"]);
+    await markFile(record)
   }
 
   const handleDelete = async(record) =>{
-    const userAgent = await canisterHttpAgent();
-    await userAgent.deleteFile(record["fileId"]);
+    await deleteFile(record)
     dispatch(refreshFiles(true));
   }
 
-  //Temporary, relook the logic
-  const handleShare = async() =>{
-    setLoadingFlag(true)
-    const icdrive = await httpAgent();
-    const userAgent = await canisterHttpAgent();
-
-    let userNumberInt = parseInt(userNumber.current.state.value)
-    let canisterIdShared = await icdrive.getUser(userNumberInt)
-
-    try{
-      if(canisterIdShared.length===1){
-        let resp_share = await userAgent.shareFile(fileObj["current"]["fileId"], userNumberInt, parseInt(localStorage.getItem("userNumber")))
-        if(resp_share[0]==="Success"){
-          const identityAgent = await httpAgentIdentity()
-          const userAgentShare = Actor.createActor(FileHandle_idl, { agent: identityAgent, canisterId: canisterIdShared[0] });
-          let fileInfo = {
-            fileId: fileObj["current"]["fileId"],
-            userNumber: fileObj["current"]["userNumber"],
-            createdAt: Date.now(),
-            name: fileObj["current"]["name"],
-            chunkCount: fileObj["current"]["chunkCount"],
-            fileSize: fileObj["current"]["fileSize"],
-            mimeType: fileObj["current"]["mimeType"],
-            marked: false,
-            sharedWith: [],
-            deleted: false
-          }
-          let res = await userAgentShare.addSharedFile(fileInfo)
-          message.success("File Shared")
-          setLoadingFlag(false)
-        }
-      }else{
-        message.error("Something Went Wrong! Check User Number")
-        setLoadingFlag(false)
-      }
-    } catch(err){
-      console.log(err)
-      message.error("Something Went Wrong! Check User Number")
-      setLoadingFlag(false)
-    }
-  }
-
-  const handleView = async() =>{
-    let flag = 0
-    console.log(fileObj["current"]["mimeType"])
-    for(let i=0; i<image_types.length;i++){
-      if(fileObj["current"]["mimeType"]===image_types[i]){
-        flag=1
-        setType("image")
-        break
-      }
-    }
-    if(fileObj["current"]["mimeType"].toString()==="application/pdf"){
-      setType("pdf")
-      flag=1
-    }
-    setName(fileObj["current"]["name"])
-    if(flag){
-      //setViewFlag(true)
-      const userAgent = await canisterHttpAgent();
-      const chunkBuffers = [];
-      for(let j=0; j<fileObj["current"]["chunkCount"]; j++){
-        const bytes = await userAgent.getFileChunk(fileObj["current"]["fileId"], j+1);
-        const bytesAsBuffer = new Uint8Array(bytes[0]);
-        chunkBuffers.push(bytesAsBuffer);
-      }
-      const fileBlob = new Blob([Buffer.concat(chunkBuffers)], {
-        type: fileObj["current"]["mimeType"],
-      });
-      const fileURL = URL.createObjectURL(fileBlob);
-      window.open(fileURL, '_blank');
-      //setImage(fileURL)
-    } else{
+  const handleView = async(record) =>{
+    let response = await viewFile(record)
+    if(!response){
       message.info("Only PDF and Images can be viewed")
     }
-    fileObj.current = {};
   }
 
+  const handleShare = async() =>{
+    setLoadingFlag(true)
+    let response = await shareFile(fileObj.current, parseInt(userNumber.current.state.value))
+    if(response){
+      message.success("File Shared")
+    } else{
+      message.error("Something Went Wrong! Check User Number")
+    }
+    setLoadingFlag(false)
+  }
+
+  // Defining Columns of Table
   const columns = [
     {
       title: 'File Name',
       dataIndex: 'name',
       key: 'name',
       editable: true,
-      render: (text, record) => <div onDoubleClick={()=>{fileObj.current = record;handleView()}}>{text}</div>,
+      render: (text, record) => <div onDoubleClick={()=>{handleView(record)}}>{text}</div>,
     },
     {
       title: 'File Size',
@@ -203,7 +97,7 @@ const ListView = () =>{
           <a>
             <EditOutlined />
           </a>
-          <Popconfirm title="Sure to delete?" onConfirm={() => {handleDelete(record)}}>
+          <Popconfirm title="Sure to delete?" onConfirm={()=>{handleDelete(record)}}>
           <a>
             <DeleteOutlined />
           </a>
@@ -222,6 +116,8 @@ const ListView = () =>{
       <div>
         <Table dataSource={files} columns={columns} />
       </div>
+
+      {/* Modal For INput User Number */}
       <Modal footer={null} title={false} visible={shareModal} onCancel={()=>{setShareModal(false); fileObj.current = {} }}>
         <div>
         <span>User Number:&nbsp;<Input ref={userNumber} /></span>
@@ -230,22 +126,6 @@ const ListView = () =>{
         </div>
       </Modal>
 
-      <Modal
-        footer={null}
-        width="600px"
-        visible={viewFlag}
-        destroyOnClose = {true}
-        centered = {true}
-        onCancel={()=>{setImage("");fileObj.current = {};setViewFlag(false)}}
-        closeIcon = {null}
-      >
-        {
-          type=="pdf"?
-          <object data={image} name={name} type='application/pdf' width="500px" height="650px"></object>
-          :
-          <img src={image} width="500px" height="650px" />
-        }
-      </Modal>
     </Style>
   )
 }

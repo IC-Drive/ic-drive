@@ -1,12 +1,12 @@
-import React from "react";
-import styled from 'styled-components';
+import React from 'react'
+import styled from 'styled-components'
 
 // custom imports
-import Profile from './Profile';
+import Profile from './Profile'
 
 // 3rd party imports
-import { AuthClient } from "@dfinity/auth-client";
-import { Spin } from 'antd';
+import { AuthClient } from '@dfinity/auth-client'
+import { Spin } from 'antd'
 
 const Login = () =>{
 

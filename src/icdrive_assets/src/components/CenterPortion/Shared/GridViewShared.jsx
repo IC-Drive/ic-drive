@@ -2,61 +2,35 @@ import React from 'react'
 import styled from 'styled-components'
 
 // custom imports
-import { filesUpdate, refreshFiles } from '../../state/actions'
-import { downloadFile, viewFile, markFile, deleteFile, shareFile } from './Methods'
+import { refreshFiles } from '../../../state/actions'
+import { downloadSharedFile, viewSharedFile, deleteSharedFile } from '../Methods'
 
 // 3rd party imports
-import {Modal, message, Button, Input} from 'antd'
-import {useSelector, useDispatch} from 'react-redux'
+import { message } from 'antd'
+import { useSelector, useDispatch } from 'react-redux'
 import { ContextMenu, MenuItem, ContextMenuTrigger } from 'react-contextmenu'
 
 const GridView = () =>{
 
-  const files = useSelector(state=>state.FileHandler.files)
+  const shared = useSelector(state=>state.FileHandler.shared);
   const dispatch = useDispatch();
 
   const fileObj = React.useRef({})
-  const [shareModal, setShareModal] = React.useState(false)
-  const [loadingFlag, setLoadingFlag] = React.useState(false)
-  const userNumber = React.useRef("")
 
   const handleDownload = async () =>{
-    console.log(fileObj)
-    await downloadFile(fileObj.current)
-  }
-
-  const handleMarked = async() =>{
-    let temp = [...files]
-    for(let i=0; i<temp.length; i++){
-      if(temp[i]["fileId"]===fileObj["current"]["fileId"]){
-        temp[i]["marked"] = !temp[i]["marked"]
-      }
-    }
-    dispatch(filesUpdate(temp))
-    await markFile(fileObj.current)
+    await downloadSharedFile(fileObj.current)
   }
 
   const handleDelete = async() =>{
-    await deleteFile(fileObj.current)
+    await deleteSharedFile(fileObj.current)
     dispatch(refreshFiles(true));
   }
 
   const handleView = async() =>{
-    let response = await viewFile(fileObj.current)
+    let response = await viewSharedFile(fileObj.current)
     if(!response){
       message.info("Only PDF and Images can be viewed")
     }
-  }
-
-  const handleShare = async() =>{
-    setLoadingFlag(true)
-    let response = shareFile(fileObj.current, parseInt(userNumber.current.state.value))
-    if(response){
-      message.success("File Shared")
-    } else{
-      message.error("Something Went Wrong! Check User Number")
-    }
-    setLoadingFlag(false)
   }
 
   const handleClick = async (e, data) => {
@@ -67,12 +41,6 @@ const GridView = () =>{
     if(option==="view"){
       await handleView()
     }
-    if(option==="share"){
-      await setShareModal(true)
-    }
-    if(option==="mark"){
-      await handleMarked()
-    }
     if(option==="delete"){
       await handleDelete()
     }
@@ -82,7 +50,7 @@ const GridView = () =>{
     <Style>
       <div className="grid-container">
         {
-          files.map((value, index)=>{
+          shared.map((value, index)=>{
             return(
               <ContextMenuTrigger id="same_unique_identifier">
                 <div className="file-div" onContextMenu={()=>{fileObj.current = value}}>
@@ -105,41 +73,18 @@ const GridView = () =>{
             Download
           </div>
         </MenuItem>
-        <MenuItem data={{selected: 'edit'}} onClick={handleClick}>
-          <div id="context-edit">
-            Edit
-          </div>
-        </MenuItem>
         <MenuItem data={{selected: 'view'}} onClick={handleClick}>
           <div id="context-view">
             View
           </div>
         </MenuItem>
-        <MenuItem data={{selected: 'share'}} onClick={handleClick}>
-          <div id="context-share">
-            Share
-          </div>
-        </MenuItem>
         <MenuItem divider />
-        <MenuItem data={{selected: 'mark'}} onClick={handleClick}>
-          <div id="context-mark">
-            Mark
-          </div>
-        </MenuItem>
         <MenuItem data={{selected: 'delete'}} onClick={handleClick}>
           <div id="context-delete">
             Delete
           </div>
         </MenuItem>
       </ContextMenu>
-
-      <Modal footer={null} title={false} visible={shareModal} onCancel={()=>{setShareModal(false); fileObj.current = {} }}>
-        <div>
-        <span>User Number:&nbsp;<Input ref={userNumber} /></span>
-        <Button type="primary" style={{float:"right", marginTop:"10px"}} loading={loadingFlag} onClick={handleShare}>Share</Button>
-        <br/><br/><br/>
-        </div>
-      </Modal>
 
     </Style>
   )

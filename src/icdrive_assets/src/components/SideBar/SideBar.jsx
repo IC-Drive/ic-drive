@@ -1,11 +1,11 @@
-import React from "react";
-import styled from 'styled-components';
+import React from 'react'
+import styled from 'styled-components'
 
 // custom imports
-import {useUploadFile} from './File.jsx';
+import {useUploadFile} from './File.jsx'
 
 // 3rd party imports
-import {useDispatch, useSelector} from 'react-redux'
+import {useDispatch} from 'react-redux'
 import {uploadUpdate, refreshFiles, switchHome, switchMarked, switchShared, uploadProgress, uploadFileId} from '../../state/actions'
 
 const SideBar = () =>{

@@ -2,17 +2,18 @@ import React from 'react'
 import styled from 'styled-components'
 
 // custom imports
-import { filesUpdate, refreshFiles } from '../../state/actions'
-import { downloadFile, viewFile, markFile, deleteFile, shareFile } from './Methods'
+import { filesUpdate, refreshFiles } from '../../../state/actions'
+import { downloadFile, viewFile, markFile, deleteFile, shareFile } from '../Methods'
 
 // 3rd party imports
-import {Modal, message, Button, Input} from 'antd'
-import {useSelector, useDispatch} from 'react-redux'
+import { Modal, message, Button, Input } from 'antd'
+import { useSelector, useDispatch } from 'react-redux'
 import { ContextMenu, MenuItem, ContextMenuTrigger } from 'react-contextmenu'
 
 const GridView = () =>{
 
   const files = useSelector(state=>state.FileHandler.files)
+  const [data, setData] = React.useState([])
   const dispatch = useDispatch();
 
   const fileObj = React.useRef({})
@@ -20,8 +21,18 @@ const GridView = () =>{
   const [loadingFlag, setLoadingFlag] = React.useState(false)
   const userNumber = React.useRef("")
 
+  //Functions
+  React.useEffect(()=>{
+    let temp = []
+    for(let i=0; i<files.length; i++){
+      if(files[i]["marked"]){
+        temp.push(files[i])
+      }
+    }
+    setData(temp)
+  },[])
+
   const handleDownload = async () =>{
-    console.log(fileObj)
     await downloadFile(fileObj.current)
   }
 
@@ -32,8 +43,8 @@ const GridView = () =>{
         temp[i]["marked"] = !temp[i]["marked"]
       }
     }
-    dispatch(filesUpdate(temp))
-    await markFile(fileObj.current)
+    dispatch(filesUpdate(temp));
+    await markFile(fileObj.current, files, dispatch, filesUpdate)
   }
 
   const handleDelete = async() =>{
@@ -82,7 +93,7 @@ const GridView = () =>{
     <Style>
       <div className="grid-container">
         {
-          files.map((value, index)=>{
+          data.map((value, index)=>{
             return(
               <ContextMenuTrigger id="same_unique_identifier">
                 <div className="file-div" onContextMenu={()=>{fileObj.current = value}}>
