@@ -177,7 +177,7 @@ export const deleteSharedFile = async(fileInfo) =>{
   await userAgent.deleteSharedFile(fileInfo["fileId"]);
 }
 
-
+/*----------------------------------------------Testing--------------------------------------*/
 // For large files not working on firefox to be fixed
   /*const download = async (fileId, chunk_count, fileName) => {
     streamSaver.WritableStream = WritableStream
