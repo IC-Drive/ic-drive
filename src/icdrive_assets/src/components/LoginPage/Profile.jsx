@@ -18,6 +18,8 @@ const Profile = () =>{
 
     //Check if user already exist else create his canister
     if(profile.length===0){
+      var userNumber = Math.floor(Math.random() * 100000);
+      localStorage.setItem("userNumber", userNumber)
       let create = await icdrive.createProfile(parseInt(localStorage.getItem('userNumber')))
       if(create.length===1){
         localStorage.setItem("fileCanister", create[0].toText())
