@@ -3,7 +3,7 @@ import styled from 'styled-components'
 
 // custom imports
 import { filesUpdate, refreshFiles } from '../../state/actions'
-import { downloadFile, viewFile, markFile, deleteFile, shareFile } from './Methods'
+import { downloadFile, viewFile, markFile, deleteFile, shareFile, bytesToSize } from './Methods'
 
 // 3rd party imports
 import { useSelector, useDispatch } from 'react-redux'
@@ -72,7 +72,7 @@ const ListView = () =>{
       title: 'File Size',
       dataIndex: 'fileSize',
       key: 'fileSize',
-      render: text => <div>{(Number(text)/(1024*1024)).toFixed(2)}&nbsp;MB</div>,
+      render: text => <div>{(bytesToSize(Number(text)))}</div>,
     },
     {
       title: 'Created',
