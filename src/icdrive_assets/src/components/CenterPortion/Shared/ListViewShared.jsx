@@ -17,7 +17,7 @@ const ListView = () =>{
 
   //Functions
   const handleDownload = async (record) =>{
-    await downloadSharedFile(record)
+    await downloadSharedFile(record, parseInt(localStorage.getItem("userNumber")))
   }
 
   const handleDelete = async(record) =>{
@@ -26,7 +26,7 @@ const ListView = () =>{
   }
 
   const handleView = async(record) =>{
-    let response = await viewSharedFile(record)
+    let response = await viewSharedFile(record, parseInt(localStorage.getItem("userNumber")))
     if(!response){
       message.info("Only PDF and Images can be viewed")
     }

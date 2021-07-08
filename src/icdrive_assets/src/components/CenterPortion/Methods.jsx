@@ -109,7 +109,7 @@ export const shareFile = async(fileObj, userNumber) =>{
   }
 }
 
-export const downloadSharedFile = async (fileInfo) =>{
+export const downloadSharedFile = async (fileInfo, userNumber) =>{
   const icdrive = await httpAgent();
   const canisterIdShared = await icdrive.getUserCanister(fileInfo["userNumber"]); //Canister id of owner
 
@@ -118,7 +118,7 @@ export const downloadSharedFile = async (fileInfo) =>{
   
   const chunkBuffers = [];
   for(let j=0; j<fileInfo["chunkCount"]; j++){
-    const bytes = await userAgentShare.getSharedFileChunk(fileInfo["fileId"], j+1);
+    const bytes = await userAgentShare.getSharedFileChunk(fileInfo["fileId"], j+1, userNumber);
     const bytesAsBuffer = new Uint8Array(bytes[0]);
     chunkBuffers.push(bytesAsBuffer);
   }
@@ -134,7 +134,7 @@ export const downloadSharedFile = async (fileInfo) =>{
   link.click();
 }
 
-export const viewSharedFile = async(fileInfo) =>{
+export const viewSharedFile = async(fileInfo, userNumber) =>{
   // Currently View only image and pdf files
   let flag = 0
   for(let i=0; i<image_types.length;i++){
@@ -157,7 +157,7 @@ export const viewSharedFile = async(fileInfo) =>{
 
     const chunkBuffers = [];
     for(let j=0; j<fileInfo["chunkCount"]; j++){
-      const bytes = await userAgentShare.getFileChunk(fileInfo["fileId"], j+1);
+      const bytes = await userAgentShare.getSharedFileChunk(fileInfo["fileId"], j+1, userNumber);
       const bytesAsBuffer = new Uint8Array(bytes[0]);
       chunkBuffers.push(bytesAsBuffer);
     }
