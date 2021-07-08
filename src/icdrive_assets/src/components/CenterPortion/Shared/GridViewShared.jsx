@@ -18,7 +18,7 @@ const GridView = () =>{
   const fileObj = React.useRef({})
 
   const handleDownload = async () =>{
-    await downloadSharedFile(fileObj.current)
+    await downloadSharedFile(fileObj.current, parseInt(localStorage.getItem("userNumber")))
   }
 
   const handleDelete = async() =>{
@@ -27,7 +27,7 @@ const GridView = () =>{
   }
 
   const handleView = async() =>{
-    let response = await viewSharedFile(fileObj.current)
+    let response = await viewSharedFile(fileObj.current, parseInt(localStorage.getItem("userNumber")))
     if(!response){
       message.info("Only PDF and Images can be viewed")
     }
