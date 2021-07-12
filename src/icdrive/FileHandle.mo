@@ -1,14 +1,15 @@
-import Array "mo:base/Array"; 
-import Bool "mo:base/Bool";
+import Array "mo:base/Array";
 import Buffer "mo:base/Buffer";
+import Bool "mo:base/Bool";
 import Debug "mo:base/Debug";
 import Int "mo:base/Int";
+import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";
 import Nat8 "mo:base/Nat8";
-import Iter "mo:base/Iter";
 import Principal "mo:base/Principal";
 import Text "mo:base/Text";
 import Time "mo:base/Time";
+
 import FileTypes "./backend/fileTypes";
 
 shared ({caller = admin}) actor class FileHandle (){
@@ -20,9 +21,12 @@ shared ({caller = admin}) actor class FileHandle (){
   public type ChunkData = FileTypes.ChunkData;
   public type FileInfo = FileTypes.FileInfo;
   public type FileInit = FileTypes.FileInit;
+
+  stable var files_backup : [(FileId, FileInfo)] = [];
+  stable var chunks_backup : [(ChunkId, ChunkData)] = [];
   
   var state = FileTypes.empty();
-  var owner:Principal = admin;
+  stable var owner:Principal = admin;
 
   public query(msg) func whoami() : async Principal {
     msg.caller
@@ -183,6 +187,23 @@ shared ({caller = admin}) actor class FileHandle (){
       let file_info = state.files.get(fileId)!;
       state.files.delete(file_info.fileId);
     }
+  };
+
+  //Backup and Recover
+  system func preupgrade() {
+    files_backup := Iter.toArray(state.files.entries());
+    chunks_backup := Iter.toArray(state.chunks.entries());
+  };
+
+  system func postupgrade() {
+    for ((fileId, fileInfo) in files_backup.vals()) {
+      state.files.put(fileId, fileInfo);
+    };
+    for ((chunkId, chunkData) in chunks_backup.vals()) {
+      state.chunks.put(chunkId, chunkData);
+    };
+    files_backup := [];
+    chunks_backup := [];
   };
 
   //func deleteCorruptFile_(file_info : FileInfo) : () {

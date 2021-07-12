@@ -13,12 +13,16 @@ shared (msg) actor class icdrive (){
   let admin = msg.caller;
   type Profile = ProfileTypes.Profile;
   type UserId = ProfileTypes.UserId;
+  type UserNumber = ProfileTypes.UserNumber;
   type FileCanister = ProfileTypes.FileCanister;
   type FileId = FileTypes.FileId;
   type FileInfo = FileTypes.FileInfo;
   type FileInit = FileTypes.FileInit;
 
   var user: Database.User = Database.User();
+
+  stable var user_entries : [(UserId, Profile)] = [];
+  stable var user_number_entries : [(UserNumber, UserId)] = [];
 
   public shared(msg) func createProfile(userNumber: Int) : async ?FileCanister {
     switch(user.findOne(msg.caller)){
@@ -54,14 +58,21 @@ shared (msg) actor class icdrive (){
     }
   };
 
-  /*public shared(msg) func shareFile(fileId : FileId, userNumber: Int, fileInfo : FileInfo) : async ?() {
-    do?{
-      let userId = user.getUserId(userNumber)!;
-      let profile = user.findOne(userId)!;
-      let fileHandleObj = profile.fileCanister;
-      let res = await fileHandleObj.shareFile(fileId, userNumber);
-      await fileHandleObj.addSharedFile(fileInfo)
-    }
-  };*/
+  //Backup and Recover
+  system func preupgrade() {
+    user_entries := user.getAllUsers();
+    user_number_entries := user.getAllUsersNumbers();
+  };
+
+  system func postupgrade() {
+    for ((userId, profile) in user_entries.vals()) {
+      user.insertUsers(userId, profile);
+    };
+    for ((userNumber, userId) in user_number_entries.vals()) {
+      user.insertUsersNumbers(userNumber, userId);
+    };
+    user_entries := [];
+    user_number_entries := [];
+  };
 
 };

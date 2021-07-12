@@ -3,6 +3,7 @@ import HashMap "mo:base/HashMap";
 import Principal "mo:base/Principal";
 import Time "mo:base/Time";
 import Text "mo:base/Text";
+import Iter "mo:base/Iter";
 import Int "mo:base/Int";
 
 module {
@@ -46,6 +47,22 @@ module {
     public func getUserId(userNumber: Int): ?UserId {
       hashMapUserNumber.get(userNumber);
     };
+
+    // Functions used for creating backup of state
+    public func getAllUsers(): [(UserId, Profile)] {
+      Iter.toArray(hashMap.entries())
+    };
+    public func getAllUsersNumbers(): [(UserNumber, UserId)] {
+      Iter.toArray(hashMapUserNumber.entries())
+    };
+
+    public func insertUsers(userId: UserId, profile: Profile) {
+      hashMap.put(userId, profile);
+    };
+    public func insertUsersNumbers(userNumber: UserNumber, userId: UserId) {
+      hashMapUserNumber.put(userNumber, userId);
+    };
+
   };
 
 };
