@@ -82,21 +82,21 @@ export function bytesToSize(bytes) {
 }
 
 //Temporary, relook the logic
-export const shareFile = async(fileObj, userNumber) =>{
+export const shareFile = async(fileObj, userName) =>{
   const icdrive = await httpAgent();
   const userAgent = await canisterHttpAgent();
 
-  let canisterIdShared = await icdrive.getUserCanister(userNumber)
+  let canisterIdShared = await icdrive.getUserCanister(userName)
 
   try{
     if(canisterIdShared.length===1){
-      let resp_share = await userAgent.shareFile(fileObj["fileId"], userNumber, parseInt(localStorage.getItem("userNumber")))
+      let resp_share = await userAgent.shareFile(fileObj["fileId"], userName, localStorage.getItem("userName"))
       if(resp_share[0]==="Success"){
         const identityAgent = await httpAgentIdentity()
         const userAgentShare = Actor.createActor(FileHandle_idl, { agent: identityAgent, canisterId: canisterIdShared[0] });
         let fileInfo = {
           fileId: fileObj["fileId"],
-          userNumber: fileObj["userNumber"],
+          userName: fileObj["userName"],
           createdAt: Date.now(),
           name: fileObj["name"],
           chunkCount: fileObj["chunkCount"],
@@ -116,16 +116,16 @@ export const shareFile = async(fileObj, userNumber) =>{
   }
 }
 
-export const downloadSharedFile = async (fileInfo, userNumber) =>{
+export const downloadSharedFile = async (fileInfo, userName) =>{
   const icdrive = await httpAgent();
-  const canisterIdShared = await icdrive.getUserCanister(fileInfo["userNumber"]); //Canister id of owner
+  const canisterIdShared = await icdrive.getUserCanister(fileInfo["userName"]); //Canister id of owner
 
   const identityAgent = await httpAgentIdentity();
   const userAgentShare = Actor.createActor(FileHandle_idl, { agent: identityAgent, canisterId: canisterIdShared[0] });
   
   const chunkBuffers = [];
   for(let j=0; j<fileInfo["chunkCount"]; j++){
-    const bytes = await userAgentShare.getSharedFileChunk(fileInfo["fileId"], j+1, userNumber);
+    const bytes = await userAgentShare.getSharedFileChunk(fileInfo["fileId"], j+1, userName);
     const bytesAsBuffer = new Uint8Array(bytes[0]);
     chunkBuffers.push(bytesAsBuffer);
   }
@@ -141,7 +141,7 @@ export const downloadSharedFile = async (fileInfo, userNumber) =>{
   link.click();
 }
 
-export const viewSharedFile = async(fileInfo, userNumber) =>{
+export const viewSharedFile = async(fileInfo, userName) =>{
   // Currently View only image and pdf files
   let flag = 0
   for(let i=0; i<image_types.length;i++){
@@ -157,14 +157,14 @@ export const viewSharedFile = async(fileInfo, userNumber) =>{
   // If file is image or pdf
   if(flag){
     const icdrive = await httpAgent();
-    const canisterIdShared = await icdrive.getUserCanister(fileInfo["userNumber"]); //Canister id of owner
+    const canisterIdShared = await icdrive.getUserCanister(fileInfo["userName"]); //Canister id of owner
     
     const identityAgent = await httpAgentIdentity();
     const userAgentShare = Actor.createActor(FileHandle_idl, { agent: identityAgent, canisterId: canisterIdShared[0] });
 
     const chunkBuffers = [];
     for(let j=0; j<fileInfo["chunkCount"]; j++){
-      const bytes = await userAgentShare.getSharedFileChunk(fileInfo["fileId"], j+1, userNumber);
+      const bytes = await userAgentShare.getSharedFileChunk(fileInfo["fileId"], j+1, userName);
       const bytesAsBuffer = new Uint8Array(bytes[0]);
       chunkBuffers.push(bytesAsBuffer);
     }
@@ -199,3 +199,14 @@ export const deleteSharedFile = async(fileInfo) =>{
     }
     writer.close();
   };*/
+
+  export const get_logs = async() =>{
+    const userAgent = await canisterHttpAgent();
+    let k1 = await userAgent.get_logs();
+    console.log("logs1")
+    console.log(k1)
+    const icdrive = await httpAgent();
+    let k2 = await icdrive.get_logs();
+    console.log("logs2")
+    console.log(k2)
+  }

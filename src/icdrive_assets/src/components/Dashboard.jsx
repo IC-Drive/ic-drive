@@ -29,8 +29,7 @@ const Dashboard = () =>{
         file_list[0][i]["chunkCount"] = file_list[0][i]["chunkCount"]
         let temp = new Date(parseInt(Number(file_list[0][i]["createdAt"]).toString().slice(0, -6)))
         file_list[0][i]["createdAt"] = temp.getDate() + "-" + (temp.getMonth()+1) + "-" + temp.getFullYear()
-        console.log(localStorage.getItem("userNumber"), file_list[0][i]["userNumber"])
-        if(localStorage.getItem("userNumber")===file_list[0][i]["userNumber"].toString()){
+        if(localStorage.getItem("userName")===file_list[0][i]["userName"]){
           files.push(file_list[0][i])
         } else{
           sharedFiles.push(file_list[0][i])

@@ -21,7 +21,7 @@ function getFileInit(
 
 async function uploadFile(file, userAgent, dispatch, uploadProgress, uploadFileId) {
   const fileInit = getFileInit(file);
-  let fileId = await userAgent.createFile(fileInit, parseInt(localStorage.getItem("userNumber")));
+  let fileId = await userAgent.createFile(fileInit, localStorage.getItem("userName"));
   fileId = fileId[0]
   console.log("id")
   console.log(fileId)

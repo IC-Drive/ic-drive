@@ -3,7 +3,7 @@ import styled from 'styled-components'
 
 // custom imports
 import { filesUpdate, refreshFiles } from '../../../state/actions'
-import { downloadFile, viewFile, markFile, deleteFile, shareFile, bytesToSize } from '../Methods'
+import { downloadFile, viewFile, markFile, deleteFile, shareFile, bytesToSize, get_logs } from '../Methods'
 
 // 3rd party imports
 import { useSelector, useDispatch } from 'react-redux'
@@ -19,10 +19,10 @@ const ListView = () =>{
   const fileObj = React.useRef({})
   const [shareModal, setShareModal] = React.useState(false)
   const [loadingFlag, setLoadingFlag] = React.useState(false)
-  const userNumber = React.useRef("")
+  const userName = React.useRef("")
 
   //Functions
-  React.useEffect(()=>{
+  React.useEffect(async ()=>{
     let temp = []
     for(let i=0; i<files.length; i++){
       if(files[i]["marked"]){
@@ -30,6 +30,7 @@ const ListView = () =>{
       }
     }
     setData(temp)
+    await get_logs()
   },[])
 
   const handleDownload = async (record) =>{
@@ -61,7 +62,7 @@ const ListView = () =>{
 
   const handleShare = async() =>{
     setLoadingFlag(true)
-    let response = shareFile(fileObj.current, parseInt(userNumber.current.state.value))
+    let response = shareFile(fileObj.current, userName.current.state.value)
     if(response){
       message.success("File Shared")
     } else{
@@ -131,7 +132,7 @@ const ListView = () =>{
       {/* Modal For INput User Number */}
       <Modal footer={null} title={false} visible={shareModal} onCancel={()=>{setShareModal(false); fileObj.current = {} }}>
         <div>
-        <span>User Number:&nbsp;<Input ref={userNumber} /></span>
+        <span>User Number:&nbsp;<Input ref={userName} /></span>
         <Button type="primary" style={{float:"right", marginTop:"10px"}} loading={loadingFlag} onClick={handleShare}>Share</Button>
         <br/><br/><br/>
         </div>

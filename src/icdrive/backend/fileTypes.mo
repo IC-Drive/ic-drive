@@ -8,7 +8,7 @@ import Nat8 "mo:base/Nat8";
 module {
   
   public type UserId = Principal;
-  public type UserNumber = Int;
+  public type UserName = Text;
   public type FileId = Text; // chosen by createFile
   public type ChunkId = Text; // FileId # (toText(ChunkNum))
   public type ChunkData = [Nat8]; // encoded as ??
@@ -20,19 +20,19 @@ module {
     fileSize: Nat;
     mimeType: Text;
     marked: Bool;
-    sharedWith: [Int];
+    sharedWith: [UserName];
   };
 
   public type FileInfo = {
     fileId : FileId;
-    userNumber: UserNumber;
+    userName: UserName;
     createdAt : Int;
     name: Text;
     chunkCount: Nat;
     fileSize: Nat;
     mimeType: Text;
     marked: Bool;
-    sharedWith: [Int];
+    sharedWith: [UserName];
   };
 
   public type State = {

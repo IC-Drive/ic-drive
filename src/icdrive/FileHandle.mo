@@ -2,6 +2,7 @@ import Array "mo:base/Array";
 import Buffer "mo:base/Buffer";
 import Bool "mo:base/Bool";
 import Debug "mo:base/Debug";
+import Cycles "mo:base/ExperimentalCycles";
 import Int "mo:base/Int";
 import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";
@@ -15,7 +16,7 @@ import FileTypes "./backend/fileTypes";
 shared ({caller = admin}) actor class FileHandle (){
 
   type UserId = FileTypes.UserId;
-  type UserNumber = FileTypes.UserNumber;
+  type UserName = FileTypes.UserName;
   public type FileId = FileTypes.FileId;
   public type ChunkId = FileTypes.ChunkId;
   public type ChunkData = FileTypes.ChunkData;
@@ -28,26 +29,30 @@ shared ({caller = admin}) actor class FileHandle (){
   var state = FileTypes.empty();
   stable var owner:Principal = admin;
 
+  var logs : [(Text, Nat)] = [];
+
   public query(msg) func whoami() : async Principal {
     msg.caller
   };
 
   // Create owner of canister
   public shared func createOwner(newOwner: Principal) : async() {
+    var bal = Cycles.balance();
     owner := newOwner;
+    logs := Array.append<(Text, Nat)>(logs, [("assignment_operation", bal-Cycles.balance())]);
   };
 
   // Create file
-  func createFile_(fileData : FileInit, userNumber: UserNumber) : async ?FileId {
+  func createFile_(fileData : FileInit, userName: UserName) : async ?FileId {
     let now = Time.now();
-    let fileId = Int.toText(userNumber) # "-" # fileData.name # "-" # (Int.toText(now));
+    let fileId = userName # "-" # fileData.name # "-" # (Int.toText(now));
 
     switch (state.files.get(fileId)) {
     case (?_) { /* error -- ID already taken. */ null };
     case null { /* ok, not taken yet. */
             state.files.put(fileId, {
               fileId = fileId;
-              userNumber = userNumber;
+              userName = userName;
               name = fileData.name;
               createdAt = now;
               chunkCount = fileData.chunkCount;
@@ -62,10 +67,10 @@ shared ({caller = admin}) actor class FileHandle (){
     };
   };
 
-  public shared(msg) func createFile(i : FileInit, userNumber: UserNumber) : async ?FileId {
+  public shared(msg) func createFile(i : FileInit, userName: UserName) : async ?FileId {
     do?{
       assert(msg.caller==owner);
-      let fileId = await createFile_(i, userNumber);
+      let fileId = await createFile_(i, userName);
       fileId!
     }
   };
@@ -86,9 +91,10 @@ shared ({caller = admin}) actor class FileHandle (){
   public shared(msg) func markFile(fileId : FileId) : async ?() {
     do ? {
       assert(msg.caller==owner);
+      var bal = Cycles.balance();
       var file_info = state.files.get(fileId)!;
       state.files.put(fileId, {
-        userNumber = file_info.userNumber;
+        userName = file_info.userName;
         createdAt = file_info.createdAt ;
         fileId = fileId ;
         name = file_info.name ;
@@ -98,6 +104,7 @@ shared ({caller = admin}) actor class FileHandle (){
         marked= not(file_info.marked) ;
         sharedWith = file_info.sharedWith ;
       });
+      logs := Array.append<(Text, Nat)>(logs, [("mark_file", bal-Cycles.balance())]);
     }
   };
 
@@ -110,13 +117,18 @@ shared ({caller = admin}) actor class FileHandle (){
     (fileId : FileId, chunkNum : Nat, chunkData : [Nat8]) : async ()
   {
     assert(msg.caller==owner);
+    var bal = Cycles.balance();
     state.chunks.put(chunkId(fileId, chunkNum), chunkData);
+    logs := Array.append<(Text, Nat)>(logs, [("put_chunk", bal-Cycles.balance())]);
   };
 
   // Get File Chunk
   public query(msg) func getFileChunk(fileId : FileId, chunkNum : Nat) : async ?[Nat8] {
     assert(msg.caller==owner);
-    state.chunks.get(chunkId(fileId, chunkNum));
+    var bal = Cycles.balance();
+    let chunk = state.chunks.get(chunkId(fileId, chunkNum));
+    logs := Array.append<(Text, Nat)>(logs, [("get_chunk", bal-Cycles.balance())]);
+    chunk
   };
 
   // Delete File
@@ -136,7 +148,7 @@ shared ({caller = admin}) actor class FileHandle (){
   };
 
   // Share File
-  public shared(msg) func shareFile(fileId : FileId, userNumberShared : UserNumber, userNumber: UserNumber) : async ?(Text) {
+  public shared(msg) func shareFile(fileId : FileId, userNameShared : UserName, userName: UserName) : async ?(Text) {
     do ? {
       assert(msg.caller==owner);
       let fileInfo = state.files.get(fileId)!;      // Info of File
@@ -148,7 +160,7 @@ shared ({caller = admin}) actor class FileHandle (){
       //  return(?"Unauthorized");
       //};
       state.files.put(fileId, {
-        userNumber = userNumber;
+        userName = userName;
         createdAt = fileInfo.createdAt ;
         fileId = fileId ;
         name = fileInfo.name ;
@@ -156,7 +168,7 @@ shared ({caller = admin}) actor class FileHandle (){
         fileSize = fileInfo.fileSize;
         mimeType = fileInfo.mimeType ;
         marked = fileInfo.marked ;
-        sharedWith = Array.append<Int>(fileInfo.sharedWith, [userNumberShared]);
+        sharedWith = Array.append<Text>(fileInfo.sharedWith, [userNameShared]);
       });
       return(?"Success")
     }
@@ -167,12 +179,12 @@ shared ({caller = admin}) actor class FileHandle (){
     state.files.put(fileInfo.fileId, fileInfo)
   };
 
-  public query(msg) func getSharedFileChunk(fileId : FileId, chunkNum : Nat, userNumber: UserNumber) : async ?[Nat8] {
+  public query(msg) func getSharedFileChunk(fileId : FileId, chunkNum : Nat, userName: UserName) : async ?[Nat8] {
     do?{
       let fileInfo = state.files.get(fileId)!;
       var flag = 0;
       for (j in fileInfo.sharedWith.vals()) {
-        if(userNumber==j){
+        if(userName==j){
           flag := 1;
         };
       };
@@ -242,6 +254,10 @@ shared ({caller = admin}) actor class FileHandle (){
           body = Text.encodeUtf8("<b>Hello World!</b>");
       };
   };
+
+  public query func get_logs() : async [((Text, Nat))]{
+    logs
+  }
 
 };
 
