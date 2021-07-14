@@ -6,6 +6,7 @@
 Applied for proposal for verified subnet on 14th July, 2021.
 - Proposal ID - 10238
 - Proposal Link - https://nns.ic0.app/#/proposal/10238
+- Principal ID - id6ny-albdu-eafse-zhlsu-na3y2-ljmvh-w7xhi-iy5kp-7xhwq-epoqi-dqe
 
 IC Drive is a storage application built on the internet computer, which offers users a privacy first decentralized alternate to the current web2 storage services like dropbox, google drive, etc. Users can interact with IC Drive from multiple devices by logging in through the internet identity. Users can easily store, view, manage and share files with other users from the dashboard<br> 
 
