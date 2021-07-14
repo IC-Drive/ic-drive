@@ -18,7 +18,7 @@ const ListView = () =>{
   const fileObj = React.useRef({})
   const [shareModal, setShareModal] = React.useState(false)
   const [loadingFlag, setLoadingFlag] = React.useState(false)
-  const userNumber = React.useRef("")
+  const userName = React.useRef("")
 
   //Functions
   const handleDownload = async (record) =>{
@@ -50,7 +50,7 @@ const ListView = () =>{
 
   const handleShare = async() =>{
     setLoadingFlag(true)
-    let response = await shareFile(fileObj.current, parseInt(userNumber.current.state.value))
+    let response = await shareFile(fileObj.current, parseInt(userName.current.state.value))
     if(response){
       message.success("File Shared")
     } else{
@@ -120,7 +120,7 @@ const ListView = () =>{
       {/* Modal For INput User Number */}
       <Modal footer={null} title={false} visible={shareModal} onCancel={()=>{setShareModal(false); fileObj.current = {} }}>
         <div>
-        <span>User Number:&nbsp;<Input ref={userNumber} /></span>
+        <span>User Number:&nbsp;<Input ref={userName} /></span>
         <Button type="primary" style={{float:"right", marginTop:"10px"}} loading={loadingFlag} onClick={handleShare}>Share</Button>
         <br/><br/><br/>
         </div>
