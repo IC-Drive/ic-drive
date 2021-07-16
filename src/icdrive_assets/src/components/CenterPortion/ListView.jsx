@@ -50,7 +50,7 @@ const ListView = () =>{
 
   const handleShare = async() =>{
     setLoadingFlag(true)
-    let response = await shareFile(fileObj.current, parseInt(userName.current.state.value))
+    let response = await shareFile(fileObj.current, (userName.current.state.value))
     if(response){
       message.success("File Shared")
     } else{
