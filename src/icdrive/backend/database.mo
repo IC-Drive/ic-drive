@@ -1,37 +1,38 @@
+import ProfileTypes "profileTypes";
 import HashMap "mo:base/HashMap";
 import Principal "mo:base/Principal";
 import Time "mo:base/Time";
 import Text "mo:base/Text";
-import Int "mo:base/Int";
-import Types "./types";
+import Iter "mo:base/Iter";
 
 module {
   
-  type Profile = Types.Profile;
-  type UserId = Types.UserId;
-  type userNumber = Types.UserNumber;
+  type Profile = ProfileTypes.Profile;
+  type UserId = ProfileTypes.UserId;
+  type FileCanister = ProfileTypes.FileCanister;
+  type UserName = ProfileTypes.UserName;
 
-  func makeProfile(userId: UserId, userNumber: Int): Profile {
+  func makeProfile(userId: UserId, userName: UserName, fileCanister: FileCanister): Profile {
     {
       id = userId;
-      userNumber = userNumber;
-      name = "";
-      img = "";
+      fileCanister = fileCanister;
+      userName = userName;
+      name = "Anonymous";
       createdAt = Time.now();
     }
   };
 
   func isEq(x: UserId, y: UserId): Bool { x == y };
-  func isEqUserNumber(x: userNumber, y: userNumber): Bool { x == y };
+  func isEqUserName(x: UserName, y: UserName): Bool { x == y };
 
   public class User() {
     
-    let hashMap = HashMap.HashMap<UserId, Profile>(1, isEq, Text.hash);
-    let hashMapUserNumber = HashMap.HashMap<userNumber, UserId>(1, isEqUserNumber, Int.hash);
+    let hashMap = HashMap.HashMap<UserId, Profile>(1, isEq, Principal.hash);
+    let hashMapUserName = HashMap.HashMap<UserName, UserId>(1, isEqUserName, Text.hash);
 
-    public func createOne(userId: UserId, userNumber: Int) {
-      hashMap.put(userId, makeProfile(userId, userNumber));
-      hashMapUserNumber.put(userNumber, userId);
+    public func createOne(userId: UserId, userName: UserName, fileCanister: FileCanister) {
+      hashMap.put(userId, makeProfile(userId, userName, fileCanister));
+      hashMapUserName.put(userName, userId);
     };
 
 //    public func updateOne(userId: UserId, profile: Profile) {
@@ -42,9 +43,25 @@ module {
       hashMap.get(userId);
     };
 
-    public func getUserId(userNumber: Int): ?UserId {
-      hashMapUserNumber.get(userNumber);
+    public func getUserId(userName: UserName): ?UserId {
+      hashMapUserName.get(userName);
     };
+
+    // Functions used for creating backup of state
+    public func getAllUsers(): [(UserId, Profile)] {
+      Iter.toArray(hashMap.entries())
+    };
+    public func getAllUsersNames(): [(UserName, UserId)] {
+      Iter.toArray(hashMapUserName.entries())
+    };
+
+    public func insertUsers(userId: UserId, profile: Profile) {
+      hashMap.put(userId, profile);
+    };
+    public func insertUsersNames(userName: UserName, userId: UserId) {
+      hashMapUserName.put(userName, userId);
+    };
+
   };
 
 };

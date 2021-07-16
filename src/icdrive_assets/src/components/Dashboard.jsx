@@ -1,42 +1,42 @@
-import React from "react";
-import styled from 'styled-components';
+import React from 'react'
+import styled from 'styled-components'
 
 // custom imports
-import TopBar from './TopBar/TopBar.jsx';
-import SideBar from './SideBar/SideBar.jsx';
+import TopBar from './TopBar/TopBar.jsx'
+import SideBar from './SideBar/SideBar.jsx'
+import { canisterHttpAgent } from '../httpAgent'
 import CenterPortion from './CenterPortion/CenterPortion.jsx'
-import {httpAgent} from '../httpAgent'
 
 // 3rd party imports
-import {useDispatch,useSelector} from 'react-redux';
-import {filesUpdate,refreshFiles} from '../state/actions';
+import { useDispatch, useSelector } from 'react-redux'
+import { filesUpdate, sharedUpdate, refreshFiles } from '../state/actions'
 
 const Dashboard = () =>{
 
   const refresh_files = useSelector(state=>state.FileHandler.refresh_files);
+  const sidebar = useSelector(state=>state.SideBarShow.state);
   const dispatch = useDispatch();
 
   React.useEffect(async () => {
-    const icdrive = await httpAgent()
-    let profile = await icdrive.getProfile()
-    if(profile.length===0){
-      icdrive.createProfile(parseInt(localStorage.getItem('userNumber')))
-    }
-  }, [])
-
-  React.useEffect(async () => {
     dispatch(refreshFiles(false))
-    const icdrive = await httpAgent()
-    const file_list = await icdrive.getFiles()
-    console.log("list")
-    console.log(file_list)
+    const userAgent = await canisterHttpAgent()
+    const file_list = await userAgent.getFiles()
+    console.log("dash")
+    let files = []
+    let sharedFiles = []
     if(file_list.length>0){
       for(let i=0; i<file_list[0].length; i++){
-        file_list[0][i]["chunkCount"] = file_list[0][i]["chunkCount"].toString()
+        file_list[0][i]["chunkCount"] = file_list[0][i]["chunkCount"]
         let temp = new Date(parseInt(Number(file_list[0][i]["createdAt"]).toString().slice(0, -6)))
         file_list[0][i]["createdAt"] = temp.getDate() + "-" + (temp.getMonth()+1) + "-" + temp.getFullYear()
+        if(localStorage.getItem("userName")===file_list[0][i]["userName"]){
+          files.push(file_list[0][i])
+        } else{
+          sharedFiles.push(file_list[0][i])
+        }
       }
-      dispatch(filesUpdate(file_list[0]))
+      dispatch(filesUpdate(files))
+      dispatch(sharedUpdate(sharedFiles))
     }
     console.log("over")
   }, [refresh_files])
@@ -48,6 +48,14 @@ const Dashboard = () =>{
         <SideBar />
         <CenterPortion/>
       </div>
+      <div className="side-center-mobile">
+        {
+          sidebar?
+          <SideBar />
+          :
+          <CenterPortion/>
+        }
+      </div>
     </Style>
   )
 }
@@ -58,5 +66,16 @@ const Style = styled.div`
   font-style: sans-serif;
   .side-center{
     display: flex;
+  }
+  .side-center-mobile{
+    display: none;
+  }
+  @media only screen and (max-width: 600px){
+    .side-center{
+      display: none;
+    }
+    .side-center-mobile{
+      display: block;
+    }
   }
 `
