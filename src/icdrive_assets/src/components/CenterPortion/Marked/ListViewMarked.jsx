@@ -1,97 +1,101 @@
-import React from "react";
-import styled from 'styled-components';
+import React from 'react'
+import styled from 'styled-components'
 
 // custom imports
+import { filesUpdate, refreshFiles } from '../../../state/actions'
+import { downloadFile, viewFile, markFile, deleteFile, shareFile, bytesToSize, get_logs } from '../Methods'
 
 // 3rd party imports
-import * as streamSaver from 'streamsaver';
-import { WritableStream } from 'web-streams-polyfill/ponyfill'
-import { Actor, HttpAgent } from '@dfinity/agent';
-import { AuthClient } from "@dfinity/auth-client";
-import { idlFactory as icdrive_idl, canisterId as icdrive_id } from 'dfx-generated/icdrive';
-import {useSelector, useDispatch} from 'react-redux';
-import {DownloadOutlined, DeleteOutlined, EditOutlined} from "@ant-design/icons";
-import {Table, Popconfirm, Space} from 'antd';
+import { useSelector, useDispatch } from 'react-redux'
+import { Table, Popconfirm, Space, Modal, message, Button, Input } from 'antd'
+import { DownloadOutlined, DeleteOutlined, EditOutlined, ShareAltOutlined } from '@ant-design/icons'
 
-const ListViewMarked = () =>{
+const ListView = () =>{
 
-  const files = useSelector(state=>state.FileHandler.files);
+  const files = useSelector(state=>state.FileHandler.files)
   const [data, setData] = React.useState("")
-  //const data = useRef([]);
   const dispatch = useDispatch();
 
-  React.useEffect(()=>{
+  const fileObj = React.useRef({})
+  const [shareModal, setShareModal] = React.useState(false)
+  const [loadingFlag, setLoadingFlag] = React.useState(false)
+  const userName = React.useRef("")
+
+  //Functions
+  React.useEffect(async ()=>{
     let temp = []
     for(let i=0; i<files.length; i++){
       if(files[i]["marked"]){
         temp.push(files[i])
       }
     }
-    console.log("here")
-    console.log(temp)
     setData(temp)
+    await get_logs()
   },[])
 
-  // For large files not working on firefox to be fixed
-  /*const download = async (fileId, chunk_count, fileName) => {
-    streamSaver.WritableStream = WritableStream
-    streamSaver.mitm = 'http://localhost:8000/mitm.html'
-    const fileStream = streamSaver.createWriteStream(fileName);
-    const writer = fileStream.getWriter();
-    for(let j=0; j<chunk_count; j++){
-      const bytes = await icdrive.getFileChunk(fileId, j+1);
-      //const bytesAsBuffer = Buffer.from(new Uint8Array(bytes[0]));
-      const bytesAsBuffer = new Uint8Array(bytes[0]);
-      writer.write(bytesAsBuffer);
-    }
-    writer.close();
-  };*/
-
-  //Temporary method works well on small files
-  const download = async (fileId, chunk_count, fileName, mimeType) => {
-    const authClient = await AuthClient.create();
-    const identity = await authClient.getIdentity();
-    const agent = new HttpAgent({ identity });
-    const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
-
-    const chunkBuffers = [];
-    for(let j=0; j<chunk_count; j++){
-      const bytes = await icdrive.getFileChunk(fileId, j+1);
-      const bytesAsBuffer = new Uint8Array(bytes[0]);
-      chunkBuffers.push(bytesAsBuffer);
-    }
-    
-    const fileBlob = new Blob([Buffer.concat(chunkBuffers)], {
-      type: mimeType,
-    });
-    const fileURL = URL.createObjectURL(fileBlob);
-    var link = document.createElement('a');
-    link.href = fileURL;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-  };
-
   const handleDownload = async (record) =>{
-    let k = await download(record["fileId"], record["chunkCount"], record["name"], record["mimeType"])
+    await downloadFile(record)
   }
 
+  const handleMarked = async(record) =>{
+    let temp = [...files]
+    for(let i=0; i<temp.length; i++){
+      if(temp[i]["fileId"]===record["fileId"]){
+        temp[i]["marked"] = !temp[i]["marked"]
+      }
+    }
+    dispatch(filesUpdate(temp));
+    await markFile(record)
+  }
+
+  const handleDelete = async(record) =>{
+    await deleteFile(record)
+    dispatch(refreshFiles(true));
+  }
+
+  const handleView = async(record) =>{
+    let response = await viewFile(record)
+    if(!response){
+      message.info("Only PDF and Images can be viewed")
+    }
+  }
+
+  const handleShare = async() =>{
+    setLoadingFlag(true)
+    let response = shareFile(fileObj.current, userName.current.state.value)
+    if(response){
+      message.success("File Shared")
+    } else{
+      message.error("Something Went Wrong! Check User Number")
+    }
+    setLoadingFlag(false)
+  }
+
+  // Defining Columns of Table
   const columns = [
     {
       title: 'File Name',
       dataIndex: 'name',
       key: 'name',
+      editable: true,
+      render: (text, record) => <div onDoubleClick={()=>{handleView(record)}}>{text}</div>,
     },
     {
       title: 'File Size',
-      dataIndex: 'chunkCount',
-      key: 'chunkCount',
-      render: text => <div>{text/2}MB</div>,
+      dataIndex: 'fileSize',
+      key: 'fileSize',
+      render: text => <div>{(bytesToSize(Number(text)))}</div>,
     },
     {
       title: 'Created',
       dataIndex: 'createdAt',
       key: 'createdAt',
+    },
+    {
+      title: 'Mark',
+      dataIndex: 'marked',
+      key: 'marked',
+      render: (_, record) => <div>{record.marked?<img src="./icons/mark-blue.svg" style={{ height: '14px' }} onClick={()=>handleMarked(record)} />:<img src="./icons/mark-gray.svg" style={{ height: '14px' }} onClick={()=>handleMarked(record)} />}</div>,
     },
     {
       title: '',
@@ -105,11 +109,14 @@ const ListViewMarked = () =>{
           <a>
             <EditOutlined />
           </a>
-          <Popconfirm title="Sure to delete?" onConfirm={() => {}}>
+          <Popconfirm title="Sure to delete?" onConfirm={()=>{handleDelete(record)}}>
           <a>
             <DeleteOutlined />
           </a>
           </Popconfirm>
+          <a>
+            <ShareAltOutlined onClick={()=>{setShareModal(true);fileObj.current = record}} />
+          </a>
         </Space>
         );
       },
@@ -119,17 +126,26 @@ const ListViewMarked = () =>{
   return(
     <Style>
       <div>
-        {
-          data===""?null:<Table dataSource={data} columns={columns} />
-        }
-        
+        <Table dataSource={data} columns={columns} />
       </div>
+
+      {/* Modal For INput User Number */}
+      <Modal footer={null} title={false} visible={shareModal} onCancel={()=>{setShareModal(false); fileObj.current = {} }}>
+        <div>
+        <span>User Number:&nbsp;<Input ref={userName} /></span>
+        <Button type="primary" style={{float:"right", marginTop:"10px"}} loading={loadingFlag} onClick={handleShare}>Share</Button>
+        <br/><br/><br/>
+        </div>
+      </Modal>
+
     </Style>
   )
 }
 
-export default ListViewMarked;
+export default ListView;
 
 const Style = styled.div`
-
+  thead[class*="ant-table-thead"] th{
+    font-weight: bold !important;
+  }
 `

@@ -1,91 +1,51 @@
-import React from "react";
-import styled from 'styled-components';
+import React from 'react'
+import styled from 'styled-components'
 
 // custom imports
+import { refreshFiles } from '../../../state/actions'
+import { downloadSharedFile, viewSharedFile, deleteSharedFile, bytesToSize } from '../Methods'
 
 // 3rd party imports
-import * as streamSaver from 'streamsaver';
-import { WritableStream } from 'web-streams-polyfill/ponyfill'
-import { Actor, HttpAgent } from '@dfinity/agent';
-import { AuthClient } from "@dfinity/auth-client";
-import { idlFactory as icdrive_idl, canisterId as icdrive_id } from 'dfx-generated/icdrive';
-import {useSelector, useDispatch} from 'react-redux';
-import {DownloadOutlined, DeleteOutlined, EditOutlined} from "@ant-design/icons";
-import {Table, Popconfirm, Space} from 'antd';
+import { useSelector, useDispatch } from 'react-redux'
+import { Table, Popconfirm, Space, message } from 'antd'
+import { DownloadOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons'
 
-const ListViewShared = () =>{
+const ListView = () =>{
 
-  const files = useSelector(state=>state.FileHandler.files);
-  const [data, setData] = React.useState("")
-  //const data = useRef([]);
+  const shared = useSelector(state=>state.FileHandler.shared);
   const dispatch = useDispatch();
 
-  React.useEffect(()=>{
-    let temp = []
-    console.log(files)
-    for(let i=0; i<files.length; i++){
-      if(files[i]["sharedWith"].length>0){
-        temp.push(files[i])
-      }
-    }
-    setData(temp)
-  },[])
-
-  // For large files not working on firefox to be fixed
-  /*const download = async (fileId, chunk_count, fileName) => {
-    streamSaver.WritableStream = WritableStream
-    streamSaver.mitm = 'http://localhost:8000/mitm.html'
-    const fileStream = streamSaver.createWriteStream(fileName);
-    const writer = fileStream.getWriter();
-    for(let j=0; j<chunk_count; j++){
-      const bytes = await icdrive.getFileChunk(fileId, j+1);
-      //const bytesAsBuffer = Buffer.from(new Uint8Array(bytes[0]));
-      const bytesAsBuffer = new Uint8Array(bytes[0]);
-      writer.write(bytesAsBuffer);
-    }
-    writer.close();
-  };*/
-
-  //Temporary method works well on small files
-  const download = async (fileId, chunk_count, fileName, mimeType) => {
-    const authClient = await AuthClient.create();
-    const identity = await authClient.getIdentity();
-    const agent = new HttpAgent({ identity });
-    const icdrive = Actor.createActor(icdrive_idl, { agent, canisterId: icdrive_id });
-
-    const chunkBuffers = [];
-    for(let j=0; j<chunk_count; j++){
-      const bytes = await icdrive.getFileChunk(fileId, j+1);
-      const bytesAsBuffer = new Uint8Array(bytes[0]);
-      chunkBuffers.push(bytesAsBuffer);
-    }
-    
-    const fileBlob = new Blob([Buffer.concat(chunkBuffers)], {
-      type: mimeType,
-    });
-    const fileURL = URL.createObjectURL(fileBlob);
-    var link = document.createElement('a');
-    link.href = fileURL;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-  };
-
+  //Functions
   const handleDownload = async (record) =>{
-    let k = await download(record["fileId"], record["chunkCount"], record["name"], record["mimeType"])
+    await downloadSharedFile(record, localStorage.getItem("userName"))
   }
 
+  const handleDelete = async(record) =>{
+    await deleteSharedFile(record)
+    dispatch(refreshFiles(true));
+  }
+
+  const handleView = async(record) =>{
+    let response = await viewSharedFile(record, localStorage.getItem("userName"))
+    if(!response){
+      message.info("Only PDF and Images can be viewed")
+    }
+  }
+
+  // Defining Columns of Table
   const columns = [
     {
       title: 'File Name',
       dataIndex: 'name',
       key: 'name',
+      editable: true,
+      render: (text, record) => <div onDoubleClick={()=>{handleView(record)}}>{text}</div>,
     },
     {
       title: 'File Size',
-      dataIndex: 'chunkCount',
-      key: 'chunkCount',
-      render: text => <div>{text/2}MB</div>,
+      dataIndex: 'fileSize',
+      key: 'fileSize',
+      render: text => <div>{(bytesToSize(Number(text)))}</div>,
     },
     {
       title: 'Created',
@@ -104,7 +64,7 @@ const ListViewShared = () =>{
           <a>
             <EditOutlined />
           </a>
-          <Popconfirm title="Sure to delete?" onConfirm={() => {}}>
+          <Popconfirm title="Sure to delete?" onConfirm={()=>{handleDelete(record)}}>
           <a>
             <DeleteOutlined />
           </a>
@@ -118,17 +78,16 @@ const ListViewShared = () =>{
   return(
     <Style>
       <div>
-        {
-          data===""?null:<Table dataSource={data} columns={columns} />
-        }
-        
+        <Table dataSource={shared} columns={columns} />
       </div>
     </Style>
   )
 }
 
-export default ListViewShared;
+export default ListView;
 
 const Style = styled.div`
-
+  thead[class*="ant-table-thead"] th{
+    font-weight: bold !important;
+  }
 `

@@ -1,16 +1,19 @@
-import React from "react";
-import styled from 'styled-components';
+import React from 'react'
+import styled from 'styled-components'
 
 // custom imports
-import ListView from './ListView';
-import GridView from './GridView';
-import ListViewMarked from './Marked/ListViewMarked';
-import ListViewShared from "./Shared/ListViewShared";
+import ListView from './ListView'
+import GridView from './GridView'
+import ListViewMarked from './Marked/ListViewMarked'
+import ListViewShared from './Shared/ListViewShared'
+import GridViewMarked from './Marked/GridViewMarked'
+import GridViewShared from './Shared/GridViewShared'
+
 
 // 3rd party imports
-import {MenuOutlined, AppstoreOutlined, CaretDownOutlined, CaretUpOutlined} from "@ant-design/icons";
-import {useSelector} from 'react-redux';
-import { Progress } from 'antd';
+import { Progress } from 'antd'
+import {useSelector} from 'react-redux'
+import {MenuOutlined, AppstoreOutlined, CaretDownOutlined, CaretUpOutlined} from "@ant-design/icons"
 
 const CenterPortion = () =>{
 
@@ -25,6 +28,11 @@ const CenterPortion = () =>{
       <div className="top-bar">
         <div>
           {
+            optionSelected==="home"?
+            <div className="show-section">
+              &nbsp;&nbsp;Home
+            </div>
+            :
             optionSelected==="marked"?
             <div className="show-section">
               &nbsp;&nbsp;Marked
@@ -35,11 +43,6 @@ const CenterPortion = () =>{
               &nbsp;&nbsp;Shared
             </div>
             :
-            optionSelected==="home"?
-            <div className="show-section">
-              &nbsp;&nbsp;Home
-            </div>
-            :
             null
           }
         </div>
@@ -47,13 +50,13 @@ const CenterPortion = () =>{
           {
             selectedView==="listView"?
             <span>
-              <MenuOutlined onClick={()=>{setSelectedView("listView")}} className="list-view" style={{fontSize:"20px", color: "#fff"}} />&nbsp;&nbsp;
-              <AppstoreOutlined onClick={()=>{setSelectedView("gridView")}} className="grid-view" style={{fontSize:"20px", color: "#21353E"}} />
+              <MenuOutlined onClick={()=>{setSelectedView("listView")}} className="list-view" style={{fontSize:"20px", color: "#21353E"}} />&nbsp;&nbsp;
+              <AppstoreOutlined onClick={()=>{setSelectedView("gridView")}} className="grid-view" style={{fontSize:"20px", color: "#fff"}} />
             </span>
             :
             <span>
-              <MenuOutlined onClick={()=>{setSelectedView("listView")}} className="list-view" style={{fontSize:"20px", color: "#21353E"}} />&nbsp;&nbsp;
-              <AppstoreOutlined onClick={()=>{setSelectedView("gridView")}} className="grid-view" style={{fontSize:"20px", color: "#fff"}} />
+              <MenuOutlined onClick={()=>{setSelectedView("listView")}} className="list-view" style={{fontSize:"20px", color: "#fff"}} />&nbsp;&nbsp;
+              <AppstoreOutlined onClick={()=>{setSelectedView("gridView")}} className="grid-view" style={{fontSize:"20px", color: "#21353E"}} />
             </span>
           }
         </div>
@@ -61,12 +64,22 @@ const CenterPortion = () =>{
       {
         optionSelected==="marked"?
         <div>
-          <ListViewMarked/>
+          {
+            selectedView==="listView"?
+            <ListViewMarked/>
+            :
+            <GridViewMarked/>
+          }
         </div>
         :
         optionSelected==="shared"?
         <div>
-          <ListViewShared/>
+          {
+            selectedView==="listView"?
+            <ListViewShared/>
+            :
+            <GridViewShared/>
+          }
         </div>
         :
         optionSelected==="home"?
@@ -120,19 +133,32 @@ const CenterPortion = () =>{
 export default CenterPortion;
 
 const Style = styled.div`
-  width: calc(100vw - 225px);
   height: calc(100vh - 50px);
   box-sizing: border-box;
   overflow-x: auto;
   overflow-y: auto;
 
-  .top-bar{
+  @media only screen and (max-width: 600px){
+    width: calc(100vw);
+    .top-bar{
+      width: calc(100vw);
+      height: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #C9D1C8;
+    }
+  }
+  @media only screen and (min-width: 600px){
     width: calc(100vw - 225px);
-    height: 32px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #C9D1C8;
+    .top-bar{
+      width: calc(100vw - 225px);
+      height: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #C9D1C8;
+    }
   }
   .list-grid-view{
     display: flex;
