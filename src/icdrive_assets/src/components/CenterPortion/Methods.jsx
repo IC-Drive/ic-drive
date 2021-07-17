@@ -199,14 +199,3 @@ export const deleteSharedFile = async(fileInfo) =>{
     }
     writer.close();
   };*/
-
-  export const get_logs = async() =>{
-    const userAgent = await canisterHttpAgent();
-    let k1 = await userAgent.get_logs();
-    console.log("logs1")
-    console.log(k1)
-    const icdrive = await httpAgent();
-    let k2 = await icdrive.get_logs();
-    console.log("logs2")
-    console.log(k2)
-  }

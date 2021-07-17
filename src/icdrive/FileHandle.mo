@@ -29,17 +29,13 @@ shared ({caller = admin}) actor class FileHandle (){
   var state = FileTypes.empty();
   stable var owner:Principal = admin;
 
-  var logs : [(Text, Nat)] = [];
-
   public query(msg) func whoami() : async Principal {
     msg.caller
   };
 
   // Create owner of canister
   public shared func createOwner(newOwner: Principal) : async() {
-    var bal = Cycles.balance();
     owner := newOwner;
-    logs := Array.append<(Text, Nat)>(logs, [("assignment_operation", bal-Cycles.balance())]);
   };
 
   // Create file
@@ -91,7 +87,6 @@ shared ({caller = admin}) actor class FileHandle (){
   public shared(msg) func markFile(fileId : FileId) : async ?() {
     do ? {
       assert(msg.caller==owner);
-      var bal = Cycles.balance();
       var file_info = state.files.get(fileId)!;
       state.files.put(fileId, {
         userName = file_info.userName;
@@ -104,7 +99,6 @@ shared ({caller = admin}) actor class FileHandle (){
         marked= not(file_info.marked) ;
         sharedWith = file_info.sharedWith ;
       });
-      logs := Array.append<(Text, Nat)>(logs, [("mark_file", bal-Cycles.balance())]);
     }
   };
 
@@ -117,18 +111,13 @@ shared ({caller = admin}) actor class FileHandle (){
     (fileId : FileId, chunkNum : Nat, chunkData : [Nat8]) : async ()
   {
     assert(msg.caller==owner);
-    var bal = Cycles.balance();
     state.chunks.put(chunkId(fileId, chunkNum), chunkData);
-    logs := Array.append<(Text, Nat)>(logs, [("put_chunk", bal-Cycles.balance())]);
   };
 
   // Get File Chunk
   public query(msg) func getFileChunk(fileId : FileId, chunkNum : Nat) : async ?[Nat8] {
     assert(msg.caller==owner);
-    var bal = Cycles.balance();
-    let chunk = state.chunks.get(chunkId(fileId, chunkNum));
-    logs := Array.append<(Text, Nat)>(logs, [("get_chunk", bal-Cycles.balance())]);
-    chunk
+    state.chunks.get(chunkId(fileId, chunkNum));
   };
 
   // Delete File
@@ -254,10 +243,6 @@ shared ({caller = admin}) actor class FileHandle (){
           body = Text.encodeUtf8("<b>Hello World!</b>");
       };
   };
-
-  public query func get_logs() : async [((Text, Nat))]{
-    logs
-  }
 
 };
 
