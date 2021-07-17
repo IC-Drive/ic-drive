@@ -1,14 +1,13 @@
 import Array "mo:base/Array";
 import Cycles "mo:base/ExperimentalCycles";
+import Database "./backend/database";
 import Debug "mo:base/Debug";
+import FileHandle "FileHandle";
+import FileTypes "./backend/fileTypes";
 import Int "mo:base/Int";
 import Nat "mo:base/Nat";
-import Option "mo:base/Option";
-
+import Principal "mo:base/Bool";
 import ProfileTypes "./backend/profileTypes";
-import FileTypes "./backend/fileTypes";
-import Database "./backend/database";
-import FileHandle "FileHandle";
 
 shared (msg) actor class icdrive (){
 
@@ -26,19 +25,13 @@ shared (msg) actor class icdrive (){
   stable var user_entries : [(UserId, Profile)] = [];
   stable var user_name_entries : [(UserName, UserId)] = [];
 
-  var logs : [(Text, Nat)] = [];
-
   public shared(msg) func createProfile(userName: UserName) : async ?FileCanister {
     switch(user.findOne(msg.caller)){
       case null{
-        var bal = Cycles.balance();
-        Cycles.add(10_000_000_000);
+        Cycles.add(1_000_000_000_000);
         let fileHandleObj = await FileHandle.FileHandle(); // dynamically install a new Canister
-        logs := Array.append<(Text, Nat)>(logs, [("canister_create", bal-Cycles.balance())]);
         await fileHandleObj.createOwner(msg.caller);
-        bal := Cycles.balance();
         user.createOne(msg.caller, userName, fileHandleObj);
-        logs := Array.append<(Text, Nat)>(logs, [("user_create", bal-Cycles.balance())]);
         return(?fileHandleObj);
       };
       case (?_){
@@ -48,19 +41,14 @@ shared (msg) actor class icdrive (){
   };
 
   public query(msg) func checkUserName(userName: UserName) : async Bool {
-    let id = Option.get(user.getUserId(userName), false);
-    if(id==false){
-      false
-    } else{
-      true
-    }
+    switch (user.getUserId(userName)) {
+    case (?_) { /* error -- ID already taken. */ true };
+    case null { /* ok, not taken yet. */ false };
+    };
   };
 
   public query(msg) func getProfile() : async ?Profile {
-    var bal = Cycles.balance();
-    let user_ = user.findOne(msg.caller);
-    logs := Array.append<(Text, Nat)>(logs, [("get_profile", bal-Cycles.balance())]);
-    user_
+    user.findOne(msg.caller);
   };
 
   public query(msg) func getUserCanister(userName: UserName) : async ?FileCanister {
@@ -96,7 +84,5 @@ shared (msg) actor class icdrive (){
   };
 
   ////////////////////////////////////Testing/////////////////////////////////////////////
-  public query func get_logs() : async [((Text, Nat))]{
-    logs
-  }
+  
 };

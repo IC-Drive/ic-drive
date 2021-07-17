@@ -54,7 +54,7 @@ const ListView = () =>{
     if(response){
       message.success("File Shared")
     } else{
-      message.error("Something Went Wrong! Check User Number")
+      message.error("Something Went Wrong! Check User Name")
     }
     setLoadingFlag(false)
   }
@@ -117,10 +117,10 @@ const ListView = () =>{
         <Table dataSource={files} columns={columns} />
       </div>
 
-      {/* Modal For INput User Number */}
+      {/* Modal For INput User Name */}
       <Modal footer={null} title={false} visible={shareModal} onCancel={()=>{setShareModal(false); fileObj.current = {} }}>
         <div>
-        <span>User Number:&nbsp;<Input ref={userName} /></span>
+        <span>User Name:&nbsp;<Input ref={userName} /></span>
         <Button type="primary" style={{float:"right", marginTop:"10px"}} loading={loadingFlag} onClick={handleShare}>Share</Button>
         <br/><br/><br/>
         </div>

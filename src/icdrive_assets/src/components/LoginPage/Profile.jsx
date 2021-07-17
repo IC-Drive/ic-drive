@@ -18,12 +18,13 @@ const Profile = () =>{
   const createCanister = async() =>{
     setLoadingFlag(true)
     if(userName.current.state.value===""){
-      message.error("Enter User Name")
+      //message.error("Enter User Name")
+      message.error("App will be open to public soon!!!")
       setLoadingFlag(false)
     } else{
       const icdrive = await httpAgent()
       let check_name = await icdrive.checkUserName(userName.current.state.value)
-      
+      console.log(check_name)
       if(!check_name){
         let create = await icdrive.createProfile(userName.current.state.value)
         if(create.length===1){
@@ -88,7 +89,7 @@ const Style = styled.div`
   .waiting{
     height: 200px;
     width: 250px;
-    margin-top: 20%;
+    margin-top: 18%;
     margin-left: 40%;
     border-radius: 10px;
     background: #324851;
