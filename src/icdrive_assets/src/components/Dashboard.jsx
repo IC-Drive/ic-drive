@@ -21,7 +21,7 @@ const Dashboard = () =>{
     dispatch(refreshFiles(false))
     const userAgent = await canisterHttpAgent()
     const file_list = await userAgent.getFiles()
-    console.log("dash")
+    console.log("here")
     let files = []
     let sharedFiles = []
     if(file_list.length>0){
@@ -35,10 +35,10 @@ const Dashboard = () =>{
           sharedFiles.push(file_list[0][i])
         }
       }
+      console.log(files)
       dispatch(filesUpdate(files))
       dispatch(sharedUpdate(sharedFiles))
     }
-    console.log("over")
   }, [refresh_files])
 
   return(

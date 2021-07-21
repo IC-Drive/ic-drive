@@ -1,11 +1,11 @@
 import React from 'react'
-import Login from './components/LoginPage/Login'
+import Routes from './components/Routes/Routes'
 import 'antd/dist/antd.css'
 
 const App = () => {
   return (
     <div className="App">
-      <Login />
+      <Routes />
     </div>
   );
 }

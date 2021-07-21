@@ -3,7 +3,7 @@ import styled from 'styled-components'
 
 // custom imports
 import { filesUpdate, refreshFiles } from '../../state/actions'
-import { downloadFile, viewFile, markFile, deleteFile, shareFile, bytesToSize } from './Methods'
+import { downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, bytesToSize } from './Methods'
 
 // 3rd party imports
 import { useSelector, useDispatch } from 'react-redux'
@@ -17,7 +17,8 @@ const ListView = () =>{
 
   const fileObj = React.useRef({})
   const [shareModal, setShareModal] = React.useState(false)
-  const [loadingFlag, setLoadingFlag] = React.useState(false)
+  const [ShareLoadingFlag, setShareLoadingFlag] = React.useState(false)
+  const [PublicLoadingFlag, setPublicLoadingFlag] = React.useState(false)
   const userName = React.useRef("")
 
   //Functions
@@ -49,14 +50,26 @@ const ListView = () =>{
   }
 
   const handleShare = async() =>{
-    setLoadingFlag(true)
-    let response = await shareFile(fileObj.current, (userName.current.state.value))
+    setShareLoadingFlag(true)
+    let response = await shareFile(fileObj.current, userName.current.state.value)
     if(response){
       message.success("File Shared")
     } else{
       message.error("Something Went Wrong! Check User Name")
     }
-    setLoadingFlag(false)
+    setShareLoadingFlag(false)
+  }
+
+  const handleSharePublic = async() =>{
+    setPublicLoadingFlag(true)
+    let response = await shareFilePublic(fileObj.current)
+    console.log(response)
+    if(response){
+      fileObj.current["fileHash"] = response
+    } else{
+      message.info("Only Images and PDF can be made public!!!")
+    }
+    setPublicLoadingFlag(false)
   }
 
   // Defining Columns of Table
@@ -120,9 +133,18 @@ const ListView = () =>{
       {/* Modal For INput User Name */}
       <Modal footer={null} title={false} visible={shareModal} onCancel={()=>{setShareModal(false); fileObj.current = {} }}>
         <div>
-        <span>User Name:&nbsp;<Input ref={userName} /></span>
-        <Button type="primary" style={{float:"right", marginTop:"10px"}} loading={loadingFlag} onClick={handleShare}>Share</Button>
-        <br/><br/><br/>
+        {
+          fileObj.current["fileHash"]===""?
+          <div>
+            <span>User Name:&nbsp;<Input ref={userName} /></span>
+            <Button type="primary" style={{float:"right", marginTop:"10px"}} loading={ShareLoadingFlag} onClick={handleShare}>Share</Button>&nbsp;&nbsp;&nbsp;&nbsp;
+            <Button type="primary" style={{float:"right", marginTop:"10px"}} loading={PublicLoadingFlag} onClick={handleSharePublic}>Public</Button>&nbsp;&nbsp;&nbsp;&nbsp;
+            <br/><br/>
+          </div>
+          :
+          <a onClick={() => {navigator.clipboard.writeText(window.location.href+"public/"+fileObj.current["fileHash"]); message.info("copied to clipboard")}}>{window.location.href}public/{fileObj.current["fileHash"]}</a>
+        }
+        <br/>
         </div>
       </Modal>
 

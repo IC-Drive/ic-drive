@@ -22,6 +22,7 @@ const CenterPortion = () =>{
   const upload = useSelector(state=>state.FileHandler.upload);
   const optionSelected = useSelector(state=>state.OptionSelected.option);
   const uploadProgress = useSelector(state=>state.UploadProgress.progress);
+  const uploadSize = useSelector(state=>state.UploadProgress.size);
 
   return(
     <Style>
@@ -117,7 +118,12 @@ const CenterPortion = () =>{
                   {upload["file_uploading"]}
                 </div>
                 <div id="right-section">
-                  <Progress steps={4} percent={uploadProgress} />
+                  {
+                    uploadSize/(1024*1024)<2?
+                    null
+                    :
+                    <Progress steps={4} percent={uploadProgress} />
+                  }
                 </div>
               </span>
             </div>
