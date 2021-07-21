@@ -24,7 +24,7 @@ const Profile = () =>{
     } else{
       const icdrive = await httpAgent()
       let check_name = await icdrive.checkUserName(userName.current.state.value)
-      console.log(check_name)
+      //console.log(check_name)
       if(!check_name){
         let create = await icdrive.createProfile(userName.current.state.value)
         if(create.length===1){

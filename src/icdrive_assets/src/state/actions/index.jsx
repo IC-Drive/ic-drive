@@ -55,6 +55,12 @@ export const uploadProgress = (payload) =>{
       payload
   }
 }
+export const sizeUpdate = (payload) =>{
+  return{
+      type: 'sizeUpdate',
+      payload
+  }
+}
 
 //---------------------------------------Side Bar----------------------------------------------//
 export const updateState = () =>{
