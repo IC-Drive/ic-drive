@@ -2,6 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 
 // custom imports
+import Profile from './Profile'
 import TopBar from './TopBar/TopBar.jsx'
 import SideBar from './SideBar/SideBar.jsx'
 import { canisterHttpAgent } from '../httpAgent'
@@ -14,6 +15,7 @@ import { filesUpdate, sharedUpdate, refreshFiles } from '../state/actions'
 const Dashboard = () =>{
 
   const refresh_files = useSelector(state=>state.FileHandler.refresh_files);
+  const optionSelected = useSelector(state=>state.OptionSelected.option);
   const sidebar = useSelector(state=>state.SideBarShow.state);
   const dispatch = useDispatch();
 
@@ -44,18 +46,28 @@ const Dashboard = () =>{
   return(
     <Style>
       <TopBar />
-      <div className="side-center">
-        <SideBar />
-        <CenterPortion/>
-      </div>
-      <div className="side-center-mobile">
-        {
-          sidebar?
+      {
+        optionSelected==="profile"?
+        <div className="side-center">
           <SideBar />
-          :
-          <CenterPortion/>
-        }
-      </div>
+          <Profile/>
+        </div>
+        :
+        <div>
+          <div className="side-center">
+            <SideBar />
+            <CenterPortion/>
+          </div>
+          <div className="side-center-mobile">
+            {
+              sidebar?
+              <SideBar />
+              :
+              <CenterPortion/>
+            }
+          </div>
+        </div>
+      }
     </Style>
   )
 }

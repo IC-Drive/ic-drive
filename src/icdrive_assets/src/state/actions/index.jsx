@@ -28,6 +28,7 @@ export const uploadFileId = (payload) =>{
       payload
   }
 }
+
 //-------------------------------------Switch Options-----------------------------------------//
 export const switchHome = (payload) =>{
   return{
@@ -44,6 +45,12 @@ export const switchMarked = (payload) =>{
 export const switchShared = (payload) =>{
   return{
       type: 'switchShared',
+      payload
+  }
+}
+export const switchProfile = (payload) =>{
+  return{
+      type: 'switchProfile',
       payload
   }
 }

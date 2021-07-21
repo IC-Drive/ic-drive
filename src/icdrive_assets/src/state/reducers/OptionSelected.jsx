@@ -7,6 +7,7 @@ const reducer = (state=initial_state, action) =>{
       case "switchHome": return{...state, option: action.payload};
       case "switchMarked": return{...state, option: action.payload};
       case "switchShared": return{...state, option: action.payload};
+      case "switchProfile": return{...state, option: action.payload};
       default: return{...state};
   }
 }
