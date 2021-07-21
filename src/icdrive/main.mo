@@ -89,6 +89,13 @@ shared (msg) actor class icdrive (){
     }
   };
 
+  public query(msg) func getUserName(userId: UserId) : async ?UserName {
+    do?{
+      let profile = user.findOne(userId)!;
+      profile.userName
+    }
+  };
+
   //Public File
   public shared(msg) func makeFilePublic(hash: Text, data: Text) : async() {
     fileUrlTrieMap.put(hash, data);
