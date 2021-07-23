@@ -61,7 +61,7 @@ const GridView = () =>{
 
   const handleShare = async() =>{
     setLoadingFlag(true)
-    let response = shareFile(fileObj.current, userName.current.state.value)
+    let response = await shareFile(fileObj.current, userName.current.state.value)
     if(response){
       message.success("File Shared")
     } else{
@@ -190,9 +190,8 @@ const Style = styled.div`
     background: #425757;
   }
   .truncate-overflow{
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3 !important;
     -webkit-box-orient: vertical;
-    overflow:hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
   }

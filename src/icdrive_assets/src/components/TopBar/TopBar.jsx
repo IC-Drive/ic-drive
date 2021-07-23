@@ -2,11 +2,10 @@ import React from 'react'
 import styled from 'styled-components'
 
 // custom imports
-import {updateState} from '../../state/actions'
-import {switchHome, switchProfile} from '../../state/actions'
+import {updateState, switchProfile} from '../../state/actions'
 
 // 3rd party imports
-import {useDispatch} from 'react-redux'
+import {useDispatch, useSelector} from 'react-redux'
 import {Input, Dropdown, Menu, Modal} from 'antd'
 import { AuthClient } from '@dfinity/auth-client'
 import { QuestionCircleOutlined } from '@ant-design/icons'
@@ -14,6 +13,7 @@ import { QuestionCircleOutlined } from '@ant-design/icons'
 const TopBar = () =>{
 
   const dispatch = useDispatch();
+  const sidebar = useSelector(state=>state.SideBarShow.state);
   const [helpModal, setHelpModal] = React.useState(false)
 
   const menu = (
@@ -29,9 +29,9 @@ const TopBar = () =>{
   
   return(
     <Style>
-      <div className="container">
+      <div className="top-bar-container">
         <div className="left-section">
-          <span id="icdrive_top" onClick={()=>{dispatch(switchHome("home"));dispatch(updateState())}}>IC Drive</span>
+          <span id="icdrive_top" onClick={()=>{dispatch(updateState(!sidebar))}}>IC Drive</span>
         </div>
         <div className="right-section">
           <span><Input placeholder="Search Files" /></span>
@@ -61,7 +61,7 @@ export default TopBar;
 
 const Style = styled.div`
 
-  .container {
+  .top-bar-container {
     height: 50px;
     width: 100vw;
     background: #21353E;

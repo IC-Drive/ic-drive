@@ -236,11 +236,13 @@ shared (msg) actor class FileHandle (){
 
   //Backup and Recover
   system func preupgrade() {
+    Debug.print("hello");
     fileEntries := Iter.toArray(state.files.entries());
     chunkEntries := Iter.toArray(state.chunks.entries());
   };
 
   system func postupgrade() {
+    Debug.print("hello again");
     for ((fileId, fileInfo) in fileEntries.vals()) {
       Debug.print(fileId);
       Debug.print(Bool.toText(fileInfo.madePublic));

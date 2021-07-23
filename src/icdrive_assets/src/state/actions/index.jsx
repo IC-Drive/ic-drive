@@ -70,8 +70,9 @@ export const sizeUpdate = (payload) =>{
 }
 
 //---------------------------------------Side Bar----------------------------------------------//
-export const updateState = () =>{
+export const updateState = (payload) =>{
   return{
       type: 'updateState',
+      payload
   }
 }

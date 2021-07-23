@@ -4,6 +4,7 @@ import styled from 'styled-components'
 // custom imports
 import { filesUpdate, refreshFiles } from '../../state/actions'
 import { downloadFile, viewFile, markFile, deleteFile, shareFile } from './Methods'
+import { image_types, pdf_type } from './MimeTypes'
 
 // 3rd party imports
 import {Modal, message, Button, Input} from 'antd'
@@ -50,7 +51,7 @@ const GridView = () =>{
 
   const handleShare = async() =>{
     setLoadingFlag(true)
-    let response = shareFile(fileObj.current, (userName.current.state.value))
+    let response = await shareFile(fileObj.current, (userName.current.state.value))
     if(response){
       message.success("File Shared")
     } else{
@@ -76,6 +77,24 @@ const GridView = () =>{
     if(option==="delete"){
       await handleDelete()
     }
+  }
+
+  const isImage = (mimeType) =>{
+    let flag = false
+    for(let i=0; i<image_types.length;i++){
+      if(mimeType===image_types[i]){
+        flag=true
+        break
+      }
+    }
+    return(flag)
+  }
+  const isPdf = (mimeType) =>{
+    let flag = false
+    if(fileInfo["mimeType"].toString()===pdf_type){
+      flag = true
+    }
+    return(flag)
   }
 
   return(
@@ -158,7 +177,8 @@ const Style = styled.div`
     margin-left: 30px;
     width: 60px;
     height: 60px;
-    justify-content: center;  
+    justif
+    overflow:hidden;y-content: center;  
     align-items: center;
   }
   .text-part{
@@ -175,14 +195,13 @@ const Style = styled.div`
     display: flex;
     align-items: center;
   }
-  #context-download: hover, #context-edit: hover, #context-view: hover, #context-share: hover, #context-mark: hover, #context-delete: hover{
-    background: #425757;
-  }
   .truncate-overflow{
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3 !important;
     -webkit-box-orient: vertical;
-    overflow:hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
+  }
+  #context-download: hover, #context-edit: hover, #context-view: hover, #context-share: hover, #context-mark: hover, #context-delete: hover{
+    background: #425757;
   }
 `
