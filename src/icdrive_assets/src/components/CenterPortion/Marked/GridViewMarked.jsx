@@ -61,11 +61,11 @@ const GridView = () =>{
 
   const handleShare = async() =>{
     setLoadingFlag(true)
-    let response = shareFile(fileObj.current, userName.current.state.value)
+    let response = await shareFile(fileObj.current, userName.current.state.value)
     if(response){
       message.success("File Shared")
     } else{
-      message.error("Something Went Wrong! Check User Number")
+      message.error("Something Went Wrong! Check User Name")
     }
     setLoadingFlag(false)
   }
@@ -146,7 +146,7 @@ const GridView = () =>{
 
       <Modal footer={null} title={false} visible={shareModal} onCancel={()=>{setShareModal(false); fileObj.current = {} }}>
         <div>
-        <span>User Number:&nbsp;<Input ref={userName} /></span>
+        <span>User Name:&nbsp;<Input ref={userName} /></span>
         <Button type="primary" style={{float:"right", marginTop:"10px"}} loading={loadingFlag} onClick={handleShare}>Share</Button>
         <br/><br/><br/>
         </div>
@@ -190,9 +190,8 @@ const Style = styled.div`
     background: #425757;
   }
   .truncate-overflow{
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3 !important;
     -webkit-box-orient: vertical;
-    overflow:hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
   }

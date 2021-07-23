@@ -48,11 +48,6 @@ const ListView = () =>{
       render: text => <div>{(bytesToSize(Number(text)))}</div>,
     },
     {
-      title: 'Created',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-    },
-    {
       title: '',
       key: 'operation',
       render: (_, record) => {

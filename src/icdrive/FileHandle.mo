@@ -13,7 +13,7 @@ import Time "mo:base/Time";
 
 import FileTypes "./backend/fileTypes";
 
-shared ({caller = admin}) actor class FileHandle (){
+shared (msg) actor class FileHandle (){
 
   type UserId = FileTypes.UserId;
   type UserName = FileTypes.UserName;
@@ -23,23 +23,25 @@ shared ({caller = admin}) actor class FileHandle (){
   public type FileInfo = FileTypes.FileInfo;
   public type FileInit = FileTypes.FileInit;
 
-  stable var files_backup : [(FileId, FileInfo)] = [];
-  stable var chunks_backup : [(ChunkId, ChunkData)] = [];
+  stable var fileEntries : [(FileId, FileInfo)] = [];
+  stable var chunkEntries : [(ChunkId, ChunkData)] = [];
   
   var state = FileTypes.empty();
-  stable var owner:Principal = admin;
+  stable var admin:Principal = msg.caller;
+  stable var owner:Principal = msg.caller;
 
-  var logs : [(Text, Nat)] = [];
-
-  public query(msg) func whoami() : async Principal {
-    msg.caller
+  public query(msg) func getMyId() : async Principal {
+    admin
   };
 
   // Create owner of canister
-  public shared func createOwner(newOwner: Principal) : async() {
-    var bal = Cycles.balance();
+  public shared(msg) func makeAdmin() : async (){
+    admin := msg.caller;
+  };
+  public shared(msg) func createOwner(newOwner: Principal) : async Principal {
     owner := newOwner;
-    logs := Array.append<(Text, Nat)>(logs, [("assignment_operation", bal-Cycles.balance())]);
+    await makeAdmin();
+    return admin
   };
 
   // Create file
@@ -60,6 +62,8 @@ shared ({caller = admin}) actor class FileHandle (){
               mimeType = fileData.mimeType;
               marked = fileData.marked;
               sharedWith = [];
+              madePublic = false;
+              fileHash = "";
             });
 
           ?fileId
@@ -91,7 +95,6 @@ shared ({caller = admin}) actor class FileHandle (){
   public shared(msg) func markFile(fileId : FileId) : async ?() {
     do ? {
       assert(msg.caller==owner);
-      var bal = Cycles.balance();
       var file_info = state.files.get(fileId)!;
       state.files.put(fileId, {
         userName = file_info.userName;
@@ -103,8 +106,9 @@ shared ({caller = admin}) actor class FileHandle (){
         mimeType = file_info.mimeType ;
         marked= not(file_info.marked) ;
         sharedWith = file_info.sharedWith ;
+        madePublic = file_info.madePublic;
+        fileHash = file_info.fileHash;
       });
-      logs := Array.append<(Text, Nat)>(logs, [("mark_file", bal-Cycles.balance())]);
     }
   };
 
@@ -117,18 +121,13 @@ shared ({caller = admin}) actor class FileHandle (){
     (fileId : FileId, chunkNum : Nat, chunkData : [Nat8]) : async ()
   {
     assert(msg.caller==owner);
-    var bal = Cycles.balance();
     state.chunks.put(chunkId(fileId, chunkNum), chunkData);
-    logs := Array.append<(Text, Nat)>(logs, [("put_chunk", bal-Cycles.balance())]);
   };
 
   // Get File Chunk
   public query(msg) func getFileChunk(fileId : FileId, chunkNum : Nat) : async ?[Nat8] {
     assert(msg.caller==owner);
-    var bal = Cycles.balance();
-    let chunk = state.chunks.get(chunkId(fileId, chunkNum));
-    logs := Array.append<(Text, Nat)>(logs, [("get_chunk", bal-Cycles.balance())]);
-    chunk
+    state.chunks.get(chunkId(fileId, chunkNum));
   };
 
   // Delete File
@@ -169,6 +168,8 @@ shared ({caller = admin}) actor class FileHandle (){
         mimeType = fileInfo.mimeType ;
         marked = fileInfo.marked ;
         sharedWith = Array.append<Text>(fileInfo.sharedWith, [userNameShared]);
+        madePublic = fileInfo.madePublic;
+        fileHash = fileInfo.fileHash;
       });
       return(?"Success")
     }
@@ -201,21 +202,59 @@ shared ({caller = admin}) actor class FileHandle (){
     }
   };
 
+  //Public Files
+  public shared(msg) func makeFilePublic(fileId : FileId, file_hash: Text) : async ?() {
+    do ? {
+      assert(msg.caller==owner);
+      let file_info = state.files.get(fileId)!;
+      state.files.put(fileId, {
+        userName = file_info.userName;
+        createdAt = file_info.createdAt ;
+        fileId = fileId ;
+        name = file_info.name ;
+        chunkCount = file_info.chunkCount ;
+        fileSize = file_info.fileSize;
+        mimeType = file_info.mimeType ;
+        marked = file_info.marked ;
+        sharedWith = file_info.sharedWith ;
+        madePublic = true;
+        fileHash = file_hash;
+      });
+    }
+  };
+
+  public query(msg) func getPublicFileChunk(fileId : FileId, chunkNum : Nat) : async ?[Nat8] {
+    do?{
+      let file_info = state.files.get(fileId)!;
+      if(file_info.madePublic==true){
+        state.chunks.get(chunkId(fileId, chunkNum))!;
+      } else{
+        [];
+      }
+    };
+  };
+
   //Backup and Recover
   system func preupgrade() {
-    files_backup := Iter.toArray(state.files.entries());
-    chunks_backup := Iter.toArray(state.chunks.entries());
+    Debug.print("hello");
+    fileEntries := Iter.toArray(state.files.entries());
+    chunkEntries := Iter.toArray(state.chunks.entries());
   };
 
   system func postupgrade() {
-    for ((fileId, fileInfo) in files_backup.vals()) {
+    Debug.print("hello again");
+    for ((fileId, fileInfo) in fileEntries.vals()) {
+      Debug.print(fileId);
+      Debug.print(Bool.toText(fileInfo.madePublic));
       state.files.put(fileId, fileInfo);
     };
-    for ((chunkId, chunkData) in chunks_backup.vals()) {
+
+    for ((chunkId, chunkData) in chunkEntries.vals()) {
       state.chunks.put(chunkId, chunkData);
     };
-    files_backup := [];
-    chunks_backup := [];
+    
+    fileEntries := [];
+    chunkEntries := [];
   };
 
   //func deleteCorruptFile_(file_info : FileInfo) : () {
@@ -254,10 +293,6 @@ shared ({caller = admin}) actor class FileHandle (){
           body = Text.encodeUtf8("<b>Hello World!</b>");
       };
   };
-
-  public query func get_logs() : async [((Text, Nat))]{
-    logs
-  }
 
 };
 

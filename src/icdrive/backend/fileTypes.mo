@@ -33,6 +33,8 @@ module {
     mimeType: Text;
     marked: Bool;
     sharedWith: [UserName];
+    madePublic: Bool;
+    fileHash: Text;
   };
 
   public type State = {
