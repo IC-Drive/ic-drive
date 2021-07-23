@@ -66,6 +66,35 @@ const Login = () =>{
             }
             
           </div>
+          <div className = "RHS-mobile">
+          {
+            loading?
+            <div className="block">
+              <div className = "top">
+                <p id="ic-title">IC Drive</p>
+                <p id="ic-footer">Secure and Private Decentralized Storage App</p>
+              </div>
+              <div className="login-div">
+                <div id="login-button-loading">
+                  <Spin />
+                </div>
+              </div>
+            </div>
+            :
+            <div className="block">
+              <div className = "top">
+                <p id="ic-title">IC Drive</p>
+                <p id="ic-footer">Secure and Private Decentralized Storage App</p>
+              </div>
+              <div className="login-div" onClick={()=>handleLogin()}>
+                <div id="login-button">
+                  Login with &nbsp;&nbsp; <img src="./icons/dfinity.png" style={{ height: '16px' }} />
+                </div>
+              </div>
+            </div>
+          }
+          
+        </div>
         </div>
       }
     </Style>
@@ -103,53 +132,85 @@ const Style = styled.div`
   #login-button:hover{
     cursor: pointer;
   }
-  
-  @media only screen and (max-width: 600px) {
-      .loginPage{
-          height: 100vh;
-          display: grid;
-          grid-template-columns: 0 vw 100vw;
-      }
-      .LHS{
-          display: none;
-      }
-      .RHS{
-          background: #FFFFFF;
-      }
-  }
-  @media only screen and (min-width: 600px) {
-      .loginPage{
+
+@media only screen and (max-width: 600px) {
+    .loginPage{
         height: 100vh;
         display: grid;
-        grid-template-columns: 60vw 40vw;
-      }
-      .LHS{
-        background: #324851;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .RHS{
-        background: #FFFFFF;
-      }
-      #content{
-        display: flex;
-        flex-flow: column;
-        align-items: center;
-        justify-content: center;
-      }
-      #ic-title{
-        font-size: 72px;
-        font-family: Times New Roman;
-        font-weight: 600;
-        color: #fff;
-        line-height: 90px;
-      }
-      #ic-footer{
-        font-size: 24px;
-        font-family: Times New Roman;
-        font-weight: 400;
-        color: #fff;
-      }
-  }
+        grid-template-columns: 0 vw 100vw;
+    }
+    .login-div{
+      margin-top: calc(10vh);
+    }
+    .LHS{
+        display: none;
+    }
+    .RHS{
+        display: none;
+    }
+    .RHS-mobile{
+      background: #324851;
+    }
+    .block{
+      display: flex;
+      flex-direction: column;
+    }
+    .top{
+      margin-top: 10vh;
+    }
+    #ic-title{
+      font-size: 72px;
+      margin-bottom: 0;
+      font-family: Times New Roman;
+      text-align: center;
+      font-weight: 600;
+      color: #fff;
+      line-height: 90px;
+    }
+    #ic-footer{
+      font-size: 24px;
+      text-align: center;
+      font-family: Times New Roman;
+      font-weight: 400;
+      color: #fff;
+    }
+}
+@media only screen and (min-width: 600px) {
+    .loginPage{
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 60vw 40vw;
+    }
+    .LHS{
+      background: #324851;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .RHS{
+      background: #FFFFFF;
+    }
+    .RHS-mobile{
+      display: none;
+    }
+    #content{
+      display: flex;
+      flex-flow: column;
+      align-items: center;
+      justify-content: center;
+    }
+    #ic-title{
+      font-size: 72px;
+      font-family: Times New Roman;
+      font-weight: 600;
+      color: #fff;
+      line-height: 90px;
+    }
+    #ic-footer{
+      font-size: 24px;
+      font-family: Times New Roman;
+      font-weight: 400;
+      color: #fff;
+    }
+}
 `

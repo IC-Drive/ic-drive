@@ -17,11 +17,12 @@ import {MenuOutlined, AppstoreOutlined, CaretDownOutlined, CaretUpOutlined} from
 
 const CenterPortion = () =>{
 
-  const [selectedView, setSelectedView] = React.useState("listView");
+  const [selectedView, setSelectedView] = React.useState("gridView");
   const [minimizeUpload, setMinimizeUpload] = React.useState(false);
   const upload = useSelector(state=>state.FileHandler.upload);
   const optionSelected = useSelector(state=>state.OptionSelected.option);
   const uploadProgress = useSelector(state=>state.UploadProgress.progress);
+  const uploadSize = useSelector(state=>state.UploadProgress.size);
 
   return(
     <Style>
@@ -117,7 +118,12 @@ const CenterPortion = () =>{
                   {upload["file_uploading"]}
                 </div>
                 <div id="right-section">
-                  <Progress steps={4} percent={uploadProgress} />
+                  {
+                    uploadSize/(1024*1024)<2?
+                    null
+                    :
+                    <Progress steps={4} percent={uploadProgress} />
+                  }
                 </div>
               </span>
             </div>
@@ -148,6 +154,9 @@ const Style = styled.div`
       align-items: center;
       background: #C9D1C8;
     }
+    .list-grid-view{
+      display: none;
+    }
   }
   @media only screen and (min-width: 600px){
     width: calc(100vw - 225px);
@@ -159,12 +168,13 @@ const Style = styled.div`
       align-items: center;
       background: #C9D1C8;
     }
+    .list-grid-view{
+      display: flex;
+      margin-right: 22px;
+      width: 60px;
+    }
   }
-  .list-grid-view{
-    display: flex;
-    margin-right: 22px;
-    width: 60px;
-  }
+
   .show-section{
     font-size: 16px;
     font-weight: 500;

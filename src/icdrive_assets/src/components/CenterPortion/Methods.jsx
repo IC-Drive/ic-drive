@@ -6,8 +6,8 @@ import { image_types, pdf_type } from './MimeTypes'
 // 3rd party imports
 //import * as streamSaver from 'streamsaver';
 //import { WritableStream } from 'web-streams-polyfill/ponyfill'
+import sha256 from 'sha256';
 import { Actor } from '@dfinity/agent'
-
 /* Contain Download, File View, Mark File, Delete File and File Share Implementation */
 
 // Temporary method works well on small files
@@ -116,6 +116,31 @@ export const shareFile = async(fileObj, userName) =>{
   }
 }
 
+export const shareFilePublic = async(fileObj) =>{
+  let flag = 0
+  for(let i=0; i<image_types.length;i++){
+    if(fileObj["mimeType"]===image_types[i]){
+      flag=1
+      break
+    }
+  }
+  if(fileObj["mimeType"].toString()===pdf_type){
+    flag=1
+  }
+  if(flag){
+    const icdrive = await httpAgent();
+    const userAgent = await canisterHttpAgent();
+    let data = fileObj["mimeType"] + "$" + fileObj["chunkCount"].toString() + "$" + localStorage.getItem("fileCanister") + "$" + fileObj["fileId"];
+    let hash = sha256(data);
+    console.log(hash);
+    await icdrive.makeFilePublic(hash, data);
+    await userAgent.makeFilePublic(fileObj["fileId"], hash);
+    return(hash)
+  } else{
+    return(false)
+  }
+}
+
 export const downloadSharedFile = async (fileInfo, userName) =>{
   const icdrive = await httpAgent();
   const canisterIdShared = await icdrive.getUserCanister(fileInfo["userName"]); //Canister id of owner
@@ -199,14 +224,3 @@ export const deleteSharedFile = async(fileInfo) =>{
     }
     writer.close();
   };*/
-
-  export const get_logs = async() =>{
-    const userAgent = await canisterHttpAgent();
-    let k1 = await userAgent.get_logs();
-    console.log("logs1")
-    console.log(k1)
-    const icdrive = await httpAgent();
-    let k2 = await icdrive.get_logs();
-    console.log("logs2")
-    console.log(k2)
-  }

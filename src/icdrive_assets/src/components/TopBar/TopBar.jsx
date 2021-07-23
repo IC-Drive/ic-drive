@@ -2,29 +2,57 @@ import React from 'react'
 import styled from 'styled-components'
 
 // custom imports
-import {updateState} from '../../state/actions'
+import {updateState, switchProfile} from '../../state/actions'
 
 // 3rd party imports
-import {Input} from 'antd'
-import {useDispatch} from 'react-redux'
+import {useDispatch, useSelector} from 'react-redux'
+import {Input, Dropdown, Menu, Modal} from 'antd'
+import { AuthClient } from '@dfinity/auth-client'
 import { QuestionCircleOutlined } from '@ant-design/icons'
 
 const TopBar = () =>{
 
   const dispatch = useDispatch();
+  const sidebar = useSelector(state=>state.SideBarShow.state);
+  const [helpModal, setHelpModal] = React.useState(false)
+
+  const menu = (
+    <Menu>
+      <Menu.Item key="0">
+        <span onClick={()=>{dispatch(switchProfile("profile"))}}>Profile</span>
+      </Menu.Item>
+      <Menu.Item key="1">
+        <span onClick={async()=>{const authClient = await AuthClient.create();await authClient.logout();window.location.reload();}}>Logout</span>
+      </Menu.Item>
+    </Menu>
+  );
   
   return(
     <Style>
-      <div className="container">
+      <div className="top-bar-container">
         <div className="left-section">
-          <span id="icdrive_top" onClick={()=>{dispatch(updateState())}}>IC Drive</span>
+          <span id="icdrive_top" onClick={()=>{dispatch(updateState(!sidebar))}}>IC Drive</span>
         </div>
         <div className="right-section">
           <span><Input placeholder="Search Files" /></span>
-          <span><QuestionCircleOutlined style={{ fontSize: '25px' }} /></span>
-          <span className="dot"></span>
+          <span><QuestionCircleOutlined onClick={()=>setHelpModal(true)} style={{ fontSize: '25px' }} /></span>
+          <Dropdown overlay={menu}>
+            <span className="dot"></span>
+          </Dropdown>
         </div>
       </div>
+      <Modal
+        visible={helpModal}
+        onCancel={()=>setHelpModal(false)}
+        footer={null}
+        title={null}
+      >
+        <span className="help-modal">
+          Please share your feedback at:<br/>
+          nanditmehra123@gmail.com<br/>
+          ravish1729@gmail.com
+        </span>
+      </Modal>
     </Style>
   )
 }
@@ -33,7 +61,7 @@ export default TopBar;
 
 const Style = styled.div`
 
-  .container {
+  .top-bar-container {
     height: 50px;
     width: 100vw;
     background: #21353E;

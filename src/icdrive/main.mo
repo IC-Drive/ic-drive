@@ -1,14 +1,16 @@
 import Array "mo:base/Array";
 import Cycles "mo:base/ExperimentalCycles";
-import Debug "mo:base/Debug";
-import Int "mo:base/Int";
-import Nat "mo:base/Nat";
-import Option "mo:base/Option";
-
-import ProfileTypes "./backend/profileTypes";
-import FileTypes "./backend/fileTypes";
 import Database "./backend/database";
+import Debug "mo:base/Debug";
 import FileHandle "FileHandle";
+import FileTypes "./backend/fileTypes";
+import TrieMap "mo:base/TrieMap";
+import Int "mo:base/Int";
+import Iter "mo:base/Iter";
+import Nat "mo:base/Nat";
+import Principal "mo:base/Bool";
+import ProfileTypes "./backend/profileTypes";
+import Text "mo:base/Text";
 
 shared (msg) actor class icdrive (){
 
@@ -21,25 +23,38 @@ shared (msg) actor class icdrive (){
   type FileInfo = FileTypes.FileInfo;
   type FileInit = FileTypes.FileInit;
 
+  type CanisterSettings = ProfileTypes.CanisterSettings;
+  type UpdateSettingsParams = ProfileTypes.UpdateSettingsParams;
+  type ICActor = ProfileTypes.ICActor;
+
+  let IC: ICActor = actor("aaaaa-aa");
   var user: Database.User = Database.User();
 
   stable var user_entries : [(UserId, Profile)] = [];
   stable var user_name_entries : [(UserName, UserId)] = [];
+  stable var file_url_entries : [(Text, Text)] = [];
 
-  var logs : [(Text, Nat)] = [];
+  var fileUrlTrieMap = TrieMap.TrieMap<Text, Text>(Text.equal, Text.hash);
 
-  public shared(msg) func createProfile(userName: UserName) : async ?FileCanister {
+  public shared(msg) func createProfile(userName: UserName) : async ?Principal {
     switch(user.findOne(msg.caller)){
       case null{
-        var bal = Cycles.balance();
-        Cycles.add(10_000_000_000);
+        Cycles.add(1_000_000_000_000);
         let fileHandleObj = await FileHandle.FileHandle(); // dynamically install a new Canister
-        logs := Array.append<(Text, Nat)>(logs, [("canister_create", bal-Cycles.balance())]);
-        await fileHandleObj.createOwner(msg.caller);
-        bal := Cycles.balance();
+        let canId = await fileHandleObj.createOwner(msg.caller);
         user.createOne(msg.caller, userName, fileHandleObj);
-        logs := Array.append<(Text, Nat)>(logs, [("user_create", bal-Cycles.balance())]);
-        return(?fileHandleObj);
+        Debug.print("hello");
+        
+        let settings: CanisterSettings = {
+        controllers = [admin];
+        };
+        let params: UpdateSettingsParams = {
+            canister_id = canId;
+            settings = settings;
+        };
+        await IC.update_settings(params);
+
+        return(?canId);
       };
       case (?_){
         return(null);
@@ -48,19 +63,14 @@ shared (msg) actor class icdrive (){
   };
 
   public query(msg) func checkUserName(userName: UserName) : async Bool {
-    let id = Option.get(user.getUserId(userName), false);
-    if(id==false){
-      false
-    } else{
-      true
-    }
+    switch (user.getUserId(userName)) {
+    case (?_) { /* error -- ID already taken. */ true };
+    case null { /* ok, not taken yet. */ false };
+    };
   };
 
   public query(msg) func getProfile() : async ?Profile {
-    var bal = Cycles.balance();
-    let user_ = user.findOne(msg.caller);
-    logs := Array.append<(Text, Nat)>(logs, [("get_profile", bal-Cycles.balance())]);
-    user_
+    user.findOne(msg.caller);
   };
 
   public query(msg) func getUserCanister(userName: UserName) : async ?FileCanister {
@@ -78,25 +88,50 @@ shared (msg) actor class icdrive (){
     }
   };
 
+  public query(msg) func getUserName(userId: UserId) : async ?UserName {
+    do?{
+      let profile = user.findOne(userId)!;
+      profile.userName
+    }
+  };
+
+  //Public File
+  public shared(msg) func makeFilePublic(hash: Text, data: Text) : async() {
+    fileUrlTrieMap.put(hash, data);
+  };
+
+  public query(msg) func getPublicFileLocation(hash: Text) : async ?Text {
+    fileUrlTrieMap.get(hash);
+  };
+
   //Backup and Recover
   system func preupgrade() {
     user_entries := user.getAllUsers();
     user_name_entries := user.getAllUsersNames();
+    file_url_entries := Iter.toArray(fileUrlTrieMap.entries());
   };
 
-  system func postupgrade() {
+  system func postupgrade () {
+    //Restore  UserId Profile
     for ((userId, profile) in user_entries.vals()) {
       user.insertUsers(userId, profile);
     };
+    //Restore Username UserId
     for ((userName, userId) in user_name_entries.vals()) {
       user.insertUsersNames(userName, userId);
     };
+    //Restore URL Hash and Data
+    for ((hash, data) in file_url_entries.vals()) {
+      fileUrlTrieMap.put(hash, data);
+    };
+    
     user_entries := [];
     user_name_entries := [];
+    file_url_entries := [];
   };
 
   ////////////////////////////////////Testing/////////////////////////////////////////////
-  public query func get_logs() : async [((Text, Nat))]{
-    logs
-  }
+  public query(msg) func getAdmin() : async Principal {
+    admin
+  };
 };

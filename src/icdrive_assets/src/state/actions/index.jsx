@@ -28,6 +28,7 @@ export const uploadFileId = (payload) =>{
       payload
   }
 }
+
 //-------------------------------------Switch Options-----------------------------------------//
 export const switchHome = (payload) =>{
   return{
@@ -47,6 +48,12 @@ export const switchShared = (payload) =>{
       payload
   }
 }
+export const switchProfile = (payload) =>{
+  return{
+      type: 'switchProfile',
+      payload
+  }
+}
 
 //-------------------------------------Upload Progress-----------------------------------------//
 export const uploadProgress = (payload) =>{
@@ -55,10 +62,17 @@ export const uploadProgress = (payload) =>{
       payload
   }
 }
+export const sizeUpdate = (payload) =>{
+  return{
+      type: 'sizeUpdate',
+      payload
+  }
+}
 
 //---------------------------------------Side Bar----------------------------------------------//
-export const updateState = () =>{
+export const updateState = (payload) =>{
   return{
       type: 'updateState',
+      payload
   }
 }

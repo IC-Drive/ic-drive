@@ -26,6 +26,7 @@ package-lock.json
 
 # production
 /build
+canister_ids.json
 
 # misc
 .env.local

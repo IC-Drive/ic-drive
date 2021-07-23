@@ -6,7 +6,7 @@ import {useUploadFile} from './File.jsx'
 
 // 3rd party imports
 import {useDispatch} from 'react-redux'
-import {uploadUpdate, refreshFiles, switchHome, switchMarked, switchShared, uploadProgress, uploadFileId} from '../../state/actions'
+import {uploadUpdate, refreshFiles, switchHome, switchMarked, switchShared, uploadProgress, sizeUpdate, uploadFileId} from '../../state/actions'
 
 const SideBar = () =>{
 
@@ -19,6 +19,7 @@ const SideBar = () =>{
     for(let i=0; i<file_list.length; i++){
       const file = file_list[i];
       dispatch(uploadUpdate({file_uploading: file.name, file_count: file_list.length, completed: i+1}))
+      dispatch(sizeUpdate(file.size));
       const file_obj = await useUploadFile(file, dispatch, uploadProgress, uploadFileId);
     }
     dispatch(uploadUpdate({file_uploading: "", file_count: 0, completed: 0}))
