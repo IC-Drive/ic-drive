@@ -44,8 +44,7 @@ shared (msg) actor class icdrive (){
         let canId = await fileHandleObj.createOwner(msg.caller);
         user.createOne(msg.caller, userName, fileHandleObj);
         Debug.print("hello");
-        //Making my wallet canister controller of new canister
-        //let canId = await fileHandleObj.getMyId();
+        
         let settings: CanisterSettings = {
         controllers = [admin];
         };

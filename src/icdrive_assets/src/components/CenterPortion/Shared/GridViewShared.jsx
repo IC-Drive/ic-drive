@@ -124,9 +124,8 @@ const Style = styled.div`
     background: #425757;
   }
   .truncate-overflow{
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3 !important;
     -webkit-box-orient: vertical;
-    overflow:hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
   }

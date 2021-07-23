@@ -17,7 +17,7 @@ import {MenuOutlined, AppstoreOutlined, CaretDownOutlined, CaretUpOutlined} from
 
 const CenterPortion = () =>{
 
-  const [selectedView, setSelectedView] = React.useState("listView");
+  const [selectedView, setSelectedView] = React.useState("gridView");
   const [minimizeUpload, setMinimizeUpload] = React.useState(false);
   const upload = useSelector(state=>state.FileHandler.upload);
   const optionSelected = useSelector(state=>state.OptionSelected.option);
@@ -154,6 +154,9 @@ const Style = styled.div`
       align-items: center;
       background: #C9D1C8;
     }
+    .list-grid-view{
+      display: none;
+    }
   }
   @media only screen and (min-width: 600px){
     width: calc(100vw - 225px);
@@ -165,12 +168,13 @@ const Style = styled.div`
       align-items: center;
       background: #C9D1C8;
     }
+    .list-grid-view{
+      display: flex;
+      margin-right: 22px;
+      width: 60px;
+    }
   }
-  .list-grid-view{
-    display: flex;
-    margin-right: 22px;
-    width: 60px;
-  }
+
   .show-section{
     font-size: 16px;
     font-weight: 500;

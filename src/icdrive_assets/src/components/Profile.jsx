@@ -34,18 +34,32 @@ export default Profile;
 
 const Style = styled.div`
   font-style: sans-serif;
-  .profile-block{
-    height: 150px;
-    width: 300px;
-    margin-top: calc(50vh - 50px - 75px);
-    margin-left: calc(50vw - 225px - 150px);
-    background: #324851;
-    border-radius: 20px;
-  }
+  
   .details{
     padding-left: 40px;
     padding-top: 40px;
     font-size: 18px;
     color: #fff;
+  }
+  @media only screen and (max-width: 600px){
+    .profile-block{
+      height: 150px;
+      width: 300px;
+      margin-top: calc(50vh - 50px - 75px);
+      margin-left: calc(50vw - 150px);
+      background: #324851;
+      border-radius: 20px;
+    }
+    
+  }
+  @media only screen and (min-width: 600px){
+    .profile-block{
+      height: 150px;
+      width: 300px;
+      margin-top: calc(50vh - 50px - 75px);
+      margin-left: calc(50vw - 225px - 150px);
+      background: #324851;
+      border-radius: 20px;
+    }
   }
 `

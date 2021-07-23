@@ -48,9 +48,19 @@ const Dashboard = () =>{
       <TopBar />
       {
         optionSelected==="profile"?
-        <div className="side-center">
-          <SideBar />
-          <Profile/>
+        <div>
+          <div className="side-center">
+            <SideBar />
+            <Profile/>
+          </div>
+          <div className="side-center-mobile">
+            {
+              sidebar?
+              <SideBar />
+              :
+              <Profile/>
+            }
+          </div>
         </div>
         :
         <div>
@@ -76,18 +86,21 @@ export default Dashboard;
 
 const Style = styled.div`
   font-style: sans-serif;
-  .side-center{
-    display: flex;
-  }
-  .side-center-mobile{
-    display: none;
-  }
+    
   @media only screen and (max-width: 600px){
     .side-center{
       display: none;
     }
     .side-center-mobile{
       display: block;
+    }
+  }
+  @media only screen and (min-width: 600px){
+    .side-center{
+      display: flex;
+    }
+    .side-center-mobile{
+      display: none;
     }
   }
 `
