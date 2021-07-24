@@ -1,61 +1,64 @@
-import React from 'react'
-import styled from 'styled-components'
+import React from 'react';
+import styled from 'styled-components';
 
 // custom imports
-import {updateState, switchProfile} from '../../state/actions'
 
 // 3rd party imports
-import {useDispatch, useSelector} from 'react-redux'
-import {Input, Dropdown, Menu, Modal} from 'antd'
-import { AuthClient } from '@dfinity/auth-client'
-import { QuestionCircleOutlined } from '@ant-design/icons'
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  Input, Dropdown, Menu, Modal,
+} from 'antd';
+import { AuthClient } from '@dfinity/auth-client';
+import { QuestionCircleOutlined } from '@ant-design/icons';
+import { updateState, switchProfile } from '../../state/actions';
 
-const TopBar = () =>{
-
+const TopBar = () => {
   const dispatch = useDispatch();
-  const sidebar = useSelector(state=>state.SideBarShow.state);
-  const [helpModal, setHelpModal] = React.useState(false)
+  const sidebar = useSelector((state) => state.SideBarShow.state);
+  const [helpModal, setHelpModal] = React.useState(false);
 
   const menu = (
     <Menu>
       <Menu.Item key="0">
-        <span onClick={()=>{dispatch(switchProfile("profile"))}}>Profile</span>
+        <span role="button" tabIndex={0} onClick={() => { dispatch(switchProfile('profile')); }}>Profile</span>
       </Menu.Item>
       <Menu.Item key="1">
-        <span onClick={async()=>{const authClient = await AuthClient.create();await authClient.logout();window.location.reload();}}>Logout</span>
+        <span role="button" tabIndex={0} onClick={async () => { const authClient = await AuthClient.create(); await authClient.logout(); window.location.reload(); }}>Logout</span>
       </Menu.Item>
     </Menu>
   );
-  
-  return(
+
+  return (
     <Style>
       <div className="top-bar-container">
         <div className="left-section">
-          <span id="icdrive_top" onClick={()=>{dispatch(updateState(!sidebar))}}>IC Drive</span>
+          <span role="button" tabIndex={0} id="icdrive_top" onClick={() => { dispatch(updateState(!sidebar)); }}>IC Drive</span>
         </div>
         <div className="right-section">
           <span><Input placeholder="Search Files" /></span>
-          <span><QuestionCircleOutlined onClick={()=>setHelpModal(true)} style={{ fontSize: '25px' }} /></span>
+          <span><QuestionCircleOutlined onClick={() => setHelpModal(true)} style={{ fontSize: '25px' }} /></span>
           <Dropdown overlay={menu}>
-            <span className="dot"></span>
+            <span className="dot" />
           </Dropdown>
         </div>
       </div>
       <Modal
         visible={helpModal}
-        onCancel={()=>setHelpModal(false)}
+        onCancel={() => setHelpModal(false)}
         footer={null}
         title={null}
       >
         <span className="help-modal">
-          Please share your feedback at:<br/>
-          nanditmehra123@gmail.com<br/>
+          Please share your feedback at:
+          <br />
+          nanditmehra123@gmail.com
+          <br />
           ravish1729@gmail.com
         </span>
       </Modal>
     </Style>
-  )
-}
+  );
+};
 
 export default TopBar;
 
@@ -114,4 +117,4 @@ const Style = styled.div`
       align-items: center;
     }
   }
-`
+`;

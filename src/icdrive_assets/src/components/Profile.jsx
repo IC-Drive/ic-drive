@@ -1,18 +1,17 @@
-import React from "react";
+import React from 'react';
 import styled from 'styled-components';
 
 // custom imports
 
 // 3rd party imports
-import {useDispatch, useSelector} from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
-const Profile = () =>{
-
+const Profile = () => {
   React.useEffect(() => {
 
-  }, [])
+  }, []);
 
-  return(
+  return (
     <Style>
       <div className="profile-block">
         <div className="details">
@@ -27,8 +26,8 @@ const Profile = () =>{
         </div>
       </div>
     </Style>
-  )
-}
+  );
+};
 
 export default Profile;
 
@@ -62,4 +61,4 @@ const Style = styled.div`
       border-radius: 20px;
     }
   }
-`
+`;

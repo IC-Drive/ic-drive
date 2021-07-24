@@ -1,83 +1,87 @@
-import React from 'react'
-import styled from 'styled-components'
+import React from 'react';
+import styled from 'styled-components';
 
 // custom imports
-import {useUploadFile} from './File.jsx'
+import { useDispatch } from 'react-redux';
+import { useUploadFile } from './File';
 
 // 3rd party imports
-import {useDispatch} from 'react-redux'
-import {uploadUpdate, refreshFiles, switchHome, switchMarked, switchShared, uploadProgress, sizeUpdate, uploadFileId} from '../../state/actions'
+import {
+  uploadUpdate, refreshFiles, switchHome, switchMarked, switchShared, uploadProgress, sizeUpdate, uploadFileId,
+} from '../../state/actions';
 
-const SideBar = () =>{
-
+const SideBar = () => {
   const dispatch = useDispatch();
-  const [uploadFlag, setUploadFlag] = React.useState(false)
+  const [uploadFlag, setUploadFlag] = React.useState(false);
 
   const onFileSelect = async (evt) => {
-    setUploadFlag(true)
-    const file_list = evt.target.files
-    for(let i=0; i<file_list.length; i++){
-      const file = file_list[i];
-      dispatch(uploadUpdate({file_uploading: file.name, file_count: file_list.length, completed: i+1}))
+    setUploadFlag(true);
+    const fileList = evt.target.files;
+    for (let i = 0; i < fileList.length; i += 1) {
+      const file = fileList[i];
+      dispatch(uploadUpdate({ file_uploading: file.name, file_count: fileList.length, completed: i + 1 }));
       dispatch(sizeUpdate(file.size));
-      const file_obj = await useUploadFile(file, dispatch, uploadProgress, uploadFileId);
+      await useUploadFile(file, dispatch, uploadProgress, uploadFileId);
     }
-    dispatch(uploadUpdate({file_uploading: "", file_count: 0, completed: 0}))
-    dispatch(refreshFiles(true))
-    setUploadFlag(false)
-  }
+    dispatch(uploadUpdate({ file_uploading: '', file_count: 0, completed: 0 }));
+    dispatch(refreshFiles(true));
+    setUploadFlag(false);
+  };
 
-  return(
+  return (
     <Style>
       <div className="container">
         {
-          uploadFlag?
-            <div className="upload-button">
-              <div className="upload-element-section active">
-                <div className="upload-icon-part">
-                  <img src="./icons/upload.svg" style={{ height: '22px', color: '#fff' }} />
-                </div>
-                <div className="upload-text-part">
-                  <span>Upload</span>
+          uploadFlag
+            ? (
+              <div className="upload-button">
+                <div className="upload-element-section active">
+                  <div className="upload-icon-part">
+                    <img src="./icons/upload.svg" alt="upload icon" style={{ height: '22px', color: '#fff' }} />
+                  </div>
+                  <div className="upload-text-part">
+                    <span>Upload</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          :
-          <label id="label-file" for="upload-file">
-            <div className="upload-button">
-              <div className="upload-element-section inactive">
-                <div className="upload-icon-part">
-                  <img src="./icons/upload.svg" style={{ height: '22px', color: '#fff' }} />
-                </div>
-                <div className="upload-text-part">
-                  <span>
-                    <div>
-                      Upload
-                      <input type="file" id="upload-file" onChange={onFileSelect} className="file_upload" multiple/>
+            )
+            : (
+              <label id="label-file" htmlFor="upload-file">
+                <div className="upload-button">
+                  <div className="upload-element-section inactive">
+                    <div className="upload-icon-part">
+                      <img src="./icons/upload.svg" alt="upload icon" style={{ height: '22px', color: '#fff' }} />
                     </div>
-                  </span>
+                    <div className="upload-text-part">
+                      <span>
+                        <div>
+                          Upload
+                          <input type="file" id="upload-file" onChange={onFileSelect} className="file_upload" multiple />
+                        </div>
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </label>
+              </label>
+            )
           }
         <div className="content">
 
           <div className="element">
-            <div className="element-section" onClick={()=>{dispatch(switchHome("home"))}}>
+            <div className="element-section" role="button" tabIndex={0} onClick={() => { dispatch(switchHome('home')); }}>
               <div className="icon-part">
-                <img src="./icons/home.svg" style={{ height: '22px', color: '#fff' }} />
+                <img src="./icons/home.svg" alt="home icon" style={{ height: '22px', color: '#fff' }} />
               </div>
               <div className="text-part">
                 <span>Home</span>
               </div>
             </div>
           </div>
-          
+
           <div className="element">
-            <div className="element-section" onClick={()=>{dispatch(switchShared("shared"))}}>
+            <div className="element-section" role="button" tabIndex={0} onClick={() => { dispatch(switchShared('shared')); }}>
               <div className="icon-part">
-                <img src="./icons/share.svg" style={{ height: '22px', color: '#fff' }} />
+                <img src="./icons/share.svg" alt="home icon" style={{ height: '22px', color: '#fff' }} />
               </div>
               <div className="text-part">
                 <span>Shared</span>
@@ -86,9 +90,9 @@ const SideBar = () =>{
           </div>
 
           <div className="element">
-            <div className="element-section" onClick={()=>{dispatch(switchMarked("marked"))}}>
+            <div className="element-section" role="button" tabIndex={0} onClick={() => { dispatch(switchMarked('marked')); }}>
               <div className="icon-part">
-                <img src="./icons/mark.svg" style={{ height: '22px', color: '#fff' }} />
+                <img src="./icons/mark.svg" alt="home icon" style={{ height: '22px', color: '#fff' }} />
               </div>
               <div className="text-part">
                 <span>Marked</span>
@@ -99,7 +103,7 @@ const SideBar = () =>{
           <div className="element">
             <div className="element-section">
               <div className="icon-part">
-                <img src="./icons/import.svg" style={{ height: '22px', color: '#fff' }} />
+                <img src="./icons/import.svg" alt="home icon" style={{ height: '22px', color: '#fff' }} />
               </div>
               <div className="text-part">
                 <span>Import</span>
@@ -110,8 +114,8 @@ const SideBar = () =>{
         </div>
       </div>
     </Style>
-  )
-}
+  );
+};
 
 export default SideBar;
 
@@ -191,4 +195,4 @@ const Style = styled.div`
   .upload-icon-part{
     padding-left: 22.5px;
   }
-`
+`;

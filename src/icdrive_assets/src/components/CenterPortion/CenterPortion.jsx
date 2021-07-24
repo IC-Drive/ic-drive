@@ -1,140 +1,147 @@
-import React from 'react'
-import styled from 'styled-components'
+import React from 'react';
+import styled from 'styled-components';
 
 // custom imports
-import ListView from './ListView'
-import GridView from './GridView'
-import ListViewMarked from './Marked/ListViewMarked'
-import ListViewShared from './Shared/ListViewShared'
-import GridViewMarked from './Marked/GridViewMarked'
-import GridViewShared from './Shared/GridViewShared'
-
+import { Progress } from 'antd';
+import { useSelector } from 'react-redux';
+import {
+  MenuOutlined, AppstoreOutlined, CaretDownOutlined, CaretUpOutlined,
+} from '@ant-design/icons';
+import ListView from './ListView';
+import GridView from './GridView';
+import ListViewMarked from './Marked/ListViewMarked';
+import ListViewShared from './Shared/ListViewShared';
+import GridViewMarked from './Marked/GridViewMarked';
+import GridViewShared from './Shared/GridViewShared';
 
 // 3rd party imports
-import { Progress } from 'antd'
-import {useSelector} from 'react-redux'
-import {MenuOutlined, AppstoreOutlined, CaretDownOutlined, CaretUpOutlined} from "@ant-design/icons"
 
-const CenterPortion = () =>{
-
-  const [selectedView, setSelectedView] = React.useState("gridView");
+const CenterPortion = () => {
+  const [selectedView, setSelectedView] = React.useState('gridView');
   const [minimizeUpload, setMinimizeUpload] = React.useState(false);
-  const upload = useSelector(state=>state.FileHandler.upload);
-  const optionSelected = useSelector(state=>state.OptionSelected.option);
-  const uploadProgress = useSelector(state=>state.UploadProgress.progress);
-  const uploadSize = useSelector(state=>state.UploadProgress.size);
+  const upload = useSelector((state) => state.FileHandler.upload);
+  const optionSelected = useSelector((state) => state.OptionSelected.option);
+  const uploadProgress = useSelector((state) => state.UploadProgress.progress);
+  const uploadSize = useSelector((state) => state.UploadProgress.size);
 
-  return(
+  return (
     <Style>
       <div className="top-bar">
         <div>
           {
-            optionSelected==="home"?
-            <div className="show-section">
+            optionSelected === 'home' ? (
+              <div className="show-section">
               &nbsp;&nbsp;Home
-            </div>
-            :
-            optionSelected==="marked"?
-            <div className="show-section">
+              </div>
+            )
+              : optionSelected === 'marked' ? (
+                <div className="show-section">
               &nbsp;&nbsp;Marked
-            </div>
-            :
-            optionSelected==="shared"?
-            <div className="show-section">
+                </div>
+              )
+                : optionSelected === 'shared' ? (
+                  <div className="show-section">
               &nbsp;&nbsp;Shared
-            </div>
-            :
-            null
+                  </div>
+                )
+                  : null
           }
         </div>
         <div className="list-grid-view">
           {
-            selectedView==="listView"?
-            <span>
-              <MenuOutlined onClick={()=>{setSelectedView("listView")}} className="list-view" style={{fontSize:"20px", color: "#21353E"}} />&nbsp;&nbsp;
-              <AppstoreOutlined onClick={()=>{setSelectedView("gridView")}} className="grid-view" style={{fontSize:"20px", color: "#fff"}} />
-            </span>
-            :
-            <span>
-              <MenuOutlined onClick={()=>{setSelectedView("listView")}} className="list-view" style={{fontSize:"20px", color: "#fff"}} />&nbsp;&nbsp;
-              <AppstoreOutlined onClick={()=>{setSelectedView("gridView")}} className="grid-view" style={{fontSize:"20px", color: "#21353E"}} />
-            </span>
+            selectedView === 'listView' ? (
+              <span>
+                <MenuOutlined onClick={() => { setSelectedView('listView'); }} className="list-view" style={{ fontSize: '20px', color: '#21353E' }} />
+&nbsp;&nbsp;
+                <AppstoreOutlined onClick={() => { setSelectedView('gridView'); }} className="grid-view" style={{ fontSize: '20px', color: '#fff' }} />
+              </span>
+            )
+              : (
+                <span>
+                  <MenuOutlined onClick={() => { setSelectedView('listView'); }} className="list-view" style={{ fontSize: '20px', color: '#fff' }} />
+&nbsp;&nbsp;
+                  <AppstoreOutlined onClick={() => { setSelectedView('gridView'); }} className="grid-view" style={{ fontSize: '20px', color: '#21353E' }} />
+                </span>
+              )
           }
         </div>
       </div>
       {
-        optionSelected==="marked"?
-        <div>
-          {
-            selectedView==="listView"?
-            <ListViewMarked/>
-            :
-            <GridViewMarked/>
+        optionSelected === 'marked' ? (
+          <div>
+            {
+            selectedView === 'listView'
+              ? <ListViewMarked />
+              : <GridViewMarked />
           }
-        </div>
-        :
-        optionSelected==="shared"?
-        <div>
-          {
-            selectedView==="listView"?
-            <ListViewShared/>
-            :
-            <GridViewShared/>
+          </div>
+        )
+          : optionSelected === 'shared' ? (
+            <div>
+              {
+            selectedView === 'listView'
+              ? <ListViewShared />
+              : <GridViewShared />
           }
-        </div>
-        :
-        optionSelected==="home"?
-        <div>
-          {
-            selectedView==="listView"?
-            <ListView/>
-            :
-            <GridView/>
+            </div>
+          )
+            : optionSelected === 'home' ? (
+              <div>
+                {
+            selectedView === 'listView'
+              ? <ListView />
+              : <GridView />
           }
-        </div>
-        :
-        null
+              </div>
+            )
+              : null
       }
       {
-        upload["file_count"]>0?
-        <div className="upload-container">
-          <div className="upload-top-bar">
-            <span id="top-bar-text">Uploading&nbsp;&nbsp;{upload["completed"]}/{upload["file_count"]}&nbsp;...</span>
-            {
-              minimizeUpload?
-              <span id="top-bar-minimize" onClick={()=>setMinimizeUpload(!minimizeUpload)} ><CaretUpOutlined style={{color:"#fff", fontSize:"18px"}} /></span>
-              :
-              <span id="top-bar-minimize" onClick={()=>setMinimizeUpload(!minimizeUpload)} ><CaretDownOutlined style={{color:"#fff", fontSize:"18px"}} /></span>
+        upload.file_count > 0
+          ? (
+            <div className="upload-container">
+              <div className="upload-top-bar">
+                <span id="top-bar-text">
+                  Uploading&nbsp;&nbsp;
+                  {upload.completed}
+                  /
+                  {upload.file_count}
+&nbsp;...
+                </span>
+                {
+              minimizeUpload
+                ? <span id="top-bar-minimize" role="button" tabIndex={0} onClick={() => setMinimizeUpload(!minimizeUpload)}><CaretUpOutlined style={{ color: '#fff', fontSize: '18px' }} /></span>
+                : <span id="top-bar-minimize" role="button" tabIndex={0} onClick={() => setMinimizeUpload(!minimizeUpload)}><CaretDownOutlined style={{ color: '#fff', fontSize: '18px' }} /></span>
             }
-            
-          </div>
-          {
-            minimizeUpload?
-            null
-            :
-            <div className="upload-bottom-bar">
-              <span id="bottom-bar-text">
-                <div id="left-section" className="truncate-overflow">
-                  {upload["file_uploading"]}
-                </div>
-                <div id="right-section">
-                  {
-                    uploadSize/(1024*1024)<2?
-                    null
-                    :
-                    <Progress steps={4} percent={uploadProgress} />
+
+              </div>
+              {
+            minimizeUpload
+              ? null
+              : (
+                <div className="upload-bottom-bar">
+                  <span id="bottom-bar-text">
+                    <div id="left-section" className="truncate-overflow">
+                      {upload.file_uploading}
+                    </div>
+                    <div id="right-section">
+                      {
+                    uploadSize / (1024 * 1024) < 2
+                      ? null
+                      : <Progress steps={4} percent={uploadProgress} />
                   }
+                    </div>
+                  </span>
                 </div>
-              </span>
-            </div>
+              )
           }
-        </div>
-        :
-        null
+            </div>
+          )
+          : null
       }
     </Style>
-  )
-}
+  );
+};
 
 export default CenterPortion;
 
@@ -234,4 +241,4 @@ const Style = styled.div`
   #top-bar-minimize:hover{
     cursor: pointer;
   }
-`
+`;

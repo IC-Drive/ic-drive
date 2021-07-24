@@ -1,217 +1,213 @@
 // custom imports
-import { httpAgent, canisterHttpAgent, httpAgentIdentity } from '../../httpAgent'
-import { idlFactory as FileHandle_idl } from 'dfx-generated/FileHandle'
-import { image_types, pdf_type } from './MimeTypes'
+import { idlFactory as FileHandleIdl } from 'dfx-generated/FileHandle';
 
 // 3rd party imports
-//import * as streamSaver from 'streamsaver';
-//import { WritableStream } from 'web-streams-polyfill/ponyfill'
+// import * as streamSaver from 'streamsaver';
+// import { WritableStream } from 'web-streams-polyfill/ponyfill'
 import sha256 from 'sha256';
-import { Actor } from '@dfinity/agent'
+import { Actor } from '@dfinity/agent';
+import { imageTypes, pdfType } from './MimeTypes';
+import { httpAgent, canisterHttpAgent, httpAgentIdentity } from '../../httpAgent';
 /* Contain Download, File View, Mark File, Delete File and File Share Implementation */
 
 // Temporary method works well on small files
-export const downloadFile = async (fileInfo) =>{
+export const downloadFile = async (fileInfo) => {
   const userAgent = await canisterHttpAgent();
   const chunkBuffers = [];
-  for(let j=0; j<fileInfo["chunkCount"]; j++){
-    const bytes = await userAgent.getFileChunk(fileInfo["fileId"], j+1);
+  for (let j = 0; j < fileInfo.chunkCount; j += 1) {
+    const bytes = await userAgent.getFileChunk(fileInfo.fileId, j + 1);
     const bytesAsBuffer = new Uint8Array(bytes[0]);
     chunkBuffers.push(bytesAsBuffer);
   }
-  
+
   const fileBlob = new Blob([Buffer.concat(chunkBuffers)], {
-    type: fileInfo["mimeType"],
+    type: fileInfo.mimeType,
   });
   const fileURL = URL.createObjectURL(fileBlob);
-  var link = document.createElement('a');
+  const link = document.createElement('a');
   link.href = fileURL;
-  link.download = fileInfo["name"];
+  link.download = fileInfo.name;
   document.body.appendChild(link);
   link.click();
-}
+};
 
-export const viewFile = async(fileInfo) =>{
+export const viewFile = async (fileInfo) => {
   // Currently View only image and pdf files
-  let flag = 0
-  for(let i=0; i<image_types.length;i++){
-    if(fileInfo["mimeType"]===image_types[i]){
-      flag=1
-      break
+  let flag = 0;
+  for (let i = 0; i < imageTypes.length; i += 1) {
+    if (fileInfo.mimeType === imageTypes[i]) {
+      flag = 1;
+      break;
     }
   }
-  if(fileInfo["mimeType"].toString()===pdf_type){
-    flag=1
+  if (fileInfo.mimeType.toString() === pdfType) {
+    flag = 1;
   }
 
   // If file is image or pdf
-  if(flag){
+  if (flag) {
     const userAgent = await canisterHttpAgent();
     const chunkBuffers = [];
-    for(let j=0; j<fileInfo["chunkCount"]; j++){
-      const bytes = await userAgent.getFileChunk(fileInfo["fileId"], j+1);
+    for (let j = 0; j < fileInfo.chunkCount; j += 1) {
+      const bytes = await userAgent.getFileChunk(fileInfo.fileId, j + 1);
       const bytesAsBuffer = new Uint8Array(bytes[0]);
       chunkBuffers.push(bytesAsBuffer);
     }
     const fileBlob = new Blob([Buffer.concat(chunkBuffers)], {
-      type: fileInfo["mimeType"],
+      type: fileInfo.mimeType,
     });
     const fileURL = URL.createObjectURL(fileBlob);
     window.open(fileURL, '_blank');
-    return(true)
-  } else{
-    return(false)
+    return (true);
   }
-}
+  return (false);
+};
 
-export const markFile = async(fileInfo) =>{
+export const markFile = async (fileInfo) => {
   const userAgent = await canisterHttpAgent();
-  await userAgent.markFile(fileInfo["fileId"]);
-}
+  await userAgent.markFile(fileInfo.fileId);
+};
 
-export const deleteFile = async(fileInfo) =>{
+export const deleteFile = async (fileInfo) => {
   const userAgent = await canisterHttpAgent();
-  await userAgent.deleteFile(fileInfo["fileId"]);
-}
+  await userAgent.deleteFile(fileInfo.fileId);
+};
 
 export function bytesToSize(bytes) {
-  var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-  if (bytes == 0) return '0 Byte';
-  var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-  return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  if (bytes === 0) return '0 Byte';
+  const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)), 10);
+  return `${Math.round(bytes / Math.pow(1024, i), 2)} ${sizes[i]}`;
 }
 
-//Temporary, relook the logic
-export const shareFile = async(fileObj, userName) =>{
+// Temporary, relook the logic
+export const shareFile = async (fileObj, userName) => {
   const icdrive = await httpAgent();
   const userAgent = await canisterHttpAgent();
 
-  let canisterIdShared = await icdrive.getUserCanister(userName)
+  const canisterIdShared = await icdrive.getUserCanister(userName);
 
-  try{
-    if(canisterIdShared.length===1){
-      let resp_share = await userAgent.shareFile(fileObj["fileId"], userName, localStorage.getItem("userName"))
-      if(resp_share[0]==="Success"){
-        const identityAgent = await httpAgentIdentity()
-        const userAgentShare = Actor.createActor(FileHandle_idl, { agent: identityAgent, canisterId: canisterIdShared[0] });
-        let fileInfo = {
-          fileId: fileObj["fileId"],
-          userName: fileObj["userName"],
+  try {
+    if (canisterIdShared.length === 1) {
+      const respShare = await userAgent.shareFile(fileObj.fileId, userName, localStorage.getItem('userName'));
+      if (respShare[0] === 'Success') {
+        const identityAgent = await httpAgentIdentity();
+        const userAgentShare = Actor.createActor(FileHandleIdl, { agent: identityAgent, canisterId: canisterIdShared[0] });
+        const fileInfo = {
+          fileId: fileObj.fileId,
+          userName: fileObj.userName,
           createdAt: Date.now(),
-          name: fileObj["name"],
-          chunkCount: fileObj["chunkCount"],
-          fileSize: fileObj["fileSize"],
-          mimeType: fileObj["mimeType"],
+          name: fileObj.name,
+          chunkCount: fileObj.chunkCount,
+          fileSize: fileObj.fileSize,
+          mimeType: fileObj.mimeType,
           marked: false,
-          sharedWith: []
-        }
-        let res = await userAgentShare.addSharedFile(fileInfo)
-        return(true)
+          sharedWith: [],
+        };
+        await userAgentShare.addSharedFile(fileInfo);
+        return (true);
       }
-    }else{
-      return(false)
+    } else {
+      return (false);
     }
-  } catch(err){
-    return(false)
+  } catch (err) {
+    return (false);
   }
-}
+};
 
-export const shareFilePublic = async(fileObj) =>{
-  let flag = 0
-  for(let i=0; i<image_types.length;i++){
-    if(fileObj["mimeType"]===image_types[i]){
-      flag=1
-      break
+export const shareFilePublic = async (fileObj) => {
+  let flag = 0;
+  for (let i = 0; i < imageTypes.length; i += 1) {
+    if (fileObj.mimeType === imageTypes[i]) {
+      flag = 1;
+      break;
     }
   }
-  if(fileObj["mimeType"].toString()===pdf_type){
-    flag=1
+  if (fileObj.mimeType.toString() === pdfType) {
+    flag = 1;
   }
-  if(flag){
+  if (flag) {
     const icdrive = await httpAgent();
     const userAgent = await canisterHttpAgent();
-    let data = fileObj["mimeType"] + "$" + fileObj["chunkCount"].toString() + "$" + localStorage.getItem("fileCanister") + "$" + fileObj["fileId"];
-    let hash = sha256(data);
-    console.log(hash);
+    const data = `${fileObj.mimeType}$${fileObj.chunkCount.toString()}$${localStorage.getItem('fileCanister')}$${fileObj.fileId}`;
+    const hash = sha256(data);
     await icdrive.makeFilePublic(hash, data);
-    await userAgent.makeFilePublic(fileObj["fileId"], hash);
-    return(hash)
-  } else{
-    return(false)
+    await userAgent.makeFilePublic(fileObj.fileId, hash);
+    return (hash);
   }
-}
+  return (false);
+};
 
-export const downloadSharedFile = async (fileInfo, userName) =>{
+export const downloadSharedFile = async (fileInfo, userName) => {
   const icdrive = await httpAgent();
-  const canisterIdShared = await icdrive.getUserCanister(fileInfo["userName"]); //Canister id of owner
+  const canisterIdShared = await icdrive.getUserCanister(fileInfo.userName); // Canister id of owner
 
   const identityAgent = await httpAgentIdentity();
-  const userAgentShare = Actor.createActor(FileHandle_idl, { agent: identityAgent, canisterId: canisterIdShared[0] });
-  
+  const userAgentShare = Actor.createActor(FileHandleIdl, { agent: identityAgent, canisterId: canisterIdShared[0] });
+
   const chunkBuffers = [];
-  for(let j=0; j<fileInfo["chunkCount"]; j++){
-    const bytes = await userAgentShare.getSharedFileChunk(fileInfo["fileId"], j+1, userName);
+  for (let j = 0; j < fileInfo.chunkCount; j += 1) {
+    const bytes = await userAgentShare.getSharedFileChunk(fileInfo.fileId, j + 1, userName);
     const bytesAsBuffer = new Uint8Array(bytes[0]);
     chunkBuffers.push(bytesAsBuffer);
   }
-  
+
   const fileBlob = new Blob([Buffer.concat(chunkBuffers)], {
-    type: fileInfo["mimeType"],
+    type: fileInfo.mimeType,
   });
   const fileURL = URL.createObjectURL(fileBlob);
-  var link = document.createElement('a');
+  const link = document.createElement('a');
   link.href = fileURL;
-  link.download = fileInfo["name"];
+  link.download = fileInfo.name;
   document.body.appendChild(link);
   link.click();
-}
+};
 
-export const viewSharedFile = async(fileInfo, userName) =>{
+export const viewSharedFile = async (fileInfo, userName) => {
   // Currently View only image and pdf files
-  let flag = 0
-  for(let i=0; i<image_types.length;i++){
-    if(fileInfo["mimeType"]===image_types[i]){
-      flag=1
-      break
+  let flag = 0;
+  for (let i = 0; i < imageTypes.length; i += 1) {
+    if (fileInfo.mimeType === imageTypes[i]) {
+      flag = 1;
+      break;
     }
   }
-  if(fileInfo["mimeType"].toString()===pdf_type){
-    flag=1
+  if (fileInfo.mimeType.toString() === pdfType) {
+    flag = 1;
   }
 
   // If file is image or pdf
-  if(flag){
+  if (flag) {
     const icdrive = await httpAgent();
-    const canisterIdShared = await icdrive.getUserCanister(fileInfo["userName"]); //Canister id of owner
-    
+    const canisterIdShared = await icdrive.getUserCanister(fileInfo.userName); // Canister id of owner
+
     const identityAgent = await httpAgentIdentity();
-    const userAgentShare = Actor.createActor(FileHandle_idl, { agent: identityAgent, canisterId: canisterIdShared[0] });
+    const userAgentShare = Actor.createActor(FileHandleIdl, { agent: identityAgent, canisterId: canisterIdShared[0] });
 
     const chunkBuffers = [];
-    for(let j=0; j<fileInfo["chunkCount"]; j++){
-      const bytes = await userAgentShare.getSharedFileChunk(fileInfo["fileId"], j+1, userName);
+    for (let j = 0; j < fileInfo.chunkCount; j += 1) {
+      const bytes = await userAgentShare.getSharedFileChunk(fileInfo.fileId, j + 1, userName);
       const bytesAsBuffer = new Uint8Array(bytes[0]);
       chunkBuffers.push(bytesAsBuffer);
     }
     const fileBlob = new Blob([Buffer.concat(chunkBuffers)], {
-      type: fileInfo["mimeType"],
+      type: fileInfo.mimeType,
     });
     const fileURL = URL.createObjectURL(fileBlob);
     window.open(fileURL, '_blank');
-    return(true)
-  } else{
-    return(false)
+    return (true);
   }
-}
+  return (false);
+};
 
-export const deleteSharedFile = async(fileInfo) =>{
+export const deleteSharedFile = async (fileInfo) => {
   const userAgent = await canisterHttpAgent();
-  await userAgent.deleteSharedFile(fileInfo["fileId"]);
-}
+  await userAgent.deleteSharedFile(fileInfo.fileId);
+};
 
-/*----------------------------------------------Testing--------------------------------------*/
+/* ----------------------------------------------Testing--------------------------------------*/
 // For large files not working on firefox to be fixed
-  /*const download = async (fileId, chunk_count, fileName) => {
+/* const download = async (fileId, chunk_count, fileName) => {
     streamSaver.WritableStream = WritableStream
     streamSaver.mitm = 'http://localhost:8000/mitm.html'
     const fileStream = streamSaver.createWriteStream(fileName);
@@ -223,4 +219,4 @@ export const deleteSharedFile = async(fileInfo) =>{
       writer.write(bytesAsBuffer);
     }
     writer.close();
-  };*/
+  }; */

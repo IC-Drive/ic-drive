@@ -1,74 +1,79 @@
-import React from 'react'
-import styled from 'styled-components'
+import React from 'react';
+import styled from 'styled-components';
 
 // custom imports
-import { filesUpdate, refreshFiles } from '../../../state/actions'
-import { downloadFile, viewFile, markFile, deleteFile, shareFile, bytesToSize, get_logs } from '../Methods'
 
 // 3rd party imports
-import { useSelector, useDispatch } from 'react-redux'
-import { Table, Popconfirm, Space, Modal, message, Button, Input } from 'antd'
-import { DownloadOutlined, DeleteOutlined, EditOutlined, ShareAltOutlined } from '@ant-design/icons'
+import { useSelector, useDispatch } from 'react-redux';
+import {
+  Table, Popconfirm, Space, Modal, message, Button, Input,
+} from 'antd';
+import {
+  DownloadOutlined, DeleteOutlined, ShareAltOutlined,
+} from '@ant-design/icons';
+import {
+  downloadFile, viewFile, markFile, deleteFile, shareFile, bytesToSize,
+} from '../Methods';
+import { filesUpdate, refreshFiles } from '../../../state/actions';
 
-const ListView = () =>{
-
-  const files = useSelector(state=>state.FileHandler.files)
-  const [data, setData] = React.useState("")
+const ListView = () => {
+  const files = useSelector((state) => state.FileHandler.files);
+  const [data, setData] = React.useState('');
   const dispatch = useDispatch();
 
-  const fileObj = React.useRef({})
-  const [shareModal, setShareModal] = React.useState(false)
-  const [loadingFlag, setLoadingFlag] = React.useState(false)
-  const userName = React.useRef("")
+  const fileObj = React.useRef({});
+  const [shareModal, setShareModal] = React.useState(false);
+  const [loadingFlag, setLoadingFlag] = React.useState(false);
+  const userName = React.useRef('');
 
-  //Functions
-  React.useEffect(async ()=>{
-    let temp = []
-    for(let i=0; i<files.length; i++){
-      if(files[i]["marked"]){
-        temp.push(files[i])
+  // Functions
+  React.useEffect(async () => {
+    const temp = [];
+    for (let i = 0; i < files.length; i += 1) {
+      if (files[i].marked) {
+        temp.push(files[i]);
       }
     }
-    setData(temp)
-  },[])
+    setData(temp);
+  }, []);
 
-  const handleDownload = async (record) =>{
-    await downloadFile(record)
-  }
+  const handleDownload = async (record) => {
+    await downloadFile(record);
+  };
 
-  const handleMarked = async(record) =>{
-    let temp = [...files]
-    for(let i=0; i<temp.length; i++){
-      if(temp[i]["fileId"]===record["fileId"]){
-        temp[i]["marked"] = !temp[i]["marked"]
+  const handleMarked = async (record) => {
+    const temp = [...files];
+    for (let i = 0; i < temp.length; i += 1) {
+      if (temp[i].fileId === record.fileId) {
+        temp[i].marked = !temp[i].marked;
       }
     }
     dispatch(filesUpdate(temp));
-    await markFile(record)
-  }
+    await markFile(record);
+  };
 
-  const handleDelete = async(record) =>{
-    await deleteFile(record)
+  const handleDelete = async (record) => {
+    await deleteFile(record);
     dispatch(refreshFiles(true));
-  }
+  };
 
-  const handleView = async(record) =>{
-    let response = await viewFile(record)
-    if(!response){
-      message.info("Only PDF and Images can be viewed")
+  const handleView = async (record) => {
+    const response = await viewFile(record);
+    if (!response) {
+      message.info('Only PDF and Images can be viewed');
     }
-  }
+  };
 
-  const handleShare = async() =>{
-    setLoadingFlag(true)
-    let response = shareFile(fileObj.current, userName.current.state.value)
-    if(response){
-      message.success("File Shared")
-    } else{
-      message.error("Something Went Wrong! Check User Name")
+  const handleShare = async () => {
+    setLoadingFlag(true);
+    const response = shareFile(fileObj.current, userName.current.state.value);
+    if (response) {
+      message.success('File Shared');
+    } else {
+      message.error('Something Went Wrong! Check User Name');
     }
-    setLoadingFlag(false)
-  }
+    setLoadingFlag(false);
+  };
 
   // Defining Columns of Table
   const columns = [
@@ -77,13 +82,13 @@ const ListView = () =>{
       dataIndex: 'name',
       key: 'name',
       editable: true,
-      render: (text, record) => <div onDoubleClick={()=>{handleView(record)}}>{text}</div>,
+      render: (text, record) => <div onDoubleClick={() => { handleView(record); }}>{text}</div>,
     },
     {
       title: 'File Size',
       dataIndex: 'fileSize',
       key: 'fileSize',
-      render: text => <div>{(bytesToSize(Number(text)))}</div>,
+      render: (text) => <div>{(bytesToSize(Number(text)))}</div>,
     },
     {
       title: 'Created',
@@ -94,52 +99,57 @@ const ListView = () =>{
       title: 'Mark',
       dataIndex: 'marked',
       key: 'marked',
-      render: (_, record) => <div>{record.marked?<img src="./icons/mark-blue.svg" style={{ height: '14px' }} onClick={()=>handleMarked(record)} />:<img src="./icons/mark-gray.svg" style={{ height: '14px' }} onClick={()=>handleMarked(record)} />}</div>,
+      render: (_, record) => <div>{record.marked ? <img src="./icons/mark-blue.svg" alt="mark icon" style={{ height: '14px' }} onClick={() => handleMarked(record)} /> : <img src="./icons/mark-gray.svg" alt="mark icon" style={{ height: '14px' }} onClick={() => handleMarked(record)} />}</div>,
     },
     {
       title: '',
       key: 'operation',
-      render: (_, record) => {
-        return (
+      render: (_, record) => (
         <Space size="middle">
-          <a>
-            <DownloadOutlined onClick={()=>handleDownload(record)} />
-          </a>
-          <a>
-            <EditOutlined />
-          </a>
-          <Popconfirm title="Sure to delete?" onConfirm={()=>{handleDelete(record)}}>
-          <a>
-            <DeleteOutlined />
-          </a>
+          <span>
+            <DownloadOutlined style={{ color: '#4D85BD' }} onClick={() => handleDownload(record)} />
+          </span>
+          <Popconfirm title="Sure to delete?" onConfirm={() => { handleDelete(record); }}>
+            <span>
+              <DeleteOutlined style={{ color: '#4D85BD' }} />
+            </span>
           </Popconfirm>
-          <a>
-            <ShareAltOutlined onClick={()=>{setShareModal(true);fileObj.current = record}} />
-          </a>
+          <span>
+            <ShareAltOutlined style={{ color: '#4D85BD' }} onClick={() => { setShareModal(true); fileObj.current = record; }} />
+          </span>
         </Space>
-        );
-      },
+      ),
     },
   ];
 
-  return(
+  return (
     <Style>
       <div>
         <Table dataSource={data} columns={columns} />
       </div>
 
       {/* Modal For Input User Name */}
-      <Modal footer={null} title={false} visible={shareModal} onCancel={()=>{setShareModal(false); fileObj.current = {} }}>
+      <Modal
+        footer={null}
+        title={false}
+        visible={shareModal}
+        onCancel={() => { setShareModal(false); fileObj.current = {}; }}
+      >
         <div>
-        <span>User Name:&nbsp;<Input ref={userName} /></span>
-        <Button type="primary" style={{float:"right", marginTop:"10px"}} loading={loadingFlag} onClick={handleShare}>Share</Button>
-        <br/><br/><br/>
+          <span>
+            User Name:&nbsp;
+            <Input ref={userName} />
+          </span>
+          <Button type="primary" style={{ float: 'right', marginTop: '10px' }} loading={loadingFlag} onClick={handleShare}>Share</Button>
+          <br />
+          <br />
+          <br />
         </div>
       </Modal>
 
     </Style>
-  )
-}
+  );
+};
 
 export default ListView;
 
@@ -147,4 +157,4 @@ const Style = styled.div`
   thead[class*="ant-table-thead"] th{
     font-weight: bold !important;
   }
-`
+`;

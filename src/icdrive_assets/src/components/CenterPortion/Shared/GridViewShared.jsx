@@ -1,85 +1,82 @@
-import React from 'react'
-import styled from 'styled-components'
+import React from 'react';
+import styled from 'styled-components';
 
 // custom imports
-import { refreshFiles } from '../../../state/actions'
-import { downloadSharedFile, viewSharedFile, deleteSharedFile } from '../Methods'
 
 // 3rd party imports
-import { message } from 'antd'
-import { useSelector, useDispatch } from 'react-redux'
-import { ContextMenu, MenuItem, ContextMenuTrigger } from 'react-contextmenu'
+import { message } from 'antd';
+import { useSelector, useDispatch } from 'react-redux';
+import { ContextMenu, MenuItem, ContextMenuTrigger } from 'react-contextmenu';
+import { downloadSharedFile, viewSharedFile, deleteSharedFile } from '../Methods';
+import { refreshFiles } from '../../../state/actions';
 
-const GridView = () =>{
-
-  const shared = useSelector(state=>state.FileHandler.shared);
+const GridView = () => {
+  const shared = useSelector((state) => state.FileHandler.shared);
   const dispatch = useDispatch();
 
-  const fileObj = React.useRef({})
+  const fileObj = React.useRef({});
 
-  const handleDownload = async () =>{
-    await downloadSharedFile(fileObj.current, localStorage.getItem("userName"))
-  }
+  const handleDownload = async () => {
+    await downloadSharedFile(fileObj.current, localStorage.getItem('userName'));
+  };
 
-  const handleDelete = async() =>{
-    await deleteSharedFile(fileObj.current)
+  const handleDelete = async () => {
+    await deleteSharedFile(fileObj.current);
     dispatch(refreshFiles(true));
-  }
+  };
 
-  const handleView = async() =>{
-    let response = await viewSharedFile(fileObj.current, localStorage.getItem("userName"))
-    if(!response){
-      message.info("Only PDF and Images can be viewed")
+  const handleView = async () => {
+    const response = await viewSharedFile(fileObj.current, localStorage.getItem('userName'));
+    if (!response) {
+      message.info('Only PDF and Images can be viewed');
     }
-  }
+  };
 
   const handleClick = async (e, data) => {
-    let option = data.selected
-    if(option==="download"){
-      await handleDownload()
+    const option = data.selected;
+    if (option === 'download') {
+      await handleDownload();
     }
-    if(option==="view"){
-      await handleView()
+    if (option === 'view') {
+      await handleView();
     }
-    if(option==="delete"){
-      await handleDelete()
+    if (option === 'delete') {
+      await handleDelete();
     }
-  }
+  };
 
-  return(
+  return (
     <Style>
       <div className="grid-container">
         {
-          shared.map((value, index)=>{
-            return(
-              <ContextMenuTrigger id="same_unique_identifier">
-                <div className="file-div" onContextMenu={()=>{fileObj.current = value}}>
-                  <div className="icon-part">
-                    <img src="./icons/file-icon.svg" style={{ width: '60px' }}/>
-                  </div>
-                  <div className="text-part truncate-overflow">
-                    {value.name}
-                  </div>
+          shared.map((value, _) => (
+            <ContextMenuTrigger id="same_unique_identifier">
+              <div className="file-div" onContextMenu={() => { fileObj.current = value; }}>
+                <div className="icon-part">
+                  <img src="./icons/file-icon.svg" alt="file icon" style={{ width: '60px' }} />
                 </div>
-              </ContextMenuTrigger>
-            )
-          })
+                <div className="text-part truncate-overflow">
+                  {value.name}
+                </div>
+              </div>
+            </ContextMenuTrigger>
+          ))
         }
       </div>
-      
+
       <ContextMenu id="same_unique_identifier">
-        <MenuItem data={{selected: 'download'}} onClick={handleClick}>
+        <MenuItem data={{ selected: 'download' }} onClick={handleClick}>
           <div id="context-download">
             Download
           </div>
         </MenuItem>
-        <MenuItem data={{selected: 'view'}} onClick={handleClick}>
+        <MenuItem data={{ selected: 'view' }} onClick={handleClick}>
           <div id="context-view">
             View
           </div>
         </MenuItem>
         <MenuItem divider />
-        <MenuItem data={{selected: 'delete'}} onClick={handleClick}>
+        <MenuItem data={{ selected: 'delete' }} onClick={handleClick}>
           <div id="context-delete">
             Delete
           </div>
@@ -87,8 +84,8 @@ const GridView = () =>{
       </ContextMenu>
 
     </Style>
-  )
-}
+  );
+};
 
 export default GridView;
 
@@ -129,4 +126,4 @@ const Style = styled.div`
     text-overflow: ellipsis;
     display: -webkit-box;
   }
-`
+`;
