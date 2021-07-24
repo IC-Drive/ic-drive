@@ -15,7 +15,6 @@
 # frontend code
 node_modules/
 dist/
-package-lock.json
 
 # dependencies
 /.pnp
