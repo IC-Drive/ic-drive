@@ -1,10 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-// import {registerWorker} from './mitm.jsx'
-
-import { Provider } from 'react-redux';
 import { createStore } from 'redux';
+import { Provider } from 'react-redux';
 import App from './App';
 import reducers from './state/reducers';
 
@@ -21,6 +19,3 @@ ReactDOM.render(
   </Provider>,
   document.getElementById('root'),
 );
-
-// thanks to https://github.com/jimmywarting/StreamSaver.js
-// registerWorker();

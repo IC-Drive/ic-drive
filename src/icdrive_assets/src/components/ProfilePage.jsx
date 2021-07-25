@@ -6,7 +6,7 @@ import styled from 'styled-components';
 // 3rd party imports
 import { useDispatch, useSelector } from 'react-redux';
 
-const Profile = () => {
+const ProfilePage = () => {
   React.useEffect(() => {
 
   }, []);
@@ -29,7 +29,7 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default ProfilePage;
 
 const Style = styled.div`
   font-style: sans-serif;

@@ -1,0 +1,33 @@
+  .grid-container{
+    display: flex;
+    flex-flow: row wrap;
+  }
+  .file-div{
+    margin-top: 30px;
+    margin-left: 30px;
+    width: 60px;
+    justify-content: center; 
+    overflow:hidden;
+    align-items: center;
+  }
+  .grid-view-text-part{
+    font-size: 12px;
+    word-wrap: break-word;
+  }
+  .ant-dropdown-menu, .ant-dropdown-menu-item, .ant-dropdown-menu-submenu-title{
+    width: 150px;
+    color: #fff !important;
+  }
+  .ant-dropdown-menu{
+    background: #324851 !important;
+  }
+  .ant-dropdown-menu-item:hover, .ant-dropdown-menu-submenu-title:hover{
+    background: #425757 !important;
+  }
+  
+  .truncate-overflow{
+    -webkit-line-clamp: 3 !important;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+  }

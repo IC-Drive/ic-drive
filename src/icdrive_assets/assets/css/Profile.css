@@ -1,0 +1,27 @@
+  .profile-container{
+    height: 100vh;
+    width: 100vw;
+  }
+  .innercontainer{
+    padding-top: calc(50vh - 100px);
+    padding-left: calc(50vw - 125px);
+  }
+  .waiting{
+    height: 200px;
+    width: 250px;
+    border-radius: 10px;
+    background: #324851;
+    text-align: center;
+    color: #fff;
+  }
+  #text{
+    font-size: 24px;
+    font-weight: 500;
+  }
+  #username{
+    font-size: 18px;
+    font-weight: 500;
+  }
+  .ant-input{
+    width: 80% !important;
+  }

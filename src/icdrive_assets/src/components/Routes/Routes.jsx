@@ -2,7 +2,9 @@ import React from 'react';
 
 // custom imports
 import { Result } from 'antd';
-import { HashRouter as Router, Route, Switch } from 'react-router-dom';
+import {
+  HashRouter as Router, Route, Switch,
+} from 'react-router-dom';
 import Login from '../LoginPage/Login';
 import PublicUrl from '../PublicUrl';
 
@@ -14,9 +16,11 @@ const Routes = () => (
       <Route exact path="/">
         <Login />
       </Route>
+
       <Route exact path="/public/*">
         <PublicUrl />
       </Route>
+
       <Route exact path="/*">
         <Result
           status="404"
@@ -24,6 +28,7 @@ const Routes = () => (
           subTitle="Sorry, the page you visited does not exist."
         />
       </Route>
+
     </Switch>
   </Router>
 );

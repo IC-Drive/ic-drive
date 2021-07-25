@@ -1,10 +1,10 @@
 const initialState = {
-  state: false,
+  sideBar: false,
 };
 
 const reducer = (state = initialState, action) => {
   switch (action.type) {
-    case 'updateState': return { ...state, state: action.payload };
+    case 'SideBarShow': return { ...state, sideBar: action.payload };
     default: return { ...state };
   }
 };

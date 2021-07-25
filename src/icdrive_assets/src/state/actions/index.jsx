@@ -48,7 +48,7 @@ export const sizeUpdate = (payload) => ({
 });
 
 // ---------------------------------------Side Bar----------------------------------------------//
-export const updateState = (payload) => ({
-  type: 'updateState',
+export const SideBarShow = (payload) => ({
+  type: 'SideBarShow',
   payload,
 });

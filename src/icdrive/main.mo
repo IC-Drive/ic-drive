@@ -42,7 +42,7 @@ shared (msg) actor class icdrive (){
         Cycles.add(1_000_000_000_000);
         let fileHandleObj = await FileHandle.FileHandle(); // dynamically install a new Canister
         let canId = await fileHandleObj.createOwner(msg.caller);
-        user.createOne(msg.caller, userName, fileHandleObj);
+        user.createOne(msg.caller, userName, canId);
         Debug.print("hello");
         
         let settings: CanisterSettings = {

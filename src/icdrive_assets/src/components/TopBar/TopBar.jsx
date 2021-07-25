@@ -1,7 +1,7 @@
 import React from 'react';
-import styled from 'styled-components';
 
 // custom imports
+import '../../../assets/css/TopBar.css';
 
 // 3rd party imports
 import { useDispatch, useSelector } from 'react-redux';
@@ -9,12 +9,12 @@ import {
   Input, Dropdown, Menu, Modal,
 } from 'antd';
 import { AuthClient } from '@dfinity/auth-client';
-import { QuestionCircleOutlined } from '@ant-design/icons';
-import { updateState, switchProfile } from '../../state/actions';
+import { QuestionCircleOutlined, MenuOutlined } from '@ant-design/icons';
+import { SideBarShow, switchProfile } from '../../state/actions';
 
 const TopBar = () => {
   const dispatch = useDispatch();
-  const sidebar = useSelector((state) => state.SideBarShow.state);
+  const sideBarShow = useSelector((state) => state.SideBarShow.state);
   const [helpModal, setHelpModal] = React.useState(false);
 
   const menu = (
@@ -29,18 +29,22 @@ const TopBar = () => {
   );
 
   return (
-    <Style>
-      <div className="top-bar-container">
-        <div className="left-section">
-          <span role="button" tabIndex={0} id="icdrive_top" onClick={() => { dispatch(updateState(!sidebar)); }}>IC Drive</span>
+    <div className="top-bar-container">
+      <div className="top-bar-left-section">
+        <div className="slide-menu-mobile">
+          <div>
+            <MenuOutlined onClick={() => { dispatch(SideBarShow(!sideBarShow)); }} style={{ fontSize: '22.5px', color: '#fff' }} />
+&nbsp;&nbsp;
+          </div>
         </div>
-        <div className="right-section">
-          <span><Input placeholder="Search Files" /></span>
-          <span><QuestionCircleOutlined onClick={() => setHelpModal(true)} style={{ fontSize: '25px' }} /></span>
-          <Dropdown overlay={menu}>
-            <span className="dot" />
-          </Dropdown>
-        </div>
+        <div id="top-bar-icdrive">IC Drive</div>
+      </div>
+      <div className="top-bar-right-section">
+        <span id="ant-input-span"><Input placeholder="Search Files" /></span>
+        <span><QuestionCircleOutlined onClick={() => setHelpModal(true)} style={{ fontSize: '25px', marginRight: '10px' }} /></span>
+        <Dropdown overlay={menu}>
+          <span className="dot" />
+        </Dropdown>
       </div>
       <Modal
         visible={helpModal}
@@ -56,65 +60,8 @@ const TopBar = () => {
           ravish1729@gmail.com
         </span>
       </Modal>
-    </Style>
+    </div>
   );
 };
 
 export default TopBar;
-
-const Style = styled.div`
-
-  .top-bar-container {
-    height: 50px;
-    width: 100vw;
-    background: #21353E;
-    color: #fff;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .left-section {
-    font-size: 22.5px;
-    font-weight: 700;
-    padding-left: 22px;
-  }
-  .right-section{
-    width: 420px;
-    display: flex;
-    justify-content: space-evenly;
-    align-items: center;
-  }
-  .dot {
-    height: 25px;
-    width: 25px;
-    background-color: #324851;
-    border-radius: 50%;
-    display: inline-block;
-  }
-  #icdrive_top:hover{
-    cursor: pointer;
-  }
-  .icdrive_top{
-    
-  }
-
-  @media only screen and (min-width: 600px){
-    .ant-input {
-      height: 25px;
-      width: 250px;
-    }
-  }
-
-  @media only screen and (max-width: 600px){
-    .ant-input {
-      height: 25px;
-      width: 100px;
-    }
-    .right-section{
-      width: 250px;
-      display: flex;
-      justify-content: space-evenly;
-      align-items: center;
-    }
-  }
-`;

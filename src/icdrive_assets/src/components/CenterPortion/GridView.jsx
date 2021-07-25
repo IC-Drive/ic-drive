@@ -1,12 +1,12 @@
 import React from 'react';
-import styled from 'styled-components';
 
 // custom imports
 // import { image_types, pdf_type } from './MimeTypes'
+import '../../../assets/css/GridView.css';
 
 // 3rd party imports
 import {
-  Modal, message, Button, Input, Menu, Dropdown
+  Modal, message, Button, Input, Menu, Dropdown,
 } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import {
@@ -100,24 +100,21 @@ const GridView = () => {
   } */
 
   return (
-    <Style>
-      <div className="grid-container">
-        {
+    <div className="grid-container">
+      {
           files.map((value, _) => (
-            <Dropdown overlayStyle={{width: '150px', background: '#324851 !important', color: '#fff !important'}} overlay={menu} trigger={['contextMenu']}>
+            <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
               <div className="file-div" onContextMenu={() => { fileObj.current = value; }}>
-                <div className="icon-part">
+                <div className="grid-view-icon-part">
                   <img src="./icons/file-icon.svg" alt="file icon" style={{ width: '60px' }} />
                 </div>
-                <div className="text-part truncate-overflow">
+                <div className="grid-view-text-part truncate-overflow">
                   {value.name}
                 </div>
               </div>
             </Dropdown>
           ))
         }
-      </div>
-
       <Modal
         footer={null}
         title={false}
@@ -135,55 +132,8 @@ const GridView = () => {
           <br />
         </div>
       </Modal>
-
-    </Style>
+    </div>
   );
 };
 
 export default GridView;
-
-const Style = styled.div`
-
-  .grid-container{
-    display: flex;
-    flex-flow: row wrap;
-  }
-  .file-div{
-    margin-top: 30px;
-    margin-left: 30px;
-    width: 60px;
-    justif
-    overflow:hidden;y-content: center;  
-    align-items: center;
-  }
-  .text-part{
-    font-size: 12px;
-    word-wrap: break-word;
-  }
-  .ant-dropdown-menu, .ant-dropdown-menu-item, .ant-dropdown-menu-submenu-title{
-    color: #fff !important;
-  }
-  .ant-dropdown-menu, .ant-dropdown-menu-item: hover, .ant-dropdown-menu-submenu-title: hover{
-    background: #425757 !important;
-  }
-  .ant-dropdown-menu{
-    background: #324851 !important;
-  }
-  #context-download, #context-edit, #context-view, #context-share, #context-mark, #context-delete{
-    background: #324851;
-    font-size: 14px;
-    height: 28px;
-    width: 150px;
-    color: #fff;
-    padding-left: 20px;
-    display: flex;
-    align-items: center;
-  }
-
-  .truncate-overflow{
-    -webkit-line-clamp: 3 !important;
-    -webkit-box-orient: vertical;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-  }
-`;

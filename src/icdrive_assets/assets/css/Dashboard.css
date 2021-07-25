@@ -1,0 +1,20 @@
+.dashboard-div{
+  font-style: sans-serif;
+}
+  
+@media only screen and (max-width: 600px){
+  .dashboard-side-center{
+    display: none;
+  }
+  .dashboard-side-center-mobile{
+    display: block;
+  }
+}
+@media only screen and (min-width: 600px){
+  .dashboard-side-center{
+    display: flex;
+  }
+  .dashboard-side-center-mobile{
+    display: none;
+  }
+}

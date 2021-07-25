@@ -1,7 +1,7 @@
 import React from 'react';
-import styled from 'styled-components';
 
 // custom imports
+import '../../../assets/css/Login.css';
 
 // 3rd party imports
 import { AuthClient } from '@dfinity/auth-client';
@@ -36,19 +36,19 @@ const Login = () => {
   };
 
   return (
-    <Style>
+    <div className="login-container">
       {
         isLogin
           ? <Profile />
           : (
-            <div className="loginPage">
-              <div className="LHS">
-                <div id="content">
+            <div className="login">
+              <div className="login-LHS">
+                <div id="login-content">
                   <div id="ic-title">IC Drive</div>
                   <div id="ic-footer">Secure and Private Decentralized Storage App</div>
                 </div>
               </div>
-              <div className="RHS">
+              <div className="login-RHS">
                 {
               loading
                 ? (
@@ -107,120 +107,8 @@ const Login = () => {
             </div>
           )
       }
-    </Style>
+    </div>
   );
 };
 
 export default Login;
-
-const Style = styled.div`
- 
-  .login-div{
-    margin-top: calc(100vh/2 - 50px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 16px;
-  }
-  #login-button{
-    height: 40px;
-    width: 200px;
-    background: #2A3132;
-    border-radius: 10px;
-    padding-top: 8px;
-    padding-left: 35px;
-  }
-  #login-button-loading{
-    height: 40px;
-    width: 200px;
-    background: #C7C7C7;
-    border-radius: 10px;
-    padding-top: 8px;
-    padding-left: 35px;
-  }
-  #login-button:hover{
-    cursor: pointer;
-  }
-
-@media only screen and (max-width: 600px) {
-    .loginPage{
-        height: 100vh;
-        display: grid;
-        grid-template-columns: 0 vw 100vw;
-    }
-    .login-div{
-      margin-top: calc(10vh);
-    }
-    .LHS{
-        display: none;
-    }
-    .RHS{
-        display: none;
-    }
-    .RHS-mobile{
-      background: #324851;
-    }
-    .block{
-      display: flex;
-      flex-direction: column;
-    }
-    .top{
-      margin-top: 10vh;
-    }
-    #ic-title{
-      font-size: 72px;
-      margin-bottom: 0;
-      font-family: Times New Roman;
-      text-align: center;
-      font-weight: 600;
-      color: #fff;
-      line-height: 90px;
-    }
-    #ic-footer{
-      font-size: 24px;
-      text-align: center;
-      font-family: Times New Roman;
-      font-weight: 400;
-      color: #fff;
-    }
-}
-@media only screen and (min-width: 600px) {
-    .loginPage{
-      height: 100vh;
-      display: grid;
-      grid-template-columns: 60vw 40vw;
-    }
-    .LHS{
-      background: #324851;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .RHS{
-      background: #FFFFFF;
-    }
-    .RHS-mobile{
-      display: none;
-    }
-    #content{
-      display: flex;
-      flex-flow: column;
-      align-items: center;
-      justify-content: center;
-    }
-    #ic-title{
-      font-size: 72px;
-      font-family: Times New Roman;
-      font-weight: 600;
-      color: #fff;
-      line-height: 90px;
-    }
-    #ic-footer{
-      font-size: 24px;
-      font-family: Times New Roman;
-      font-weight: 400;
-      color: #fff;
-    }
-}
-`;
