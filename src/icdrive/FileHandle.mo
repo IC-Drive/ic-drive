@@ -255,6 +255,11 @@ shared (msg) actor class FileHandle (){
     }
   };
 
+  //Get Cycles
+  public query(msg) func getCycles() : async Nat {
+    Cycles.balance()
+  };
+
   //Backup and Recover
   system func preupgrade() {
     Debug.print("hello");

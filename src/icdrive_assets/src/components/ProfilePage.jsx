@@ -2,13 +2,21 @@ import React from 'react';
 import styled from 'styled-components';
 
 // custom imports
+import { canisterHttpAgent } from '../httpAgent';
 
 // 3rd party imports
-import { useDispatch, useSelector } from 'react-redux';
 
 const ProfilePage = () => {
-  React.useEffect(() => {
 
+  const [cycles, setCycles] = React.useState(0)
+
+  React.useEffect(() => {
+    const getBalance = async()=>{
+      let userAgent = await canisterHttpAgent()
+      let userCycles = await userAgent.getCycles()
+      setCycles(Number(userCycles))
+    }
+    getBalance()
   }, []);
 
   return (
@@ -17,10 +25,10 @@ const ProfilePage = () => {
         <div className="details">
           <table>
             <tr>
-              <td>username:&nbsp;&nbsp;&nbsp;abcdrd</td>
+              <td>username:&nbsp;&nbsp;&nbsp;{localStorage.getItem("userName")}</td>
             </tr>
             <tr>
-              <td>cycles:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1000000000000</td>
+              <td>cycles:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{cycles}</td>
             </tr>
           </table>
         </div>
