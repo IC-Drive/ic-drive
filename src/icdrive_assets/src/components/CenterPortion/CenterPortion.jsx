@@ -19,7 +19,7 @@ import GridViewShared from './Shared/GridViewShared';
 const CenterPortion = () => {
   const [selectedView, setSelectedView] = React.useState('gridView');
   const [minimizeUpload, setMinimizeUpload] = React.useState(false);
-  const upload = useSelector((state) => state.FileHandler.upload);
+  const uploadInProgress = useSelector((state) => state.FileHandler.upload);
   const optionSelected = useSelector((state) => state.OptionSelected.option);
   const uploadProgress = useSelector((state) => state.UploadProgress.progress);
   const uploadSize = useSelector((state) => state.UploadProgress.size);
@@ -97,15 +97,15 @@ const CenterPortion = () => {
             : null
     }
       {
-      upload.file_count > 0
+      uploadInProgress.file_count > 0
         ? (
           <div className="upload-container">
             <div className="upload-top-bar">
               <span id="top-bar-text">
                 Uploading&nbsp;&nbsp;
-                {upload.completed}
+                {uploadInProgress.completed}
                 /
-                {upload.file_count}
+                {uploadInProgress.file_count}
 &nbsp;...
               </span>
               {
@@ -122,7 +122,7 @@ const CenterPortion = () => {
               <div className="upload-bottom-bar">
                 <span id="bottom-bar-text">
                   <div id="cp-left-section" className="truncate-overflow">
-                    {upload.file_uploading}
+                    {uploadInProgress.file_uploading}
                   </div>
                   <div id="cp-right-section">
                     {

@@ -1,7 +1,7 @@
 import React from 'react';
 
 // custom imports
-// import { image_types, pdf_type } from './MimeTypes'
+import { imageTypes, pdfType } from './MimeTypes';
 import '../../../assets/css/GridView.css';
 
 // 3rd party imports
@@ -81,10 +81,10 @@ const GridView = () => {
     </Menu>
   );
 
-  /* const isImage = (mimeType) =>{
+  const isImage = (mimeType) =>{
     let flag = false
-    for(let i=0; i<image_types.length;i++){
-      if(mimeType===image_types[i]){
+    for(let i=0; i<imageTypes.length;i++){
+      if(mimeType===imageTypes[i]){
         flag=true
         break
       }
@@ -93,20 +93,76 @@ const GridView = () => {
   }
   const isPdf = (mimeType) =>{
     let flag = false
-    if(fileInfo["mimeType"].toString()===pdf_type){
+    if(mimeType===pdfType){
       flag = true
     }
     return(flag)
-  } */
+  }
+
+  const filesRender = () =>{
+    files.map((value) => {
+      if(isImage(value.mimeType)){
+        return(
+          <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
+            <div className="file-div" onContextMenu={() => { fileObj.current = value; }}>
+              <div className="grid-view-icon-part">
+                <img src="./icons/image-icon.svg" alt="file icon" style={{ width: '60px' }} />
+              </div>
+              <div className="grid-view-text-part truncate-overflow">
+                {value.name}
+              </div>
+            </div>
+          </Dropdown>
+        )
+      }
+      if(isPdf(value.mimeType)){
+        return(
+          <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
+            <div className="file-div" onContextMenu={() => { fileObj.current = value; }}>
+              <div className="grid-view-icon-part">
+                <img src="./icons/pdf-icon.svg" alt="file icon" style={{ width: '60px' }} />
+              </div>
+              <div className="grid-view-text-part truncate-overflow">
+                {value.name}
+              </div>
+            </div>
+          </Dropdown>
+        )
+      }
+      else{
+        return(
+          <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
+            <div className="file-div" onContextMenu={() => { fileObj.current = value; }}>
+              <div className="grid-view-icon-part">
+                <img src="./icons/file-icon.svg" alt="file icon" style={{ width: '60px' }} />
+              </div>
+              <div className="grid-view-text-part truncate-overflow">
+                {value.name}
+              </div>
+            </div>
+          </Dropdown>
+        )
+      }
+    }
+    )
+  }
 
   return (
     <div className="grid-container">
       {
-          files.map((value, _) => (
+          files.map((value) => (
             <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
               <div className="file-div" onContextMenu={() => { fileObj.current = value; }}>
                 <div className="grid-view-icon-part">
-                  <img src="./icons/file-icon.svg" alt="file icon" style={{ width: '60px' }} />
+                  {
+                    isImage(value.mimeType)?
+                    <img src="./icons/image-icon.svg" alt="file icon" style={{ width: '60px' }} />
+                    :
+                    isPdf(value.mimeType)?
+                    <img src="./icons/pdf-icon.svg" alt="file icon" style={{ width: '60px' }} />
+                    :
+                    <img src="./icons/file-icon.svg" alt="file icon" style={{ width: '60px' }} />
+                  }
                 </div>
                 <div className="grid-view-text-part truncate-overflow">
                   {value.name}
@@ -114,7 +170,7 @@ const GridView = () => {
               </div>
             </Dropdown>
           ))
-        }
+      }
       <Modal
         footer={null}
         title={false}

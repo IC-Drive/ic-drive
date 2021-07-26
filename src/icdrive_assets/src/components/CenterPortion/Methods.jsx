@@ -86,7 +86,6 @@ export const shareFile = async (fileObj, userName) => {
   const userAgent = await canisterHttpAgent();
 
   const canisterIdShared = await icdrive.getUserCanister(userName);
-
   try {
     if (canisterIdShared.length === 1) {
       const respShare = await userAgent.shareFile(fileObj.fileId, userName, localStorage.getItem('userName'));
@@ -103,6 +102,8 @@ export const shareFile = async (fileObj, userName) => {
           mimeType: fileObj.mimeType,
           marked: false,
           sharedWith: [],
+          madePublic: false,
+          fileHash: "",
         };
         await userAgentShare.addSharedFile(fileInfo);
         return (true);
@@ -130,12 +131,22 @@ export const shareFilePublic = async (fileObj) => {
     const icdrive = await httpAgent();
     const userAgent = await canisterHttpAgent();
     const data = `${fileObj.mimeType}$${fileObj.chunkCount.toString()}$${localStorage.getItem('fileCanister')}$${fileObj.fileId}`;
-    const hash = sha256(data);
-    await icdrive.makeFilePublic(hash, data);
-    await userAgent.makeFilePublic(fileObj.fileId, hash);
-    return (hash);
+    const fileHash = sha256(data);
+    await icdrive.makeFilePublic(fileHash, data);
+    await userAgent.makeFilePublic(fileObj.fileId, fileHash);
+    return (fileHash);
   }
   return (false);
+};
+
+export const removeFilePublic = async (fileObj) => {
+  const icdrive = await httpAgent();
+  const userAgent = await canisterHttpAgent();
+  console.log(fileObj.fileHash)
+  console.log(fileObj.fileId)
+  await icdrive.removeFilePublic(fileObj.fileHash);
+  await userAgent.removeFilePublic(fileObj.fileId);
+  return (true);
 };
 
 export const downloadSharedFile = async (fileInfo, userName) => {

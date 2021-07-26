@@ -14,7 +14,7 @@ import { SideBarShow, switchProfile } from '../../state/actions';
 
 const TopBar = () => {
   const dispatch = useDispatch();
-  const sideBarShow = useSelector((state) => state.SideBarShow.state);
+  const sideBarShow = useSelector((state) => state.SideBarShow.sideBar);
   const [helpModal, setHelpModal] = React.useState(false);
 
   const menu = (
@@ -53,7 +53,7 @@ const TopBar = () => {
         title={null}
       >
         <span className="help-modal">
-          Please share your feedback at:
+          <strong>Please share your feedback at:</strong>
           <br />
           nanditmehra123@gmail.com
           <br />

@@ -24,6 +24,7 @@ module {
     fileCanister: FileCanister;
     name : Text;
     createdAt: Int;
+    updateCanister: Bool;
   };
 
 };

@@ -6,13 +6,13 @@ import styled from 'styled-components';
 // 3rd party imports
 import { useSelector, useDispatch } from 'react-redux';
 import {
-  Table, Popconfirm, Space, Modal, message, Button, Input,
+  Table, Popconfirm, Space, Modal, message, Button, Input, Tag
 } from 'antd';
 import {
   DownloadOutlined, DeleteOutlined, ShareAltOutlined,
 } from '@ant-design/icons';
 import {
-  downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, bytesToSize,
+  downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, removeFilePublic, bytesToSize,
 } from './Methods';
 import { filesUpdate, refreshFiles } from '../../state/actions';
 
@@ -23,6 +23,7 @@ const ListView = () => {
   const fileObj = React.useRef({});
   const [shareModal, setShareModal] = React.useState(false);
   const [ShareLoadingFlag, setShareLoadingFlag] = React.useState(false);
+  const [removeFlag, setRemoveLoadingFlag] = React.useState(false);
   const [PublicLoadingFlag, setPublicLoadingFlag] = React.useState(false);
   const userName = React.useRef('');
 
@@ -76,6 +77,17 @@ const ListView = () => {
     setPublicLoadingFlag(false);
   };
 
+  const removeSharePublic = async () => {
+    setRemoveLoadingFlag(true);
+    const response = await removeFilePublic(fileObj.current);
+    if (response) {
+      fileObj.current.fileHash = '';
+    } else {
+      message.info('Something Went Wrong, Try again!!!');
+    }
+    setRemoveLoadingFlag(false);
+  };
+
   // Defining Columns of Table
   const columns = [
     {
@@ -110,7 +122,7 @@ const ListView = () => {
           <span>
             <DownloadOutlined style={{ color: '#4D85BD' }} onClick={() => handleDownload(record)} />
           </span>
-          <Popconfirm title="Sure to delete?" onConfirm={() => { handleDelete(record); }}>
+          <Popconfirm className="popconfirm" title="Sure to delete?" onConfirm={() => { handleDelete(record); }}>
             <span>
               <DeleteOutlined style={{ color: '#4D85BD' }} />
             </span>
@@ -145,20 +157,42 @@ const ListView = () => {
                   User Name:&nbsp;
                   <Input ref={userName} />
                 </span>
-                <Button type="primary" style={{ float: 'right', marginTop: '10px' }} loading={ShareLoadingFlag} onClick={handleShare}>Share</Button>
-&nbsp;&nbsp;&nbsp;&nbsp;
-                <Button type="primary" style={{ float: 'right', marginTop: '10px' }} loading={PublicLoadingFlag} onClick={handleSharePublic}>Public</Button>
-&nbsp;&nbsp;&nbsp;&nbsp;
+                <br />
+                {
+                  fileObj.current.sharedWith.map((value)=>{
+                    return(
+                      <Tag color="geekblue">{value}</Tag>
+                    )
+                  })
+                }
+                {
+                  PublicLoadingFlag?
+                  <div>
+                  <Button type="primary" style={{ float: 'right', marginTop: '10px' }} loading={ShareLoadingFlag} disabled onClick={()=>handleShare()}>Share</Button>
+                  <Button type="primary" style={{ float: 'right', marginTop: '10px', marginRight: '10px' }} loading={PublicLoadingFlag} onClick={handleSharePublic}>Public</Button>
+                  </div>
+                  :
+                  <div>
+                  <Button type="primary" style={{ float: 'right', marginTop: '10px' }} loading={ShareLoadingFlag} onClick={()=>handleShare()}>Share</Button>
+                  <Button type="primary" style={{ float: 'right', marginTop: '10px', marginRight: '10px' }} loading={PublicLoadingFlag} onClick={handleSharePublic}>Public</Button>
+                  </div>
+                }
                 <br />
                 <br />
               </div>
             )
             : (
-              <a onClick={() => { navigator.clipboard.writeText(`${window.location.href}public/${fileObj.current.fileHash}`); message.info('copied to clipboard'); }}>
-                {window.location.href}
-                public/
-                {fileObj.current.fileHash}
-              </a>
+              <div>
+                <span id="public-url" style={{color:'#4D85BD'}} onClick={() => { navigator.clipboard.writeText(`${window.location.href}public/${fileObj.current.fileHash}`); message.info('copied to clipboard'); }}>
+                  {window.location.href}
+                  public/
+                  {fileObj.current.fileHash}
+                </span>
+                <br />
+                <Button type="primary" style={{ float: 'right', marginRight: '10px' }} loading={removeFlag} onClick={()=>removeSharePublic()}>Remove</Button>
+                <br />
+                <br />
+              </div>
             )
         }
           <br />
@@ -174,5 +208,11 @@ export default ListView;
 const Style = styled.div`
   thead[class*="ant-table-thead"] th{
     font-weight: bold !important;
+  }
+  .popconfirm:hover{
+    cursor: pointer;
+  }
+  #public-url:hover{
+    cursor: pointer;
   }
 `;

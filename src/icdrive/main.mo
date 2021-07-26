@@ -46,7 +46,7 @@ shared (msg) actor class icdrive (){
         Debug.print("hello");
         
         let settings: CanisterSettings = {
-        controllers = [admin];
+        controllers = [admin, msg.caller];
         };
         let params: UpdateSettingsParams = {
             canister_id = canId;
@@ -104,7 +104,26 @@ shared (msg) actor class icdrive (){
     fileUrlTrieMap.get(hash);
   };
 
+  public shared(msg) func removeFilePublic(hash: Text) : async() {
+    Debug.print(hash);
+    fileUrlTrieMap.delete(hash);
+  };
+
   //Backup and Recover
+  public shared(msg) func updateDone() : async?() {
+    do?{
+      let profile = user.findOne(msg.caller)!;
+      user.updateDone(msg.caller, {
+        id = profile.id;
+        userName = profile.userName;
+        fileCanister = profile.fileCanister;
+        name = profile.name;
+        createdAt = profile.createdAt;
+        updateCanister = false;
+      });
+    }
+  };
+  
   system func preupgrade() {
     user_entries := user.getAllUsers();
     user_name_entries := user.getAllUsersNames();
@@ -112,9 +131,19 @@ shared (msg) actor class icdrive (){
   };
 
   system func postupgrade () {
-    //Restore  UserId Profile
+    //Restore UserId Profile
     for ((userId, profile) in user_entries.vals()) {
-      user.insertUsers(userId, profile);
+      Debug.print("start");
+      //Debug.print(Principal.toText(profile.id));
+      //Debug.print(Principal.toText(userId));
+      user.insertUsers(userId, {
+        id = profile.id;
+        userName = profile.userName;
+        fileCanister = profile.fileCanister;
+        name = profile.name;
+        createdAt = profile.createdAt;
+        updateCanister = true;
+      });
     };
     //Restore Username UserId
     for ((userName, userId) in user_name_entries.vals()) {

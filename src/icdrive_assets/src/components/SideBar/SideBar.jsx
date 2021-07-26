@@ -6,6 +6,7 @@ import { useUploadFile } from './File';
 import '../../../assets/css/SideBar.css';
 
 // 3rd party imports
+import {message} from 'antd';
 import {
   uploadUpdate, refreshFiles, switchHome, switchMarked, switchShared, uploadProgress, sizeUpdate, uploadFileId, SideBarShow,
 } from '../../state/actions';
@@ -13,20 +14,26 @@ import {
 const SideBar = () => {
   const dispatch = useDispatch();
   const [uploadFlag, setUploadFlag] = React.useState(false);
-  const sideBarShow = useSelector((state) => state.SideBarShow.state);
+  const uploadInProgress = useSelector((state) => state.FileHandler.upload);
+  const sideBarShow = useSelector((state) => state.SideBarShow.sideBar);
 
   const onFileSelect = async (evt) => {
-    setUploadFlag(true);
-    const fileList = evt.target.files;
-    for (let i = 0; i < fileList.length; i += 1) {
-      const file = fileList[i];
-      dispatch(uploadUpdate({ file_uploading: file.name, file_count: fileList.length, completed: i + 1 }));
-      dispatch(sizeUpdate(file.size));
-      await useUploadFile(file, dispatch, uploadProgress, uploadFileId);
+    dispatch(SideBarShow(!sideBarShow));
+    if(uploadInProgress.file_count > 0){
+      message.info("Wait for previous files to upload!!!")
+    } else{
+      setUploadFlag(true);
+      const fileList = evt.target.files;
+      for (let i = 0; i < fileList.length; i += 1) {
+        const file = fileList[i];
+        dispatch(uploadUpdate({ file_uploading: file.name, file_count: fileList.length, completed: i + 1 }));
+        dispatch(sizeUpdate(file.size));
+        await useUploadFile(file, dispatch, uploadProgress, uploadFileId);
+      }
+      dispatch(uploadUpdate({ file_uploading: '', file_count: 0, completed: 0 }));
+      dispatch(refreshFiles(true));
+      setUploadFlag(false);
     }
-    dispatch(uploadUpdate({ file_uploading: '', file_count: 0, completed: 0 }));
-    dispatch(refreshFiles(true));
-    setUploadFlag(false);
   };
 
   return (

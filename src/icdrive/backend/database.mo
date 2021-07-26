@@ -19,6 +19,7 @@ module {
       userName = userName;
       name = "Anonymous";
       createdAt = Time.now();
+      updateCanister = false;
     }
   };
 
@@ -60,6 +61,10 @@ module {
     };
     public func insertUsersNames(userName: UserName, userId: UserId) {
       hashMapUserName.put(userName, userId);
+    };
+
+    public func updateDone(userId: UserId, profile: Profile) {
+      hashMap.put(userId, profile);
     };
 
   };
