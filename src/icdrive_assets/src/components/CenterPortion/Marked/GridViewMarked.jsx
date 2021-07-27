@@ -24,6 +24,7 @@ const GridViewMarked = () => {
   const [ShareLoadingFlag, setShareLoadingFlag] = React.useState(false);
   const [removeFlag, setRemoveLoadingFlag] = React.useState(false);
   const [PublicLoadingFlag, setPublicLoadingFlag] = React.useState(false);
+  const [deletingFlag, setDeletingFlag] = React.useState(false);
   const userName = React.useRef('');
 
   // Functions
@@ -45,7 +46,8 @@ const GridViewMarked = () => {
     const temp = [...files];
     for (let i = 0; i < temp.length; i += 1) {
       if (temp[i].fileId === fileObj.current.fileId) {
-        temp[i].marked = !temp[i].marked;
+        temp[i].marked = false;
+        break
       }
     }
     dispatch(filesUpdate(temp));
@@ -53,8 +55,14 @@ const GridViewMarked = () => {
   };
 
   const handleDelete = async () => {
-    await deleteFile(fileObj.current);
-    dispatch(refreshFiles(true));
+    if(!deletingFlag){
+      setDeletingFlag(true);
+      await deleteFile(fileObj.current);
+      dispatch(refreshFiles(true));
+      setDeletingFlag(false);
+    } else{
+      message.info('Please wait for previous file to delete!!!');
+    }
   };
 
   const handleView = async () => {

@@ -16,6 +16,7 @@ import { refreshFiles } from '../../../state/actions';
 
 const ListViewShared = () => {
   const shared = useSelector((state) => state.FileHandler.shared);
+  const [deletingFlag, setDeletingFlag] = React.useState(false);
   const dispatch = useDispatch();
 
   // Functions
@@ -24,8 +25,14 @@ const ListViewShared = () => {
   };
 
   const handleDelete = async (record) => {
-    await deleteSharedFile(record);
-    dispatch(refreshFiles(true));
+    if(!deletingFlag){
+      setDeletingFlag(true);
+      await deleteSharedFile(record);
+      dispatch(refreshFiles(true));
+      setDeletingFlag(false);
+    } else{
+      message.info('Please wait for previous file to delete!!!');
+    }
   };
 
   const handleView = async (record) => {

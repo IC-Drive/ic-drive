@@ -25,6 +25,7 @@ const ListView = () => {
   const [ShareLoadingFlag, setShareLoadingFlag] = React.useState(false);
   const [removeFlag, setRemoveLoadingFlag] = React.useState(false);
   const [PublicLoadingFlag, setPublicLoadingFlag] = React.useState(false);
+  const [deletingFlag, setDeletingFlag] = React.useState(false);
   const userName = React.useRef('');
 
   // Functions
@@ -37,6 +38,7 @@ const ListView = () => {
     for (let i = 0; i < temp.length; i += 1) {
       if (temp[i].fileId === record.fileId) {
         temp[i].marked = !temp[i].marked;
+        break;
       }
     }
     dispatch(filesUpdate(temp));
@@ -44,8 +46,14 @@ const ListView = () => {
   };
 
   const handleDelete = async (record) => {
-    await deleteFile(record);
-    dispatch(refreshFiles(true));
+    if(!deletingFlag){
+      setDeletingFlag(true);
+      await deleteFile(record);
+      dispatch(refreshFiles(true));
+      setDeletingFlag(false);
+    } else{
+      message.info('Please wait for previous file to delete!!!');
+    }
   };
 
   const handleView = async (record) => {

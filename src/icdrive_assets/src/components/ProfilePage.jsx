@@ -2,15 +2,25 @@ import React from 'react';
 import styled from 'styled-components';
 
 // custom imports
+import {bytesToSize} from './CenterPortion/Methods';
 import { canisterHttpAgent } from '../httpAgent';
 
 // 3rd party imports
+import { useSelector } from 'react-redux';
 
 const ProfilePage = () => {
 
   const [cycles, setCycles] = React.useState(0)
+  const [storage, setStorage] = React.useState(0)
+  const files = useSelector((state) => state.FileHandler.files);
 
   React.useEffect(() => {
+    let size = 0
+    for (let i = 0; i < files.length; i += 1) {
+      size = size + Number(files[i].fileSize)
+    }
+
+    setStorage(bytesToSize(size))
     const getBalance = async()=>{
       let userAgent = await canisterHttpAgent()
       let userCycles = await userAgent.getCycles()
@@ -29,6 +39,9 @@ const ProfilePage = () => {
             </tr>
             <tr>
               <td>cycles:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{cycles}</td>
+            </tr>
+            <tr>
+              <td>storage:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{storage}</td>
             </tr>
           </table>
         </div>

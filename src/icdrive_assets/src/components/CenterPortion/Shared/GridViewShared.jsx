@@ -17,7 +17,7 @@ import { refreshFiles } from '../../../state/actions';
 const GridViewShared = () => {
   const shared = useSelector((state) => state.FileHandler.shared);
   const dispatch = useDispatch();
-
+  const [deletingFlag, setDeletingFlag] = React.useState(false);
   const fileObj = React.useRef({});
 
   const handleDownload = async (record) => {
@@ -25,8 +25,14 @@ const GridViewShared = () => {
   };
 
   const handleDelete = async (record) => {
-    await deleteSharedFile(record);
-    dispatch(refreshFiles(true));
+    if(!deletingFlag){
+      setDeletingFlag(true);
+      await deleteSharedFile(record);
+      dispatch(refreshFiles(true));
+      setDeletingFlag(false);
+    } else{
+      message.info('Please wait for previous file to delete!!!');
+    }
   };
 
   const handleView = async (record) => {
