@@ -1,129 +1,100 @@
 import React from 'react';
-import styled from 'styled-components';
 
 // custom imports
+import { imageTypes, pdfType } from '../MimeTypes';
+import '../../../../assets/css/GridView.css';
 
 // 3rd party imports
-import { message } from 'antd';
+import {
+  message, Menu, Dropdown,
+} from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
-import { ContextMenu, MenuItem, ContextMenuTrigger } from 'react-contextmenu';
-import { downloadSharedFile, viewSharedFile, deleteSharedFile } from '../Methods';
+import {
+  downloadSharedFile, viewSharedFile, deleteSharedFile,
+} from '../Methods';
 import { refreshFiles } from '../../../state/actions';
 
-const GridView = () => {
+const GridViewShared = () => {
   const shared = useSelector((state) => state.FileHandler.shared);
   const dispatch = useDispatch();
 
   const fileObj = React.useRef({});
 
-  const handleDownload = async () => {
-    await downloadSharedFile(fileObj.current, localStorage.getItem('userName'));
+  const handleDownload = async (record) => {
+    await downloadSharedFile(record, localStorage.getItem('userName'));
   };
 
-  const handleDelete = async () => {
-    await deleteSharedFile(fileObj.current);
+  const handleDelete = async (record) => {
+    await deleteSharedFile(record);
     dispatch(refreshFiles(true));
   };
 
-  const handleView = async () => {
-    const response = await viewSharedFile(fileObj.current, localStorage.getItem('userName'));
+  const handleView = async (record) => {
+    const response = await viewSharedFile(record, localStorage.getItem('userName'));
     if (!response) {
       message.info('Only PDF and Images can be viewed');
     }
   };
 
-  const handleClick = async (e, data) => {
-    const option = data.selected;
-    if (option === 'download') {
-      await handleDownload();
+  const menu = (
+    <Menu>
+      <Menu.Item key="1">
+        <span id="context-download" role="button" tabIndex={0} onClick={() => { handleDownload(); }}>Download</span>
+      </Menu.Item>
+      <Menu.Item key="2">
+        <span id="context-view" role="button" tabIndex={0} onClick={() => { handleView(); }}>View</span>
+      </Menu.Item>
+      <Menu.Item key="3">
+        <span id="context-delete" role="button" tabIndex={0} onClick={() => { handleDelete(); }}>Delete</span>
+      </Menu.Item>
+    </Menu>
+  );
+
+  const isImage = (mimeType) =>{
+    let flag = false
+    for(let i=0; i<imageTypes.length;i++){
+      if(mimeType===imageTypes[i]){
+        flag=true
+        break
+      }
     }
-    if (option === 'view') {
-      await handleView();
+    return(flag)
+  }
+  const isPdf = (mimeType) =>{
+    let flag = false
+    if(mimeType===pdfType){
+      flag = true
     }
-    if (option === 'delete') {
-      await handleDelete();
-    }
-  };
+    return(flag)
+  }
 
   return (
-    <Style>
-      <div className="grid-container">
-        {
-          shared.map((value, _) => (
-            <ContextMenuTrigger id="same_unique_identifier">
+    <div className="grid-container">
+      {
+          shared.map((value) => (
+            <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
               <div className="file-div" onContextMenu={() => { fileObj.current = value; }}>
-                <div className="icon-part">
-                  <img src="./icons/file-icon.svg" alt="file icon" style={{ width: '60px' }} />
+                <div className="grid-view-icon-part">
+                  {
+                    isImage(value.mimeType)?
+                    <img src="./icons/image-icon.svg" alt="file icon" style={{ width: '60px' }} />
+                    :
+                    isPdf(value.mimeType)?
+                    <img src="./icons/pdf-icon.svg" alt="file icon" style={{ width: '60px' }} />
+                    :
+                    <img src="./icons/file-icon.svg" alt="file icon" style={{ width: '60px' }} />
+                  }
                 </div>
-                <div className="text-part truncate-overflow">
+                <div className="grid-view-text-part truncate-overflow">
                   {value.name}
                 </div>
               </div>
-            </ContextMenuTrigger>
+            </Dropdown>
           ))
-        }
-      </div>
-
-      <ContextMenu id="same_unique_identifier">
-        <MenuItem data={{ selected: 'download' }} onClick={handleClick}>
-          <div id="context-download">
-            Download
-          </div>
-        </MenuItem>
-        <MenuItem data={{ selected: 'view' }} onClick={handleClick}>
-          <div id="context-view">
-            View
-          </div>
-        </MenuItem>
-        <MenuItem divider />
-        <MenuItem data={{ selected: 'delete' }} onClick={handleClick}>
-          <div id="context-delete">
-            Delete
-          </div>
-        </MenuItem>
-      </ContextMenu>
-
-    </Style>
+      }
+    </div>
   );
 };
 
-export default GridView;
+export default GridViewShared;
 
-const Style = styled.div`
-
-  .grid-container{
-    display: flex;
-    flex-flow: row wrap;
-  }
-  .file-div{
-    margin-top: 30px;
-    margin-left: 30px;
-    width: 60px;
-    height: 60px;
-    justify-content: center;  
-    align-items: center;
-  }
-  .text-part{
-    font-size: 12px;
-    word-wrap: break-word;
-  }
-  #context-download, #context-edit, #context-view, #context-share, #context-mark, #context-delete{
-    background: #324851;
-    font-size: 14px;
-    height: 28px;
-    width: 150px;
-    color: #fff;
-    padding-left: 20px;
-    display: flex;
-    align-items: center;
-  }
-  #context-download: hover, #context-edit: hover, #context-view: hover, #context-share: hover, #context-mark: hover, #context-delete: hover{
-    background: #425757;
-  }
-  .truncate-overflow{
-    -webkit-line-clamp: 3 !important;
-    -webkit-box-orient: vertical;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-  }
-`;

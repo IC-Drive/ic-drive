@@ -1,27 +1,29 @@
 import React from 'react';
-import styled from 'styled-components';
 
 // custom imports
+import { imageTypes, pdfType } from '../MimeTypes';
+import '../../../../assets/css/GridView.css';
 
 // 3rd party imports
 import {
-  Modal, message, Button, Input,
+  Modal, message, Button, Input, Menu, Dropdown, Tag
 } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
-import { ContextMenu, MenuItem, ContextMenuTrigger } from 'react-contextmenu';
 import {
-  downloadFile, viewFile, markFile, deleteFile, shareFile,
+  downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, removeFilePublic,
 } from '../Methods';
 import { filesUpdate, refreshFiles } from '../../../state/actions';
 
-const GridView = () => {
+const GridViewMarked = () => {
   const files = useSelector((state) => state.FileHandler.files);
   const [data, setData] = React.useState([]);
   const dispatch = useDispatch();
 
   const fileObj = React.useRef({});
   const [shareModal, setShareModal] = React.useState(false);
-  const [loadingFlag, setLoadingFlag] = React.useState(false);
+  const [ShareLoadingFlag, setShareLoadingFlag] = React.useState(false);
+  const [removeFlag, setRemoveLoadingFlag] = React.useState(false);
+  const [PublicLoadingFlag, setPublicLoadingFlag] = React.useState(false);
   const userName = React.useRef('');
 
   // Functions
@@ -41,13 +43,13 @@ const GridView = () => {
 
   const handleMarked = async () => {
     const temp = [...files];
-    for (let i = 0; i < temp.length; i+=1) {
+    for (let i = 0; i < temp.length; i += 1) {
       if (temp[i].fileId === fileObj.current.fileId) {
         temp[i].marked = !temp[i].marked;
       }
     }
     dispatch(filesUpdate(temp));
-    await markFile(fileObj.current, files, dispatch, filesUpdate);
+    await markFile(fileObj.current);
   };
 
   const handleDelete = async () => {
@@ -63,88 +65,100 @@ const GridView = () => {
   };
 
   const handleShare = async () => {
-    setLoadingFlag(true);
+    setShareLoadingFlag(true);
     const response = await shareFile(fileObj.current, userName.current.state.value);
     if (response) {
       message.success('File Shared');
     } else {
       message.error('Something Went Wrong! Check User Name');
     }
-    setLoadingFlag(false);
+    setShareLoadingFlag(false);
   };
 
-  const handleClick = async (e, target) => {
-    const option = target.selected;
-    if (option === 'download') {
-      await handleDownload();
+  const handleSharePublic = async () => {
+    setPublicLoadingFlag(true);
+    const response = await shareFilePublic(fileObj.current);
+    if (response) {
+      fileObj.current.fileHash = response;
+    } else {
+      message.info('Only Images and PDF can be made public!!!');
     }
-    if (option === 'view') {
-      await handleView();
-    }
-    if (option === 'share') {
-      await setShareModal(true);
-    }
-    if (option === 'mark') {
-      await handleMarked();
-    }
-    if (option === 'delete') {
-      await handleDelete();
-    }
+    setPublicLoadingFlag(false);
   };
+
+  const removeSharePublic = async () => {
+    setRemoveLoadingFlag(true);
+    const response = await removeFilePublic(fileObj.current);
+    if (response) {
+      fileObj.current.fileHash = '';
+    } else {
+      message.info('Something Went Wrong, Try again!!!');
+    }
+    setRemoveLoadingFlag(false);
+  };
+
+  const menu = (
+    <Menu>
+      <Menu.Item key="1">
+        <span id="context-download" role="button" tabIndex={0} onClick={() => { handleDownload(); }}>Download</span>
+      </Menu.Item>
+      <Menu.Item key="2">
+        <span id="context-view" role="button" tabIndex={0} onClick={() => { handleView(); }}>View</span>
+      </Menu.Item>
+      <Menu.Item key="3">
+        <span id="context-share" role="button" tabIndex={0} onClick={() => { setShareModal(true); }}>Share</span>
+      </Menu.Item>
+      <Menu.Item key="4">
+        <span id="context-mark" role="button" tabIndex={0} onClick={() => { handleMarked(); }}>Mark</span>
+      </Menu.Item>
+      <Menu.Item key="5">
+        <span id="context-delete" role="button" tabIndex={0} onClick={() => { handleDelete(); }}>Delete</span>
+      </Menu.Item>
+    </Menu>
+  );
+
+  const isImage = (mimeType) =>{
+    let flag = false
+    for(let i=0; i<imageTypes.length;i++){
+      if(mimeType===imageTypes[i]){
+        flag=true
+        break
+      }
+    }
+    return(flag)
+  }
+  const isPdf = (mimeType) =>{
+    let flag = false
+    if(mimeType===pdfType){
+      flag = true
+    }
+    return(flag)
+  }
 
   return (
-    <Style>
-      <div className="grid-container">
-        {
-          data.map((value, _) => (
-            <ContextMenuTrigger id="same_unique_identifier">
+    <div className="grid-container">
+      {
+          data.map((value) => (
+            <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
               <div className="file-div" onContextMenu={() => { fileObj.current = value; }}>
-                <div className="icon-part">
-                  <img src="./icons/file-icon.svg" alt="file-icon" style={{ width: '60px' }} />
+                <div className="grid-view-icon-part">
+                  {
+                    isImage(value.mimeType)?
+                    <img src="./icons/image-icon.svg" alt="file icon" style={{ width: '60px' }} />
+                    :
+                    isPdf(value.mimeType)?
+                    <img src="./icons/pdf-icon.svg" alt="file icon" style={{ width: '60px' }} />
+                    :
+                    <img src="./icons/file-icon.svg" alt="file icon" style={{ width: '60px' }} />
+                  }
                 </div>
-                <div className="text-part truncate-overflow">
+                <div className="grid-view-text-part truncate-overflow">
                   {value.name}
                 </div>
               </div>
-            </ContextMenuTrigger>
+            </Dropdown>
           ))
-        }
-      </div>
-
-      <ContextMenu id="same_unique_identifier">
-        <MenuItem data={{ selected: 'download' }} onClick={handleClick}>
-          <div id="context-download">
-            Download
-          </div>
-        </MenuItem>
-        <MenuItem data={{ selected: 'edit' }} onClick={handleClick}>
-          <div id="context-edit">
-            Edit
-          </div>
-        </MenuItem>
-        <MenuItem data={{ selected: 'view' }} onClick={handleClick}>
-          <div id="context-view">
-            View
-          </div>
-        </MenuItem>
-        <MenuItem data={{ selected: 'share' }} onClick={handleClick}>
-          <div id="context-share">
-            Share
-          </div>
-        </MenuItem>
-        <MenuItem divider />
-        <MenuItem data={{ selected: 'mark' }} onClick={handleClick}>
-          <div id="context-mark">
-            Mark
-          </div>
-        </MenuItem>
-        <MenuItem data={{ selected: 'delete' }} onClick={handleClick}>
-          <div id="context-delete">
-            Delete
-          </div>
-        </MenuItem>
-      </ContextMenu>
-
+      }
       <Modal
         footer={null}
         title={false}
@@ -152,58 +166,57 @@ const GridView = () => {
         onCancel={() => { setShareModal(false); fileObj.current = {}; }}
       >
         <div>
-          <span>
-            User Name:&nbsp;
-            <Input ref={userName} />
-          </span>
-          <Button type="primary" style={{ float: 'right', marginTop: '10px' }} loading={loadingFlag} onClick={handleShare}>Share</Button>
-          <br />
-          <br />
+          {
+          fileObj.current.fileHash === ''
+            ? (
+              <div>
+                <span>
+                  User Name:&nbsp;
+                  <Input ref={userName} />
+                </span>
+                <br />
+                {
+                  fileObj.current.sharedWith.map((value)=>{
+                    return(
+                      <Tag color="geekblue">{value}</Tag>
+                    )
+                  })
+                }
+                {
+                  PublicLoadingFlag?
+                  <div>
+                  <Button type="primary" style={{ float: 'right', marginTop: '10px' }} loading={ShareLoadingFlag} disabled onClick={()=>handleShare()}>Share</Button>
+                  <Button type="primary" style={{ float: 'right', marginTop: '10px', marginRight: '10px' }} loading={PublicLoadingFlag} onClick={handleSharePublic}>Public</Button>
+                  </div>
+                  :
+                  <div>
+                  <Button type="primary" style={{ float: 'right', marginTop: '10px' }} loading={ShareLoadingFlag} onClick={()=>handleShare()}>Share</Button>
+                  <Button type="primary" style={{ float: 'right', marginTop: '10px', marginRight: '10px' }} loading={PublicLoadingFlag} onClick={handleSharePublic}>Public</Button>
+                  </div>
+                }
+                <br />
+                <br />
+              </div>
+            )
+            : (
+              <div>
+                <span id="public-url" style={{color:'#4D85BD'}} onClick={() => { navigator.clipboard.writeText(`${window.location.href}public/${fileObj.current.fileHash}`); message.info('copied to clipboard'); }}>
+                  {window.location.href}
+                  public/
+                  {fileObj.current.fileHash}
+                </span>
+                <br />
+                <Button type="primary" style={{ float: 'right', marginRight: '10px' }} loading={removeFlag} onClick={()=>removeSharePublic()}>Remove</Button>
+                <br />
+                <br />
+              </div>
+            )
+        }
           <br />
         </div>
       </Modal>
-
-    </Style>
+    </div>
   );
 };
 
-export default GridView;
-
-const Style = styled.div`
-
-  .grid-container{
-    display: flex;
-    flex-flow: row wrap;
-  }
-  .file-div{
-    margin-top: 30px;
-    margin-left: 30px;
-    width: 60px;
-    height: 60px;
-    justify-content: center;  
-    align-items: center;
-  }
-  .text-part{
-    font-size: 12px;
-    word-wrap: break-word;
-  }
-  #context-download, #context-edit, #context-view, #context-share, #context-mark, #context-delete{
-    background: #324851;
-    font-size: 14px;
-    height: 28px;
-    width: 150px;
-    color: #fff;
-    padding-left: 20px;
-    display: flex;
-    align-items: center;
-  }
-  #context-download: hover, #context-edit: hover, #context-view: hover, #context-share: hover, #context-mark: hover, #context-delete: hover{
-    background: #425757;
-  }
-  .truncate-overflow{
-    -webkit-line-clamp: 3 !important;
-    -webkit-box-orient: vertical;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-  }
-`;
+export default GridViewMarked;

@@ -1,7 +1,7 @@
 import React from 'react';
-import styled from 'styled-components';
 
 // custom imports
+import '../../../../assets/css/ListViewShared.css'
 
 // 3rd party imports
 import { useSelector, useDispatch } from 'react-redux';
@@ -14,7 +14,7 @@ import {
 } from '../Methods';
 import { refreshFiles } from '../../../state/actions';
 
-const ListView = () => {
+const ListViewShared = () => {
   const shared = useSelector((state) => state.FileHandler.shared);
   const dispatch = useDispatch();
 
@@ -58,7 +58,7 @@ const ListView = () => {
           <span>
             <DownloadOutlined style={{ color: '#4D85BD' }} onClick={() => handleDownload(record)} />
           </span>
-          <Popconfirm title="Sure to delete?" onConfirm={() => { handleDelete(record); }}>
+          <Popconfirm className="popconfirm" title="Sure to delete?" onConfirm={() => { handleDelete(record); }}>
             <span>
               <DeleteOutlined style={{ color: '#4D85BD' }} />
             </span>
@@ -69,18 +69,13 @@ const ListView = () => {
   ];
 
   return (
-    <Style>
+    <div>
       <div>
         <Table dataSource={shared} columns={columns} />
       </div>
-    </Style>
+    </div>
   );
 };
 
-export default ListView;
+export default ListViewShared;
 
-const Style = styled.div`
-  thead[class*="ant-table-thead"] th{
-    font-weight: bold !important;
-  }
-`;

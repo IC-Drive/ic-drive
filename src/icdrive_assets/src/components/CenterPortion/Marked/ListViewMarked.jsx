@@ -1,29 +1,31 @@
 import React from 'react';
-import styled from 'styled-components';
 
 // custom imports
+import '../../../../assets/css/ListViewMarked.css';
 
 // 3rd party imports
 import { useSelector, useDispatch } from 'react-redux';
 import {
-  Table, Popconfirm, Space, Modal, message, Button, Input,
+  Table, Popconfirm, Space, Modal, message, Button, Input, Tag
 } from 'antd';
 import {
   DownloadOutlined, DeleteOutlined, ShareAltOutlined,
 } from '@ant-design/icons';
 import {
-  downloadFile, viewFile, markFile, deleteFile, shareFile, bytesToSize,
+  downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, removeFilePublic, bytesToSize,
 } from '../Methods';
 import { filesUpdate, refreshFiles } from '../../../state/actions';
 
-const ListView = () => {
+const ListViewMarked = () => {
   const files = useSelector((state) => state.FileHandler.files);
   const [data, setData] = React.useState('');
   const dispatch = useDispatch();
 
   const fileObj = React.useRef({});
   const [shareModal, setShareModal] = React.useState(false);
-  const [loadingFlag, setLoadingFlag] = React.useState(false);
+  const [ShareLoadingFlag, setShareLoadingFlag] = React.useState(false);
+  const [removeFlag, setRemoveLoadingFlag] = React.useState(false);
+  const [PublicLoadingFlag, setPublicLoadingFlag] = React.useState(false);
   const userName = React.useRef('');
 
   // Functions
@@ -65,14 +67,36 @@ const ListView = () => {
   };
 
   const handleShare = async () => {
-    setLoadingFlag(true);
-    const response = shareFile(fileObj.current, userName.current.state.value);
+    setShareLoadingFlag(true);
+    const response = await shareFile(fileObj.current, userName.current.state.value);
     if (response) {
       message.success('File Shared');
     } else {
       message.error('Something Went Wrong! Check User Name');
     }
-    setLoadingFlag(false);
+    setShareLoadingFlag(false);
+  };
+
+  const handleSharePublic = async () => {
+    setPublicLoadingFlag(true);
+    const response = await shareFilePublic(fileObj.current);
+    if (response) {
+      fileObj.current.fileHash = response;
+    } else {
+      message.info('Only Images and PDF can be made public!!!');
+    }
+    setPublicLoadingFlag(false);
+  };
+
+  const removeSharePublic = async () => {
+    setRemoveLoadingFlag(true);
+    const response = await removeFilePublic(fileObj.current);
+    if (response) {
+      fileObj.current.fileHash = '';
+    } else {
+      message.info('Something Went Wrong, Try again!!!');
+    }
+    setRemoveLoadingFlag(false);
   };
 
   // Defining Columns of Table
@@ -109,7 +133,7 @@ const ListView = () => {
           <span>
             <DownloadOutlined style={{ color: '#4D85BD' }} onClick={() => handleDownload(record)} />
           </span>
-          <Popconfirm title="Sure to delete?" onConfirm={() => { handleDelete(record); }}>
+          <Popconfirm className="popconfirm" title="Sure to delete?" onConfirm={() => { handleDelete(record); }}>
             <span>
               <DeleteOutlined style={{ color: '#4D85BD' }} />
             </span>
@@ -123,7 +147,7 @@ const ListView = () => {
   ];
 
   return (
-    <Style>
+    <div>
       <div>
         <Table dataSource={data} columns={columns} />
       </div>
@@ -136,25 +160,59 @@ const ListView = () => {
         onCancel={() => { setShareModal(false); fileObj.current = {}; }}
       >
         <div>
-          <span>
-            User Name:&nbsp;
-            <Input ref={userName} />
-          </span>
-          <Button type="primary" style={{ float: 'right', marginTop: '10px' }} loading={loadingFlag} onClick={handleShare}>Share</Button>
-          <br />
-          <br />
+          {
+          fileObj.current.fileHash === ''
+            ? (
+              <div>
+                <span>
+                  User Name:&nbsp;
+                  <Input ref={userName} />
+                </span>
+                <br />
+                {
+                  fileObj.current.sharedWith.map((value)=>{
+                    return(
+                      <Tag color="geekblue">{value}</Tag>
+                    )
+                  })
+                }
+                {
+                  PublicLoadingFlag?
+                  <div>
+                  <Button type="primary" style={{ float: 'right', marginTop: '10px' }} loading={ShareLoadingFlag} disabled onClick={()=>handleShare()}>Share</Button>
+                  <Button type="primary" style={{ float: 'right', marginTop: '10px', marginRight: '10px' }} loading={PublicLoadingFlag} onClick={handleSharePublic}>Public</Button>
+                  </div>
+                  :
+                  <div>
+                  <Button type="primary" style={{ float: 'right', marginTop: '10px' }} loading={ShareLoadingFlag} onClick={()=>handleShare()}>Share</Button>
+                  <Button type="primary" style={{ float: 'right', marginTop: '10px', marginRight: '10px' }} loading={PublicLoadingFlag} onClick={handleSharePublic}>Public</Button>
+                  </div>
+                }
+                <br />
+                <br />
+              </div>
+            )
+            : (
+              <div>
+                <span id="public-url" style={{color:'#4D85BD'}} onClick={() => { navigator.clipboard.writeText(`${window.location.href}public/${fileObj.current.fileHash}`); message.info('copied to clipboard'); }}>
+                  {window.location.href}
+                  public/
+                  {fileObj.current.fileHash}
+                </span>
+                <br />
+                <Button type="primary" style={{ float: 'right', marginRight: '10px' }} loading={removeFlag} onClick={()=>removeSharePublic()}>Remove</Button>
+                <br />
+                <br />
+              </div>
+            )
+        }
           <br />
         </div>
       </Modal>
 
-    </Style>
+    </div>
   );
 };
 
-export default ListView;
+export default ListViewMarked;
 
-const Style = styled.div`
-  thead[class*="ant-table-thead"] th{
-    font-weight: bold !important;
-  }
-`;

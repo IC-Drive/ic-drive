@@ -1,18 +1,18 @@
 import React from 'react';
 
 // custom imports
-import { imageTypes, pdfType } from './MimeTypes';
-import '../../../assets/css/GridView.css';
+import { imageTypes, pdfType } from '../MimeTypes';
+import '../../../../assets/css/GridView.css';
 
 // 3rd party imports
 import {
-  Modal, message, Button, Input, Menu, Dropdown,
+  Modal, message, Button, Input, Menu, Dropdown, Tag
 } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import {
-  downloadFile, viewFile, markFile, deleteFile, shareFile,
-} from './Methods';
-import { filesUpdate, refreshFiles } from '../../state/actions';
+  downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, removeFilePublic,
+} from '../Methods';
+import { filesUpdate, refreshFiles } from '../../../state/actions';
 
 const GridView = () => {
   const files = useSelector((state) => state.FileHandler.files);
@@ -20,7 +20,9 @@ const GridView = () => {
 
   const fileObj = React.useRef({});
   const [shareModal, setShareModal] = React.useState(false);
-  const [loadingFlag, setLoadingFlag] = React.useState(false);
+  const [ShareLoadingFlag, setShareLoadingFlag] = React.useState(false);
+  const [removeFlag, setRemoveLoadingFlag] = React.useState(false);
+  const [PublicLoadingFlag, setPublicLoadingFlag] = React.useState(false);
   const userName = React.useRef('');
 
   const handleDownload = async () => {
@@ -51,14 +53,36 @@ const GridView = () => {
   };
 
   const handleShare = async () => {
-    setLoadingFlag(true);
-    const response = await shareFile(fileObj.current, (userName.current.state.value));
+    setShareLoadingFlag(true);
+    const response = await shareFile(fileObj.current, userName.current.state.value);
     if (response) {
       message.success('File Shared');
     } else {
       message.error('Something Went Wrong! Check User Name');
     }
-    setLoadingFlag(false);
+    setShareLoadingFlag(false);
+  };
+
+  const handleSharePublic = async () => {
+    setPublicLoadingFlag(true);
+    const response = await shareFilePublic(fileObj.current);
+    if (response) {
+      fileObj.current.fileHash = response;
+    } else {
+      message.info('Only Images and PDF can be made public!!!');
+    }
+    setPublicLoadingFlag(false);
+  };
+
+  const removeSharePublic = async () => {
+    setRemoveLoadingFlag(true);
+    const response = await removeFilePublic(fileObj.current);
+    if (response) {
+      fileObj.current.fileHash = '';
+    } else {
+      message.info('Something Went Wrong, Try again!!!');
+    }
+    setRemoveLoadingFlag(false);
   };
 
   const menu = (
@@ -99,54 +123,6 @@ const GridView = () => {
     return(flag)
   }
 
-  const filesRender = () =>{
-    files.map((value) => {
-      if(isImage(value.mimeType)){
-        return(
-          <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
-            <div className="file-div" onContextMenu={() => { fileObj.current = value; }}>
-              <div className="grid-view-icon-part">
-                <img src="./icons/image-icon.svg" alt="file icon" style={{ width: '60px' }} />
-              </div>
-              <div className="grid-view-text-part truncate-overflow">
-                {value.name}
-              </div>
-            </div>
-          </Dropdown>
-        )
-      }
-      if(isPdf(value.mimeType)){
-        return(
-          <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
-            <div className="file-div" onContextMenu={() => { fileObj.current = value; }}>
-              <div className="grid-view-icon-part">
-                <img src="./icons/pdf-icon.svg" alt="file icon" style={{ width: '60px' }} />
-              </div>
-              <div className="grid-view-text-part truncate-overflow">
-                {value.name}
-              </div>
-            </div>
-          </Dropdown>
-        )
-      }
-      else{
-        return(
-          <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
-            <div className="file-div" onContextMenu={() => { fileObj.current = value; }}>
-              <div className="grid-view-icon-part">
-                <img src="./icons/file-icon.svg" alt="file icon" style={{ width: '60px' }} />
-              </div>
-              <div className="grid-view-text-part truncate-overflow">
-                {value.name}
-              </div>
-            </div>
-          </Dropdown>
-        )
-      }
-    }
-    )
-  }
-
   return (
     <div className="grid-container">
       {
@@ -178,13 +154,52 @@ const GridView = () => {
         onCancel={() => { setShareModal(false); fileObj.current = {}; }}
       >
         <div>
-          <span>
-            User Name:&nbsp;
-            <Input ref={userName} />
-          </span>
-          <Button type="primary" style={{ float: 'right', marginTop: '10px' }} loading={loadingFlag} onClick={handleShare}>Share</Button>
-          <br />
-          <br />
+          {
+          fileObj.current.fileHash === ''
+            ? (
+              <div>
+                <span>
+                  User Name:&nbsp;
+                  <Input ref={userName} />
+                </span>
+                <br />
+                {
+                  fileObj.current.sharedWith.map((value)=>{
+                    return(
+                      <Tag color="geekblue">{value}</Tag>
+                    )
+                  })
+                }
+                {
+                  PublicLoadingFlag?
+                  <div>
+                  <Button type="primary" style={{ float: 'right', marginTop: '10px' }} loading={ShareLoadingFlag} disabled onClick={()=>handleShare()}>Share</Button>
+                  <Button type="primary" style={{ float: 'right', marginTop: '10px', marginRight: '10px' }} loading={PublicLoadingFlag} onClick={handleSharePublic}>Public</Button>
+                  </div>
+                  :
+                  <div>
+                  <Button type="primary" style={{ float: 'right', marginTop: '10px' }} loading={ShareLoadingFlag} onClick={()=>handleShare()}>Share</Button>
+                  <Button type="primary" style={{ float: 'right', marginTop: '10px', marginRight: '10px' }} loading={PublicLoadingFlag} onClick={handleSharePublic}>Public</Button>
+                  </div>
+                }
+                <br />
+                <br />
+              </div>
+            )
+            : (
+              <div>
+                <span id="public-url" style={{color:'#4D85BD'}} onClick={() => { navigator.clipboard.writeText(`${window.location.href}public/${fileObj.current.fileHash}`); message.info('copied to clipboard'); }}>
+                  {window.location.href}
+                  public/
+                  {fileObj.current.fileHash}
+                </span>
+                <br />
+                <Button type="primary" style={{ float: 'right', marginRight: '10px' }} loading={removeFlag} onClick={()=>removeSharePublic()}>Remove</Button>
+                <br />
+                <br />
+              </div>
+            )
+        }
           <br />
         </div>
       </Modal>

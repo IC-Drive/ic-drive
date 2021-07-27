@@ -7,8 +7,8 @@ import { useSelector } from 'react-redux';
 import {
   MenuOutlined, AppstoreOutlined, CaretDownOutlined, CaretUpOutlined,
 } from '@ant-design/icons';
-import ListView from './ListView';
-import GridView from './GridView';
+import ListView from './Home/ListView';
+import GridView from './Home/GridView';
 import ListViewMarked from './Marked/ListViewMarked';
 import ListViewShared from './Shared/ListViewShared';
 import GridViewMarked from './Marked/GridViewMarked';

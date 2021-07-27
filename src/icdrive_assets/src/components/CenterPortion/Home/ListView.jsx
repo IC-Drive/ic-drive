@@ -1,7 +1,7 @@
 import React from 'react';
-import styled from 'styled-components';
 
 // custom imports
+import '../../../../assets/css/ListView.css'
 
 // 3rd party imports
 import { useSelector, useDispatch } from 'react-redux';
@@ -13,8 +13,8 @@ import {
 } from '@ant-design/icons';
 import {
   downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, removeFilePublic, bytesToSize,
-} from './Methods';
-import { filesUpdate, refreshFiles } from '../../state/actions';
+} from '../Methods';
+import { filesUpdate, refreshFiles } from '../../../state/actions';
 
 const ListView = () => {
   const files = useSelector((state) => state.FileHandler.files);
@@ -136,7 +136,7 @@ const ListView = () => {
   ];
 
   return (
-    <Style>
+    <div>
       <div>
         <Table dataSource={files} columns={columns} />
       </div>
@@ -199,20 +199,8 @@ const ListView = () => {
         </div>
       </Modal>
 
-    </Style>
+    </div>
   );
 };
 
 export default ListView;
-
-const Style = styled.div`
-  thead[class*="ant-table-thead"] th{
-    font-weight: bold !important;
-  }
-  .popconfirm:hover{
-    cursor: pointer;
-  }
-  #public-url:hover{
-    cursor: pointer;
-  }
-`;
