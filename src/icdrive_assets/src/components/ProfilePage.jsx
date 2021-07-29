@@ -43,6 +43,9 @@ const ProfilePage = () => {
             <tr>
               <td>storage:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{storage} / 4 GB</td>
             </tr>
+            <tr>
+              <td>Canister ID:&nbsp;&nbsp;&nbsp;&nbsp;{localStorage.getItem("fileCanister")}</td>
+            </tr>
           </table>
         </div>
       </div>
@@ -63,19 +66,18 @@ const Style = styled.div`
   }
   @media only screen and (max-width: 600px){
     .profile-block{
-      height: 150px;
-      width: 300px;
+      height: 200px;
+      width: 420px;
       margin-top: calc(50vh - 50px - 75px);
       margin-left: calc(50vw - 150px);
       background: #324851;
       border-radius: 20px;
     }
-    
   }
   @media only screen and (min-width: 600px){
     .profile-block{
-      height: 150px;
-      width: 300px;
+      height: 200px;
+      width: 400px;
       margin-top: calc(50vh - 50px - 75px);
       margin-left: calc(50vw - 225px - 150px);
       background: #324851;

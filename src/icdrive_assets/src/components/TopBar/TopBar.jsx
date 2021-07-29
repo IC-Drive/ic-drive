@@ -37,7 +37,7 @@ const TopBar = () => {
     let temp = []
     for(let i=0; i<files.length; i+=1){
       if(files[i].name.toLowerCase().indexOf(str)>-1){
-        temp.push({value: files[i].name})
+        temp.push({value: files[i].name, id: files[i].id})
       }
       if(temp.length>5){
         break
@@ -53,12 +53,9 @@ const TopBar = () => {
   };
 
   const onSelect = (data) => {
-    console.log('onSelect', data);
-    //dispatch(searchedFile(data));
+    console.log(data);
+    dispatch(searchedFile(data));
     dispatch(switchSearch('search'));
-  };
-  const onChange = (data) => {
-    setValue(data);
   };
 
   return (

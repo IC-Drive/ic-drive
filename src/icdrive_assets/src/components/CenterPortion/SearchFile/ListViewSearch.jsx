@@ -18,7 +18,10 @@ import { filesUpdate, refreshFiles } from '../../../state/actions';
 
 const ListViewSearch = () => {
   const files = useSelector((state) => state.FileHandler.files);
+  const searched = useSelector((state) => state.FileHandler.searched);
+
   const [data, setData] = React.useState('');
+  const [showFile, setShowFile] = React.useState('');
   const dispatch = useDispatch();
 
   const fileObj = React.useRef({});
@@ -33,8 +36,9 @@ const ListViewSearch = () => {
   React.useEffect(async () => {
     const temp = [];
     for (let i = 0; i < files.length; i += 1) {
-      if (files[i].marked) {
-        temp.push(files[i]);
+      if (files[i].name===searched) {
+        setShowFile(temp.push(files[i]));
+        break
       }
     }
     setData(temp);
@@ -157,7 +161,7 @@ const ListViewSearch = () => {
   return (
     <div>
       <div>
-        <Table dataSource={data} columns={columns} pagination={{
+        <Table dataSource={showFile} columns={columns} pagination={{
           defaultPageSize: 50
         }}/>
       </div>

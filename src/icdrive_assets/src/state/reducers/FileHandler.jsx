@@ -4,7 +4,7 @@ const initialState = {
   upload: { file_uploading: '', file_count: 0, completed: 0 },
   upload_file_id: '',
   refreshFiles: true,
-  searched: {fileName: '', fileId: ''}
+  searched: ''
 };
 
 const reducer = (state = initialState, action) => {

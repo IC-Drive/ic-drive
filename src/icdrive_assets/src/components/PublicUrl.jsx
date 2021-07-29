@@ -3,16 +3,24 @@ import styled from 'styled-components';
 
 // custom imports
 import { idlFactory as FileHandleIdl } from 'dfx-generated/FileHandle';
+import { imageTypes, pdfType } from './CenterPortion/MimeTypes';
 
 // 3rd party imports
 import { Result } from 'antd';
 import { Actor } from '@dfinity/agent';
 import { httpAgent, httpAgentIdentity } from '../httpAgent';
-import { imageTypes, pdfType } from './CenterPortion/MimeTypes';
 
 const PublicUrl = () => {
   const [notFound, setNotFound] = React.useState(false);
   const [data, setData] = React.useState('');
+
+  const isPdf = (mimeType) =>{
+    let flag = false
+    if(mimeType===pdfType){
+      flag = true
+    }
+    return(flag)
+  }
 
   React.useEffect(() => {
     const getFiles = async () => {
@@ -63,6 +71,7 @@ const PublicUrl = () => {
           const fileURL = URL.createObjectURL(fileBlob);
           setData(fileURL);
           //window.open(fileURL, '_self');
+          
         } else {
           setNotFound(true);
         }
@@ -82,8 +91,8 @@ const PublicUrl = () => {
               subTitle="Sorry, the page you visited does not exist."
             />
           )
-          : 
-          <object src={data} height="100vh" width="100vw" title="File"></object>
+          :
+          <object data={data} id = "object-tag" />
       }
     </Style>
   );
@@ -93,5 +102,12 @@ export default PublicUrl;
 
 const Style = styled.div`
   font-style: sans-serif;
-  
+  box-sizing: border-box;
+  width: 100vw;
+  height: 100vh;
+
+  #object-tag{
+    height: 100vh;
+    width: 100vw;
+  }
 `;

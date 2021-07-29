@@ -16,7 +16,10 @@ import { filesUpdate, refreshFiles } from '../../../state/actions';
 
 const GridViewSearch = () => {
   const files = useSelector((state) => state.FileHandler.files);
+  const searched = useSelector((state) => state.FileHandler.searched);
+
   const [data, setData] = React.useState([]);
+  const [showFile, setShowFile] = React.useState('');
   const dispatch = useDispatch();
 
   const fileObj = React.useRef({});
@@ -30,9 +33,10 @@ const GridViewSearch = () => {
   // Functions
   React.useEffect(() => {
     const temp = [];
-    for (let i = 0; i < files.length; i+=1) {
-      if (files[i].marked) {
-        temp.push(files[i]);
+    for (let i = 0; i < files.length; i += 1) {
+      if (files[i].name===searched) {
+        setShowFile(temp.push(files[i]));
+        break
       }
     }
     setData(temp);
@@ -146,7 +150,10 @@ const GridViewSearch = () => {
   return (
     <div className="grid-container">
       {
-          data.map((value) => (
+        showFile===''?
+        null
+        :
+          showFile.map((value) => (
             <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
               <div className="file-div" onDoubleClick={()=>{fileObj.current = value; handleDownload() }} onContextMenu={() => { fileObj.current = value; }}>
                 <div className="grid-view-icon-part">

@@ -6,7 +6,7 @@ import { useUploadFile } from './File';
 import '../../../assets/css/SideBar.css';
 
 // 3rd party imports
-import {message} from 'antd';
+import {message, Modal} from 'antd';
 import {
   uploadUpdate, refreshFiles, switchHome, switchMarked, switchShared, uploadProgress, sizeUpdate, uploadFileId, SideBarShow,
 } from '../../state/actions';
@@ -14,6 +14,7 @@ import {
 const SideBar = () => {
   const dispatch = useDispatch();
   const [uploadFlag, setUploadFlag] = React.useState(false);
+  const [importModal, setImportModal] = React.useState(false);
   const uploadInProgress = useSelector((state) => state.FileHandler.upload);
   const sideBarShow = useSelector((state) => state.SideBarShow.sideBar);
 
@@ -108,7 +109,7 @@ const SideBar = () => {
         </div>
 
         <div className="element">
-          <div className="element-section">
+          <div className="element-section" onClick={()=>{setImportModal(true)}}>
             <div className="side-bar-icon-part">
               <img src="./icons/import.svg" alt="home icon" style={{ height: '22px', color: '#fff' }} />
             </div>
@@ -119,6 +120,14 @@ const SideBar = () => {
         </div>
 
       </div>
+      <Modal
+        footer={null}
+        title={false}
+        visible={importModal}
+        onCancel={() => { ()=>setImportModal(false) }}
+      >
+        <strong>Will be available soon</strong>
+      </Modal>
     </div>
   );
 };
