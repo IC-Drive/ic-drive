@@ -59,12 +59,23 @@ const Login = () => {
                   </div>
                 )
                 : (
-                  <div className="login-div" role="button" tabIndex={0} onClick={() => handleLogin()}>
-                    <div id="login-button">
-                      Login with &nbsp;&nbsp;
-                      {' '}
-                      <img src="./icons/dfinity.png" alt="dfinity logo" style={{ height: '16px' }} />
+                  <div>
+                    <div className="login-div" role="button" tabIndex={0} onClick={() => handleLogin()}>
+                      <div id="login-button">
+                        Login with &nbsp;&nbsp;
+                        {' '}
+                        <img src="./icons/dfinity.png" alt="dfinity logo" style={{ height: '16px' }} />
+                      </div>
                     </div>
+                    <a href="https://twitter.com/icDrive" target="_blank">
+                      <div className="social-div" role="button" tabIndex={0}>
+                        <div id="social-button">
+                          Follow us on &nbsp;&nbsp;
+                          {' '}
+                          <img src="./icons/twitter.svg" alt="twitter logo" style={{ height: '24px' }} />
+                        </div>
+                      </div>
+                    </a>
                   </div>
                 )
             }
@@ -98,6 +109,15 @@ const Login = () => {
                       {' '}
                       <img src="./icons/dfinity.png" alt="dfinity logo" style={{ height: '16px' }} />
                     </div>
+                    <a href="https://twitter.com/icDrive" target="_blank">
+                      <div className="social-div" role="button" tabIndex={0}>
+                        <div id="social-button">
+                          Follow us on &nbsp;&nbsp;
+                          {' '}
+                          <img src="./icons/twitter.svg" alt="twitter logo" style={{ height: '24px' }} />
+                        </div>
+                      </div>
+                    </a>
                   </div>
                 </div>
               )

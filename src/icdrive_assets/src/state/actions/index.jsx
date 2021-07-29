@@ -18,6 +18,10 @@ export const uploadFileId = (payload) => ({
   type: 'uploadFileId',
   payload,
 });
+export const searchedFile = (payload) => ({
+  type: 'searchedFile',
+  payload,
+});
 
 // -------------------------------------Switch Options-----------------------------------------//
 export const switchHome = (payload) => ({
@@ -34,6 +38,10 @@ export const switchShared = (payload) => ({
 });
 export const switchProfile = (payload) => ({
   type: 'switchProfile',
+  payload,
+});
+export const switchSearch = (payload) => ({
+  type: 'switchSearch',
   payload,
 });
 

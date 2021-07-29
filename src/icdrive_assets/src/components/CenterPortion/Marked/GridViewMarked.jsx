@@ -51,7 +51,7 @@ const GridViewMarked = () => {
       }
     }
     dispatch(filesUpdate(temp));
-    await markFile(fileObj.current);
+    markFile(fileObj.current);
   };
 
   const handleDelete = async () => {
@@ -107,20 +107,20 @@ const GridViewMarked = () => {
 
   const menu = (
     <Menu>
-      <Menu.Item key="1">
-        <span id="context-download" role="button" tabIndex={0} onClick={() => { handleDownload(); }}>Download</span>
+      <Menu.Item key="1" onClick={() => { handleDownload(); }}>
+        <span id="context-download" role="button" tabIndex={0}>Download</span>
       </Menu.Item>
-      <Menu.Item key="2">
-        <span id="context-view" role="button" tabIndex={0} onClick={() => { handleView(); }}>View</span>
+      <Menu.Item key="2" onClick={() => { handleView(); }}>
+        <span id="context-view" role="button" tabIndex={0}>View</span>
       </Menu.Item>
-      <Menu.Item key="3">
-        <span id="context-share" role="button" tabIndex={0} onClick={() => { setShareModal(true); }}>Share</span>
+      <Menu.Item key="3" onClick={() => { setShareModal(true); }}>
+        <span id="context-share" role="button" tabIndex={0}>Share</span>
       </Menu.Item>
-      <Menu.Item key="4">
-        <span id="context-mark" role="button" tabIndex={0} onClick={() => { handleMarked(); }}>Mark</span>
+      <Menu.Item key="4" onClick={() => { handleMarked(); }}>
+        <span id="context-mark" role="button" tabIndex={0}>Mark</span>
       </Menu.Item>
-      <Menu.Item key="5">
-        <span id="context-delete" role="button" tabIndex={0} onClick={() => { handleDelete(); }}>Delete</span>
+      <Menu.Item key="5" onClick={() => { handleDelete(); }}>
+        <span id="context-delete" role="button" tabIndex={0}>Delete</span>
       </Menu.Item>
     </Menu>
   );
@@ -148,7 +148,7 @@ const GridViewMarked = () => {
       {
           data.map((value) => (
             <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
-              <div className="file-div" onContextMenu={() => { fileObj.current = value; }}>
+              <div className="file-div" onDoubleClick={()=>{fileObj.current = value; handleDownload() }} onContextMenu={() => { fileObj.current = value; }}>
                 <div className="grid-view-icon-part">
                   {
                     isImage(value.mimeType)?

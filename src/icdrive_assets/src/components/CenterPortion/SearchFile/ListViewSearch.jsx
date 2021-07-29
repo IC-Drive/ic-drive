@@ -16,7 +16,7 @@ import {
 } from '../Methods';
 import { filesUpdate, refreshFiles } from '../../../state/actions';
 
-const ListViewMarked = () => {
+const ListViewSearch = () => {
   const files = useSelector((state) => state.FileHandler.files);
   const [data, setData] = React.useState('');
   const dispatch = useDispatch();
@@ -53,7 +53,7 @@ const ListViewMarked = () => {
       }
     }
     dispatch(filesUpdate(temp));
-    markFile(record);
+    await markFile(record);
   };
 
   const handleDelete = async (record) => {
@@ -224,5 +224,5 @@ const ListViewMarked = () => {
   );
 };
 
-export default ListViewMarked;
+export default ListViewSearch;
 

@@ -62,7 +62,7 @@ const PublicUrl = () => {
 
           const fileURL = URL.createObjectURL(fileBlob);
           setData(fileURL);
-          window.open(fileURL, '_self');
+          //window.open(fileURL, '_self');
         } else {
           setNotFound(true);
         }
@@ -82,7 +82,8 @@ const PublicUrl = () => {
               subTitle="Sorry, the page you visited does not exist."
             />
           )
-          : null
+          : 
+          <iframe src={data} style="border:none; height: 100vh; width: 100vw" title="File"></iframe>
       }
     </Style>
   );

@@ -8,6 +8,7 @@ const reducer = (state = initialState, action) => {
     case 'switchMarked': return { ...state, option: action.payload };
     case 'switchShared': return { ...state, option: action.payload };
     case 'switchProfile': return { ...state, option: action.payload };
+    case 'switchSearch': return { ...state, option: action.payload };
     default: return { ...state };
   }
 };

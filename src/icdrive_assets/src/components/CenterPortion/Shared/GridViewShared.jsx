@@ -44,14 +44,14 @@ const GridViewShared = () => {
 
   const menu = (
     <Menu>
-      <Menu.Item key="1">
-        <span id="context-download" role="button" tabIndex={0} onClick={() => { handleDownload(); }}>Download</span>
+      <Menu.Item key="1" onClick={() => { handleDownload(); }}>
+        <span id="context-download" role="button" tabIndex={0}>Download</span>
       </Menu.Item>
-      <Menu.Item key="2">
-        <span id="context-view" role="button" tabIndex={0} onClick={() => { handleView(); }}>View</span>
+      <Menu.Item key="2" onClick={() => { handleView(); }}>
+        <span id="context-view" role="button" tabIndex={0}>View</span>
       </Menu.Item>
-      <Menu.Item key="3">
-        <span id="context-delete" role="button" tabIndex={0} onClick={() => { handleDelete(); }}>Delete</span>
+      <Menu.Item key="3" onClick={() => { handleDelete(); }}>
+        <span id="context-delete" role="button" tabIndex={0}>Delete</span>
       </Menu.Item>
     </Menu>
   );

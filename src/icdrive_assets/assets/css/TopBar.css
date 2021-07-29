@@ -37,7 +37,7 @@
     .slide-menu-mobile{
       display: none;
     }
-    #ant-input-span{
+    .ant-select, .ant-select-auto-complete, .ant-select-single, .ant-select-show-search{
       width: 250px !important;
     }
   }
@@ -53,7 +53,10 @@
     .slide-menu-mobile{
       display: block;
     }
-    #ant-input-span{
+    .top-bar-left-section {
+      font-size: 18px;
+    }
+    .ant-select, .ant-select-auto-complete, .ant-select-single, .ant-select-show-search{
       width: 110px !important;
     }
   }

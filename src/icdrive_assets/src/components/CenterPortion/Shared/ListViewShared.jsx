@@ -78,7 +78,9 @@ const ListViewShared = () => {
   return (
     <div>
       <div>
-        <Table dataSource={shared} columns={columns} />
+        <Table dataSource={shared} columns={columns} pagination={{
+          defaultPageSize: 50
+        }}/>
       </div>
     </div>
   );

@@ -146,7 +146,9 @@ const ListView = () => {
   return (
     <div>
       <div>
-        <Table dataSource={files} columns={columns} />
+        <Table dataSource={files} columns={columns} pagination={{
+          defaultPageSize: 50
+        }} />
       </div>
 
       {/* Modal For Input User Name */}

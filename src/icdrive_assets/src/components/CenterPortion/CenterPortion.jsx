@@ -13,6 +13,8 @@ import ListViewMarked from './Marked/ListViewMarked';
 import ListViewShared from './Shared/ListViewShared';
 import GridViewMarked from './Marked/GridViewMarked';
 import GridViewShared from './Shared/GridViewShared';
+import ListViewSearch from './SearchFile/ListViewSearch';
+import GridViewSearch from './SearchFile/GridViewSearch';
 
 // 3rd party imports
 
@@ -91,6 +93,15 @@ const CenterPortion = () => {
           selectedView === 'listView'
             ? <ListView />
             : <GridView />
+        }
+            </div>
+          )
+          : optionSelected === 'search' ? (
+            <div>
+              {
+          selectedView === 'listView'
+            ? <ListViewSearch />
+            : <GridViewSearch />
         }
             </div>
           )
