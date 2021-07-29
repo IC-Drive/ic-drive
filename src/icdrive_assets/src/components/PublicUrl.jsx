@@ -83,7 +83,7 @@ const PublicUrl = () => {
             />
           )
           : 
-          <iframe src={data} style="border:none; height: 100vh; width: 100vw" title="File"></iframe>
+          <object src={data} height="100vh" width="100vw" title="File"></object>
       }
     </Style>
   );
