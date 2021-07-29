@@ -41,7 +41,7 @@ const ProfilePage = () => {
               <td>cycles:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{cycles}</td>
             </tr>
             <tr>
-              <td>storage:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{storage}</td>
+              <td>storage:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{storage} / 4 GB</td>
             </tr>
           </table>
         </div>
