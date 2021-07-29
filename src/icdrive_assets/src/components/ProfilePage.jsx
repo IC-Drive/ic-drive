@@ -77,9 +77,8 @@ const Style = styled.div`
   @media only screen and (min-width: 600px){
     .profile-block{
       height: 200px;
-      width: 400px;
+      width: 350px;
       margin-top: calc(50vh - 50px - 75px);
-      margin-left: calc(50vw - 225px - 150px);
       background: #324851;
       border-radius: 20px;
     }

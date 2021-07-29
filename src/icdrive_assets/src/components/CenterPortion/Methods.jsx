@@ -216,6 +216,11 @@ export const deleteSharedFile = async (fileInfo) => {
   await userAgent.deleteSharedFile(fileInfo.fileId);
 };
 
+export const sendFeedback = async (feed) => {
+  const icdrive = await httpAgent();
+  await icdrive.addFeedback(feed);
+};
+
 /* ----------------------------------------------Testing--------------------------------------*/
 // For large files not working on firefox to be fixed
 /* const download = async (fileId, chunk_count, fileName) => {

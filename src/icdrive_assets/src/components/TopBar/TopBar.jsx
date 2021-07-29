@@ -3,20 +3,24 @@ import React from 'react';
 // custom imports
 import '../../../assets/css/TopBar.css';
 import { SideBarShow, switchProfile, switchSearch, searchedFile } from '../../state/actions';
+import {sendFeedback} from '../../components/CenterPortion/Methods'
 
 // 3rd party imports
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  AutoComplete, Dropdown, Menu, Modal,
+  AutoComplete, Dropdown, Menu, Modal, Input, Button
 } from 'antd';
 import { AuthClient } from '@dfinity/auth-client';
 import { QuestionCircleOutlined, MenuOutlined } from '@ant-design/icons';
 
 const TopBar = () => {
   const dispatch = useDispatch();
+  const { TextArea } = Input;
+  const feedback = React.useRef('');
   const sideBarShow = useSelector((state) => state.SideBarShow.sideBar);
   const files = useSelector((state) => state.FileHandler.files);
   const [helpModal, setHelpModal] = React.useState(false);
+  const [loadingFlag, setLoadingFlag] = React.useState(false);
 
   const menu = (
     <Menu>
@@ -46,6 +50,13 @@ const TopBar = () => {
     return(temp)
   }
 
+  const sendFeed = async() =>{
+    setLoadingFlag(true)
+    console.log(feedback)
+    //await sendFeedback(feedback.current.state.value)
+    setLoadingFlag(false)
+  }
+
   const onSearch = (searchText) => {
     setOptions(
       !searchText ? [] : searchFile(searchText),
@@ -54,8 +65,8 @@ const TopBar = () => {
 
   const onSelect = (data) => {
     console.log(data);
-    dispatch(searchedFile(data));
-    dispatch(switchSearch('search'));
+    //dispatch(searchedFile(data));
+    //dispatch(switchSearch('search'));
   };
 
   return (
@@ -83,12 +94,16 @@ const TopBar = () => {
         title={null}
       >
         <span className="help-modal">
-          <strong>Please share your feedback at:</strong>
-          <br />
-          nanditmehra123@gmail.com
-          <br />
-          ravish1729@gmail.com
+          <TextArea
+            className="textArea"
+            ref={feedback}
+            autoSize={{ minRows: 12, maxRows: 12 }}
+            style={{width:"90%"}}
+          />
         </span>
+        <br/><br/>
+        <Button type="primary" style={{ float: 'right', marginRight: '10px' }} loading={loadingFlag} onClick={()=>sendFeed()}>Send</Button>
+        <br/><br/><br/>
       </Modal>
     </div>
   );

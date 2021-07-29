@@ -34,6 +34,8 @@ shared (msg) actor class icdrive (){
   stable var user_name_entries : [(UserName, UserId)] = [];
   stable var file_url_entries : [(Text, Text)] = [];
 
+  stable var feedback : [Text] = [];
+
   var fileUrlTrieMap = TrieMap.TrieMap<Text, Text>(Text.equal, Text.hash);
 
   public shared(msg) func createProfile(userName: UserName) : async ?Principal {
@@ -107,6 +109,17 @@ shared (msg) actor class icdrive (){
   public shared(msg) func removeFilePublic(hash: Text) : async() {
     Debug.print(hash);
     fileUrlTrieMap.delete(hash);
+  };
+
+  //Feedback
+  public shared(msg) func addFeedback(feed: Text) : async() {
+    feedback := Array.append<Text>(feedback, [feed]);
+  };
+  public query(msg) func getFeedback() : async ?[Text] {
+    do?{
+      assert(msg.caller==admin);
+      feedback
+    }
   };
 
   //Backup and Recover

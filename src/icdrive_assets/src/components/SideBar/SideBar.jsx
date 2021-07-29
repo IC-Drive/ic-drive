@@ -124,7 +124,7 @@ const SideBar = () => {
         footer={null}
         title={false}
         visible={importModal}
-        onCancel={() => { ()=>setImportModal(false) }}
+        onCancel={() => setImportModal(false) }
       >
         <strong>Will be available soon</strong>
       </Modal>
