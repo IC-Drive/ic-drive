@@ -23,6 +23,7 @@ module {
     userName: UserName;
     fileCanister: FileCanister;
     name : Text;
+    email: Text;
     createdAt: Int;
     updateCanister: Bool;
   };
