@@ -12,12 +12,13 @@ module {
   type FileCanister = ProfileTypes.FileCanister;
   type UserName = ProfileTypes.UserName;
 
-  func makeProfile(userId: UserId, userName: UserName, fileCanister: FileCanister): Profile {
+  func makeProfile(userId: UserId, userName: UserName, fileCanister: FileCanister, email: Text): Profile {
     {
       id = userId;
       fileCanister = fileCanister;
       userName = userName;
       name = "Anonymous";
+      email = email;
       createdAt = Time.now();
       updateCanister = false;
     }
@@ -31,8 +32,8 @@ module {
     let hashMap = HashMap.HashMap<UserId, Profile>(1, isEq, Principal.hash);
     let hashMapUserName = HashMap.HashMap<UserName, UserId>(1, isEqUserName, Text.hash);
 
-    public func createOne(userId: UserId, userName: UserName, fileCanister: FileCanister) {
-      hashMap.put(userId, makeProfile(userId, userName, fileCanister));
+    public func createOne(userId: UserId, userName: UserName, fileCanister: FileCanister, email: Text) {
+      hashMap.put(userId, makeProfile(userId, userName, fileCanister, email));
       hashMapUserName.put(userName, userId);
     };
 
