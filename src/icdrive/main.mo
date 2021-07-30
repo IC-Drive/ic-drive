@@ -39,13 +39,13 @@ shared (msg) actor class icdrive (){
 
   var fileUrlTrieMap = TrieMap.TrieMap<Text, Text>(Text.equal, Text.hash);
 
-  public shared(msg) func createProfile(userName: UserName) : async ?Principal {
+  public shared(msg) func createProfile(userName: UserName, email: Text) : async ?Principal {
     switch(user.findOne(msg.caller)){
       case null{
         Cycles.add(1_000_000_000_000);
         let fileHandleObj = await FileHandle.FileHandle(); // dynamically install a new Canister
         let canId = await fileHandleObj.createOwner(msg.caller);
-        user.createOne(msg.caller, userName, canId);
+        user.createOne(msg.caller, userName, canId, email);
         
         let settings: CanisterSettings = {
         controllers = [admin, msg.caller];
@@ -126,6 +126,9 @@ shared (msg) actor class icdrive (){
   public query(msg) func getUserCount() : async Nat {
     userCount
   };
+  public query(msg) func userProfile() : async [(UserId, Profile)] {
+    user.getAllUsers()
+  };
 
   //Backup and Recover
   public shared(msg) func updateDone() : async?() {
@@ -136,6 +139,7 @@ shared (msg) actor class icdrive (){
         userName = profile.userName;
         fileCanister = profile.fileCanister;
         name = profile.name;
+        email = profile.email;
         createdAt = profile.createdAt;
         updateCanister = false;
       });
@@ -159,6 +163,7 @@ shared (msg) actor class icdrive (){
         userName = profile.userName;
         fileCanister = profile.fileCanister;
         name = profile.name;
+        email = profile.email;
         createdAt = profile.createdAt;
         updateCanister = true;
       });
