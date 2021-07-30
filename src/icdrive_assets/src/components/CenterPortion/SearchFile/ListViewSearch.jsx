@@ -21,7 +21,6 @@ const ListViewSearch = () => {
   const searched = useSelector((state) => state.FileHandler.searched);
 
   const [data, setData] = React.useState('');
-  const [showFile, setShowFile] = React.useState('');
   const dispatch = useDispatch();
 
   const fileObj = React.useRef({});
@@ -29,7 +28,6 @@ const ListViewSearch = () => {
   const [ShareLoadingFlag, setShareLoadingFlag] = React.useState(false);
   const [removeFlag, setRemoveLoadingFlag] = React.useState(false);
   const [PublicLoadingFlag, setPublicLoadingFlag] = React.useState(false);
-  const [deletingFlag, setDeletingFlag] = React.useState(false);
   const userName = React.useRef('');
 
   // Functions
@@ -37,7 +35,7 @@ const ListViewSearch = () => {
     const temp = [];
     for (let i = 0; i < files.length; i += 1) {
       if (files[i].name===searched) {
-        setShowFile(temp.push(files[i]));
+        temp.push(files[i]);
         break
       }
     }
@@ -61,14 +59,9 @@ const ListViewSearch = () => {
   };
 
   const handleDelete = async (record) => {
-    if(!deletingFlag){
-      setDeletingFlag(true);
-      await deleteFile(record);
-      dispatch(refreshFiles(true));
-      setDeletingFlag(false);
-    } else{
-      message.info('Please wait for previous file to delete!!!');
-    }
+    setDeletingFlag(true);
+    await deleteFile(record);
+    dispatch(refreshFiles(true));
   };
 
   const handleView = async (record) => {
@@ -161,7 +154,7 @@ const ListViewSearch = () => {
   return (
     <div>
       <div>
-        <Table dataSource={showFile} columns={columns} pagination={{
+        <Table dataSource={data} columns={columns} pagination={{
           defaultPageSize: 50
         }}/>
       </div>

@@ -19,7 +19,6 @@ const GridViewSearch = () => {
   const searched = useSelector((state) => state.FileHandler.searched);
 
   const [data, setData] = React.useState([]);
-  const [showFile, setShowFile] = React.useState('');
   const dispatch = useDispatch();
 
   const fileObj = React.useRef({});
@@ -27,7 +26,6 @@ const GridViewSearch = () => {
   const [ShareLoadingFlag, setShareLoadingFlag] = React.useState(false);
   const [removeFlag, setRemoveLoadingFlag] = React.useState(false);
   const [PublicLoadingFlag, setPublicLoadingFlag] = React.useState(false);
-  const [deletingFlag, setDeletingFlag] = React.useState(false);
   const userName = React.useRef('');
 
   // Functions
@@ -35,7 +33,7 @@ const GridViewSearch = () => {
     const temp = [];
     for (let i = 0; i < files.length; i += 1) {
       if (files[i].name===searched) {
-        setShowFile(temp.push(files[i]));
+        temp.push(files[i]);
         break
       }
     }
@@ -59,14 +57,8 @@ const GridViewSearch = () => {
   };
 
   const handleDelete = async () => {
-    if(!deletingFlag){
-      setDeletingFlag(true);
-      await deleteFile(fileObj.current);
-      dispatch(refreshFiles(true));
-      setDeletingFlag(false);
-    } else{
-      message.info('Please wait for previous file to delete!!!');
-    }
+    await deleteFile(fileObj.current);
+    dispatch(refreshFiles(true));
   };
 
   const handleView = async () => {
@@ -150,10 +142,7 @@ const GridViewSearch = () => {
   return (
     <div className="grid-container">
       {
-        showFile===''?
-        null
-        :
-          showFile.map((value) => (
+        data.map((value) => (
             <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
               <div className="file-div" onDoubleClick={()=>{fileObj.current = value; handleDownload() }} onContextMenu={() => { fileObj.current = value; }}>
                 <div className="grid-view-icon-part">

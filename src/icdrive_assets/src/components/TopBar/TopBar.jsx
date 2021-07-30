@@ -8,7 +8,7 @@ import {sendFeedback} from '../../components/CenterPortion/Methods'
 // 3rd party imports
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  AutoComplete, Dropdown, Menu, Modal, Input, Button
+  AutoComplete, Dropdown, Menu, Modal, Input, Button, message
 } from 'antd';
 import { AuthClient } from '@dfinity/auth-client';
 import { QuestionCircleOutlined, MenuOutlined } from '@ant-design/icons';
@@ -52,8 +52,10 @@ const TopBar = () => {
 
   const sendFeed = async() =>{
     setLoadingFlag(true)
-    console.log(feedback)
-    //await sendFeedback(feedback.current.state.value)
+    console.log(feedback.current.resizableTextArea.props.value)
+    await sendFeedback(feedback.current.resizableTextArea.props.value)
+    message.info("Thank you for the fedback!!!")
+    setHelpModal(false)
     setLoadingFlag(false)
   }
 
@@ -65,8 +67,8 @@ const TopBar = () => {
 
   const onSelect = (data) => {
     console.log(data);
-    //dispatch(searchedFile(data));
-    //dispatch(switchSearch('search'));
+    dispatch(searchedFile(data));
+    dispatch(switchSearch('search'));
   };
 
   return (
@@ -97,8 +99,8 @@ const TopBar = () => {
           <TextArea
             className="textArea"
             ref={feedback}
-            autoSize={{ minRows: 12, maxRows: 12 }}
-            style={{width:"90%"}}
+            autoSize={{ minRows: 6, maxRows: 6 }}
+            style={{minWidth: "100%"}}
           />
         </span>
         <br/><br/>

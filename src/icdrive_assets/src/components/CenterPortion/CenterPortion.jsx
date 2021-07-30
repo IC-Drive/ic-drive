@@ -46,6 +46,11 @@ const CenterPortion = () => {
             &nbsp;&nbsp;Shared
                 </div>
               )
+                : optionSelected === 'search' ? (
+                  <div className="show-section">
+              &nbsp;&nbsp;Search
+                  </div>
+                )
                 : null
         }
         </div>

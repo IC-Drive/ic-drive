@@ -115,11 +115,9 @@ shared (msg) actor class icdrive (){
   public shared(msg) func addFeedback(feed: Text) : async() {
     feedback := Array.append<Text>(feedback, [feed]);
   };
-  public query(msg) func getFeedback() : async ?[Text] {
-    do?{
-      assert(msg.caller==admin);
-      feedback
-    }
+
+  public query(msg) func getFeedback() : async [Text] {
+    feedback
   };
 
   //Backup and Recover

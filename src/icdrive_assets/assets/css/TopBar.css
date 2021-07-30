@@ -25,6 +25,12 @@
     border-radius: 50%;
     margin-right: 10px;
   }
+  .ant-modal-close{
+    display: none;
+  }
+  .ant-input{
+    min-width: 100% !important;
+  }
 
   @media only screen and (min-width: 600px){
     .ant-input {
