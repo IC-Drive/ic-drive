@@ -136,7 +136,7 @@ const GridView = () => {
       {
           files.map((value) => (
             <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
-              <div className="file-div" onDoubleClick={()=>{fileObj.current = value; handleDownload() }} onContextMenu={() => { fileObj.current = value; }}>
+              <div className="file-div" onDoubleClick={()=>{fileObj.current = value; handleView() }} onContextMenu={() => { fileObj.current = value; }}>
                 <div className="grid-view-icon-part">
                   {
                     isImage(value.mimeType)?
@@ -196,9 +196,9 @@ const GridView = () => {
             )
             : (
               <div>
-                <span id="public-url" style={{color:'#4D85BD'}} onClick={() => { navigator.clipboard.writeText(`${window.location.href}public/${fileObj.current.fileHash}`); message.info('copied to clipboard'); }}>
+                <span id="public-url" style={{color:'#4D85BD'}} onClick={() => { navigator.clipboard.writeText(`${window.location.href}icdrive/${fileObj.current.fileHash}`); message.info('copied to clipboard'); }}>
                   {window.location.href}
-                  public/
+                  icdrive/
                   {fileObj.current.fileHash}
                 </span>
                 <br />

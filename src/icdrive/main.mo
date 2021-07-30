@@ -35,6 +35,7 @@ shared (msg) actor class icdrive (){
   stable var file_url_entries : [(Text, Text)] = [];
 
   stable var feedback : [Text] = [];
+  stable var userCount : Nat = 0;
 
   var fileUrlTrieMap = TrieMap.TrieMap<Text, Text>(Text.equal, Text.hash);
 
@@ -45,7 +46,6 @@ shared (msg) actor class icdrive (){
         let fileHandleObj = await FileHandle.FileHandle(); // dynamically install a new Canister
         let canId = await fileHandleObj.createOwner(msg.caller);
         user.createOne(msg.caller, userName, canId);
-        Debug.print("hello");
         
         let settings: CanisterSettings = {
         controllers = [admin, msg.caller];
@@ -56,6 +56,8 @@ shared (msg) actor class icdrive (){
         };
         await IC.update_settings(params);
 
+        userCount := userCount + 1;
+        
         return(?canId);
       };
       case (?_){
@@ -118,6 +120,11 @@ shared (msg) actor class icdrive (){
 
   public query(msg) func getFeedback() : async [Text] {
     feedback
+  };
+
+  //user count
+  public query(msg) func getUserCount() : async Nat {
+    userCount
   };
 
   //Backup and Recover

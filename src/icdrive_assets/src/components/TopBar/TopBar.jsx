@@ -11,7 +11,7 @@ import {
   AutoComplete, Dropdown, Menu, Modal, Input, Button, message
 } from 'antd';
 import { AuthClient } from '@dfinity/auth-client';
-import { QuestionCircleOutlined, MenuOutlined } from '@ant-design/icons';
+import { QuestionCircleOutlined, MenuOutlined, UserOutlined } from '@ant-design/icons';
 
 const TopBar = () => {
   const dispatch = useDispatch();
@@ -33,7 +33,6 @@ const TopBar = () => {
     </Menu>
   );
 
-  const [value, setValue] = React.useState('');
   const [options, setOptions] = React.useState([]);
 
   const searchFile = (str) => {
@@ -86,7 +85,7 @@ const TopBar = () => {
         <span id="ant-input-span" style={{ marginRight: '10px' }}><AutoComplete options={options} onSelect={onSelect} onSearch={onSearch} placeholder="Search Files" /></span>
         <span><QuestionCircleOutlined onClick={() => setHelpModal(true)} style={{ fontSize: '25px', marginRight: '10px' }} /></span>
         <Dropdown overlay={menu}>
-          <span className="dot" />
+          <UserOutlined style={{ fontSize: '25px', marginRight: '10px' }} />
         </Dropdown>
       </div>
       <Modal

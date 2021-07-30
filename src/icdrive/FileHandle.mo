@@ -283,42 +283,7 @@ shared (msg) actor class FileHandle (){
     chunkEntries := [];
   };
 
-  //func deleteCorruptFile_(file_info : FileInfo) : () {
-  //  Debug.print(file_info.fileId);
-    //for (j in Iter.range(1, file_info.chunkCount)) {
-    //  state.chunks.delete(chunkId(file_info.fileId, j));
-    //};
-    //state.files.delete(file_info.fileId);
-  //};
-
-  /*public query(msg) func deleteCorruptFile(fileId : FileId) : async ?() {
-    do ? {
-      let file_info = getFileInfo_(fileId)!;
-      if(msg.caller==file_info.userId){
-        deleteCorruptFile_(file_info);
-      }
-    }
-  };*/
-
 ///////////////////////////////////////////////////// TEST  //////////////////////////////////////
-
-  type HeaderField = (Text, Text);
-
-  type HttpResponse = {
-      status_code: Nat16;
-      headers: [HeaderField];
-      body: Blob;
-  };
-
-  public query func http_request() : async HttpResponse {
-      //let data := state.chunks.get(chunkId(fileId, chunkNum));
-      Debug.print("Woah, it works!!");
-      return {
-          status_code = 200;
-          headers = [("Content-Type", "application/octet-stream; charset=utf-8"),("Content-Disposition", "attachment; filename*=UTF-8''abc.txt")];
-          body = Text.encodeUtf8("<b>Hello World!</b>");
-      };
-  };
 
 };
 

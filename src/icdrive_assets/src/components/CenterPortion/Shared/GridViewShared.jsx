@@ -20,14 +20,14 @@ const GridViewShared = () => {
   const [deletingFlag, setDeletingFlag] = React.useState(false);
   const fileObj = React.useRef({});
 
-  const handleDownload = async (record) => {
-    await downloadSharedFile(record, localStorage.getItem('userName'));
+  const handleDownload = async () => {
+    await downloadSharedFile(fileObj.current, localStorage.getItem('userName'));
   };
 
-  const handleDelete = async (record) => {
+  const handleDelete = async () => {
     if(!deletingFlag){
       setDeletingFlag(true);
-      await deleteSharedFile(record);
+      await deleteSharedFile(fileObj.current);
       dispatch(refreshFiles(true));
       setDeletingFlag(false);
     } else{
@@ -35,8 +35,8 @@ const GridViewShared = () => {
     }
   };
 
-  const handleView = async (record) => {
-    const response = await viewSharedFile(record, localStorage.getItem('userName'));
+  const handleView = async () => {
+    const response = await viewSharedFile(fileObj.current, localStorage.getItem('userName'));
     if (!response) {
       message.info('Only PDF and Images can be viewed');
     }
@@ -79,7 +79,7 @@ const GridViewShared = () => {
       {
           shared.map((value) => (
             <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
-              <div className="file-div" onContextMenu={() => { fileObj.current = value; }}>
+              <div className="file-div" onDoubleClick={()=>{fileObj.current = value; handleView() }} onContextMenu={() => { fileObj.current = value; }}>
                 <div className="grid-view-icon-part">
                   {
                     isImage(value.mimeType)?

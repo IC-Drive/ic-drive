@@ -17,7 +17,7 @@ const Routes = () => (
         <Login />
       </Route>
 
-      <Route exact path="/public/*">
+      <Route exact path="/icdrive/*">
         <PublicUrl />
       </Route>
 
