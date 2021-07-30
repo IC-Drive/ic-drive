@@ -54,7 +54,7 @@ const TopBar = () => {
     setLoadingFlag(true)
     console.log(feedback.current.resizableTextArea.props.value)
     await sendFeedback(feedback.current.resizableTextArea.props.value)
-    message.info("Thank you for the fedback!!!")
+    message.info("Thank you for the feedback !")
     setHelpModal(false)
     setLoadingFlag(false)
   }
@@ -95,6 +95,7 @@ const TopBar = () => {
         footer={null}
         title={null}
       >
+        <p>Report issues, Provide Feedback or Ideas to Improve</p>
         <span className="help-modal">
           <TextArea
             className="textArea"
