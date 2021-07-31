@@ -51,7 +51,6 @@ const TopBar = () => {
 
   const sendFeed = async() =>{
     setLoadingFlag(true)
-    console.log(feedback.current.resizableTextArea.props.value)
     await sendFeedback(feedback.current.resizableTextArea.props.value)
     message.info("Thank you for the feedback !")
     setHelpModal(false)
@@ -65,7 +64,6 @@ const TopBar = () => {
   };
 
   const onSelect = (data) => {
-    console.log(data);
     dispatch(searchedFile(data));
     dispatch(switchSearch('search'));
   };
