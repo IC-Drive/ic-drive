@@ -142,8 +142,6 @@ export const shareFilePublic = async (fileObj) => {
 export const removeFilePublic = async (fileObj) => {
   const icdrive = await httpAgent();
   const userAgent = await canisterHttpAgent();
-  console.log(fileObj.fileHash)
-  console.log(fileObj.fileId)
   await icdrive.removeFilePublic(fileObj.fileHash);
   await userAgent.removeFilePublic(fileObj.fileId);
   return (true);
