@@ -37,7 +37,6 @@ const Dashboard = () => {
             sharedFiles.push(fileList[0][i]);
           }
         }
-        console.log(files);
         dispatch(filesUpdate(files));
         dispatch(sharedUpdate(sharedFiles));
       }
