@@ -109,7 +109,6 @@ shared (msg) actor class icdrive (){
   };
 
   public shared(msg) func removeFilePublic(hash: Text) : async() {
-    Debug.print(hash);
     fileUrlTrieMap.delete(hash);
   };
 
@@ -155,9 +154,6 @@ shared (msg) actor class icdrive (){
   system func postupgrade () {
     //Restore UserId Profile
     for ((userId, profile) in user_entries.vals()) {
-      Debug.print("start");
-      //Debug.print(Principal.toText(profile.id));
-      //Debug.print(Principal.toText(userId));
       user.insertUsers(userId, {
         id = profile.id;
         userName = profile.userName;
