@@ -35,34 +35,54 @@ shared (msg) actor class icdrive (){
   stable var file_url_entries : [(Text, Text)] = [];
 
   stable var feedback : [Text] = [];
+  stable var emailList : [Text] = [];
+  stable var emailIdList : [Text] = process.env.emailList;
   stable var userCount : Nat = 0;
+  stable var tempNewEmails : [Text] = [];
 
   var fileUrlTrieMap = TrieMap.TrieMap<Text, Text>(Text.equal, Text.hash);
 
   public shared(msg) func createProfile(userName: UserName, email: Text) : async ?Principal {
-    switch(user.findOne(msg.caller)){
-      case null{
-        Cycles.add(1_000_000_000_000);
-        let fileHandleObj = await FileHandle.FileHandle(); // dynamically install a new Canister
-        let canId = await fileHandleObj.createOwner(msg.caller);
-        user.createOne(msg.caller, userName, canId, email);
-        
-        let settings: CanisterSettings = {
-        controllers = [admin, msg.caller];
-        };
-        let params: UpdateSettingsParams = {
-            canister_id = canId;
-            settings = settings;
-        };
-        await IC.update_settings(params);
+    for (e in emailList.vals()) {
+      if(e==email){
+        return null
+      };
+    };
+    var flag = 0;
+    for (e in emailIdList.vals()) {
+      if(e==email){
+        flag := 1
+      };
+    };
+    if(flag==1){
+      switch(user.findOne(msg.caller)){
+        case null{
+          Cycles.add(600_000_000_000);
+          let fileHandleObj = await FileHandle.FileHandle(); // dynamically install a new Canister
+          let canId = await fileHandleObj.createOwner(msg.caller);
+          user.createOne(msg.caller, userName, canId, email);
+          
+          let settings: CanisterSettings = {
+          controllers = [admin, msg.caller];
+          };
+          let params: UpdateSettingsParams = {
+              canister_id = canId;
+              settings = settings;
+          };
+          await IC.update_settings(params);
 
-        userCount := userCount + 1;
-        
-        return(?canId);
-      };
-      case (?_){
-        return(null);
-      };
+          emailList := Array.append<Text>(emailList, [email]);
+          userCount := userCount + 1;
+          
+          return(?canId);
+        };
+        case (?_){
+          return(null);
+        };
+      }
+    } else{
+      tempNewEmails := Array.append<Text>(tempNewEmails, [email]);
+      return null;
     }
   };
 
@@ -108,25 +128,46 @@ shared (msg) actor class icdrive (){
     fileUrlTrieMap.get(hash);
   };
 
-  public shared(msg) func removeFilePublic(hash: Text) : async() {
-    fileUrlTrieMap.delete(hash);
-  };
+  // public shared(msg) func removeFilePublic(hash: Text) : async() {
+  //   fileUrlTrieMap.delete(hash);
+  // };
 
   //Feedback
   public shared(msg) func addFeedback(feed: Text) : async() {
     feedback := Array.append<Text>(feedback, [feed]);
   };
 
-  public query(msg) func getFeedback() : async [Text] {
-    feedback
+  public query(msg) func getFeedback(password: Text) : async [Text] {
+    if (password == process.env.password) {
+        feedback
+    } else {
+        []
+    }
+  };
+
+  public query(msg) func getTempNewEmails(password: Text) : async [Text] {
+    if (password == process.env.password) {
+        tempNewEmails
+    } else {
+        []
+    }
   };
 
   //user count
-  public query(msg) func getUserCount() : async Nat {
-    userCount
+  public query(msg) func getUserCount(password: Text) : async Nat {
+    if (password == process.env.password) {
+        userCount
+    } else {
+        0
+    }
   };
-  public query(msg) func userProfile() : async [(UserId, Profile)] {
-    user.getAllUsers()
+
+  public query(msg) func userProfile(password: Text) : async [(UserId, Profile)] {
+    if (password == process.env.password) {
+        user.getAllUsers()
+    } else {
+        []
+    }
   };
 
   //Backup and Recover
