@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { Helmet } from "react-helmet";
 
 // custom imports
 import { idlFactory as FileHandleIdl } from 'dfx-generated/FileHandle';
@@ -69,10 +70,18 @@ const PublicUrl = () => {
           });
 
           const fileURL = URL.createObjectURL(fileBlob);
-          setType(mimeType);
-          setData(fileURL);
+          if(isPdf(type)){
+            setType(mimeType);
+            setData(fileURL);
+          } else{
+            let reader = new FileReader();
+            reader.readAsDataURL(fileBlob);
+            reader.onloadend = function() {
+              setData(reader.result);
+            }
+            setType(mimeType);
+          }
           //window.open(fileURL, '_self');
-          
         } else {
           setNotFound(true);
         }
@@ -83,6 +92,10 @@ const PublicUrl = () => {
 
   return (
     <Style>
+      <Helmet>
+        <title>IC Drive</title>
+        <meta name="viewport" content="width=device-width, minimum-scale=0.1" />
+      </Helmet>
       {
         notFound
           ? (
@@ -99,7 +112,7 @@ const PublicUrl = () => {
             </div>
             :
             <div className="show-image">
-              <img id="the-image" src={data}/>
+              <img alt="IC Drive - File on Blockchain" id="the-image" src={data}/>
             </div>
       }
     </Style>
