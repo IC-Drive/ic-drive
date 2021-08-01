@@ -14,8 +14,10 @@ import {
 } from '../Methods';
 import { filesUpdate, refreshFiles } from '../../../state/actions';
 
-const GridViewMarked = () => {
+const GridViewSearch = () => {
   const files = useSelector((state) => state.FileHandler.files);
+  const searched = useSelector((state) => state.FileHandler.searched);
+
   const [data, setData] = React.useState([]);
   const dispatch = useDispatch();
 
@@ -24,15 +26,15 @@ const GridViewMarked = () => {
   const [ShareLoadingFlag, setShareLoadingFlag] = React.useState(false);
   const [removeFlag, setRemoveLoadingFlag] = React.useState(false);
   const [PublicLoadingFlag, setPublicLoadingFlag] = React.useState(false);
-  const [deletingFlag, setDeletingFlag] = React.useState(false);
   const userName = React.useRef('');
 
   // Functions
   React.useEffect(() => {
     const temp = [];
-    for (let i = 0; i < files.length; i+=1) {
-      if (files[i].marked) {
+    for (let i = 0; i < files.length; i += 1) {
+      if (files[i].name===searched) {
         temp.push(files[i]);
+        break
       }
     }
     setData(temp);
@@ -51,18 +53,12 @@ const GridViewMarked = () => {
       }
     }
     dispatch(filesUpdate(temp));
-    markFile(fileObj.current);
+    await markFile(fileObj.current);
   };
 
   const handleDelete = async () => {
-    if(!deletingFlag){
-      setDeletingFlag(true);
-      await deleteFile(fileObj.current);
-      dispatch(refreshFiles(true));
-      setDeletingFlag(false);
-    } else{
-      message.info('Please wait for previous file to delete!!!');
-    }
+    await deleteFile(fileObj.current);
+    dispatch(refreshFiles(true));
   };
 
   const handleView = async () => {
@@ -146,7 +142,7 @@ const GridViewMarked = () => {
   return (
     <div className="grid-container">
       {
-          data.map((value) => (
+        data.map((value) => (
             <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
               <div className="file-div" onDoubleClick={()=>{fileObj.current = value; handleView() }} onContextMenu={() => { fileObj.current = value; }}>
                 <div className="grid-view-icon-part">
@@ -227,4 +223,4 @@ const GridViewMarked = () => {
   );
 };
 
-export default GridViewMarked;
+export default GridViewSearch;

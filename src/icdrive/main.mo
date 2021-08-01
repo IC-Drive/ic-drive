@@ -34,31 +34,55 @@ shared (msg) actor class icdrive (){
   stable var user_name_entries : [(UserName, UserId)] = [];
   stable var file_url_entries : [(Text, Text)] = [];
 
+  stable var feedback : [Text] = [];
+  stable var emailList : [Text] = [];
+  stable var emailIdList : [Text] = process.env.emailList;
+  stable var userCount : Nat = 0;
+  stable var tempNewEmails : [Text] = [];
+
   var fileUrlTrieMap = TrieMap.TrieMap<Text, Text>(Text.equal, Text.hash);
 
-  public shared(msg) func createProfile(userName: UserName) : async ?Principal {
-    switch(user.findOne(msg.caller)){
-      case null{
-        Cycles.add(1_000_000_000_000);
-        let fileHandleObj = await FileHandle.FileHandle(); // dynamically install a new Canister
-        let canId = await fileHandleObj.createOwner(msg.caller);
-        user.createOne(msg.caller, userName, fileHandleObj);
-        Debug.print("hello");
-        
-        let settings: CanisterSettings = {
-        controllers = [admin];
-        };
-        let params: UpdateSettingsParams = {
-            canister_id = canId;
-            settings = settings;
-        };
-        await IC.update_settings(params);
+  public shared(msg) func createProfile(userName: UserName, email: Text) : async ?Principal {
+    for (e in emailList.vals()) {
+      if(e==email){
+        return null
+      };
+    };
+    var flag = 0;
+    for (e in emailIdList.vals()) {
+      if(e==email){
+        flag := 1
+      };
+    };
+    if(flag==1){
+      switch(user.findOne(msg.caller)){
+        case null{
+          Cycles.add(600_000_000_000);
+          let fileHandleObj = await FileHandle.FileHandle(); // dynamically install a new Canister
+          let canId = await fileHandleObj.createOwner(msg.caller);
+          user.createOne(msg.caller, userName, canId, email);
+          
+          let settings: CanisterSettings = {
+          controllers = [admin, msg.caller];
+          };
+          let params: UpdateSettingsParams = {
+              canister_id = canId;
+              settings = settings;
+          };
+          await IC.update_settings(params);
 
-        return(?canId);
-      };
-      case (?_){
-        return(null);
-      };
+          emailList := Array.append<Text>(emailList, [email]);
+          userCount := userCount + 1;
+          
+          return(?canId);
+        };
+        case (?_){
+          return(null);
+        };
+      }
+    } else{
+      tempNewEmails := Array.append<Text>(tempNewEmails, [email]);
+      return null;
     }
   };
 
@@ -104,7 +128,64 @@ shared (msg) actor class icdrive (){
     fileUrlTrieMap.get(hash);
   };
 
+  // public shared(msg) func removeFilePublic(hash: Text) : async() {
+  //   fileUrlTrieMap.delete(hash);
+  // };
+
+  //Feedback
+  public shared(msg) func addFeedback(feed: Text) : async() {
+    feedback := Array.append<Text>(feedback, [feed]);
+  };
+
+  public query(msg) func getFeedback(password: Text) : async [Text] {
+    if (password == process.env.password) {
+        feedback
+    } else {
+        []
+    }
+  };
+
+  public query(msg) func getTempNewEmails(password: Text) : async [Text] {
+    if (password == process.env.password) {
+        tempNewEmails
+    } else {
+        []
+    }
+  };
+
+  //user count
+  public query(msg) func getUserCount(password: Text) : async Nat {
+    if (password == process.env.password) {
+        userCount
+    } else {
+        0
+    }
+  };
+
+  public query(msg) func userProfile(password: Text) : async [(UserId, Profile)] {
+    if (password == process.env.password) {
+        user.getAllUsers()
+    } else {
+        []
+    }
+  };
+
   //Backup and Recover
+  public shared(msg) func updateDone() : async?() {
+    do?{
+      let profile = user.findOne(msg.caller)!;
+      user.updateDone(msg.caller, {
+        id = profile.id;
+        userName = profile.userName;
+        fileCanister = profile.fileCanister;
+        name = profile.name;
+        email = profile.email;
+        createdAt = profile.createdAt;
+        updateCanister = false;
+      });
+    }
+  };
+  
   system func preupgrade() {
     user_entries := user.getAllUsers();
     user_name_entries := user.getAllUsersNames();
@@ -112,9 +193,17 @@ shared (msg) actor class icdrive (){
   };
 
   system func postupgrade () {
-    //Restore  UserId Profile
+    //Restore UserId Profile
     for ((userId, profile) in user_entries.vals()) {
-      user.insertUsers(userId, profile);
+      user.insertUsers(userId, {
+        id = profile.id;
+        userName = profile.userName;
+        fileCanister = profile.fileCanister;
+        name = profile.name;
+        email = profile.email;
+        createdAt = profile.createdAt;
+        updateCanister = true;
+      });
     };
     //Restore Username UserId
     for ((userName, userId) in user_name_entries.vals()) {

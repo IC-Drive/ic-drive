@@ -14,9 +14,8 @@ import {
 } from '../Methods';
 import { filesUpdate, refreshFiles } from '../../../state/actions';
 
-const GridViewMarked = () => {
+const GridView = () => {
   const files = useSelector((state) => state.FileHandler.files);
-  const [data, setData] = React.useState([]);
   const dispatch = useDispatch();
 
   const fileObj = React.useRef({});
@@ -27,17 +26,6 @@ const GridViewMarked = () => {
   const [deletingFlag, setDeletingFlag] = React.useState(false);
   const userName = React.useRef('');
 
-  // Functions
-  React.useEffect(() => {
-    const temp = [];
-    for (let i = 0; i < files.length; i+=1) {
-      if (files[i].marked) {
-        temp.push(files[i]);
-      }
-    }
-    setData(temp);
-  }, []);
-
   const handleDownload = async () => {
     await downloadFile(fileObj.current);
   };
@@ -46,12 +34,12 @@ const GridViewMarked = () => {
     const temp = [...files];
     for (let i = 0; i < temp.length; i += 1) {
       if (temp[i].fileId === fileObj.current.fileId) {
-        temp[i].marked = false;
-        break
+        temp[i].marked = !temp[i].marked;
+        break;
       }
     }
     dispatch(filesUpdate(temp));
-    markFile(fileObj.current);
+    await markFile(fileObj.current);
   };
 
   const handleDelete = async () => {
@@ -146,7 +134,7 @@ const GridViewMarked = () => {
   return (
     <div className="grid-container">
       {
-          data.map((value) => (
+          files.map((value) => (
             <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
               <div className="file-div" onDoubleClick={()=>{fileObj.current = value; handleView() }} onContextMenu={() => { fileObj.current = value; }}>
                 <div className="grid-view-icon-part">
@@ -227,4 +215,4 @@ const GridViewMarked = () => {
   );
 };
 
-export default GridViewMarked;
+export default GridView;

@@ -1,12 +1,12 @@
-const initial_state = {
-  state: false
-}
+const initialState = {
+  sideBar: false,
+};
 
-const reducer = (state=initial_state, action) =>{
-  switch(action.type){
-      case "updateState": return{...state, state: action.payload};
-      default: return{...state};
+const reducer = (state = initialState, action) => {
+  switch (action.type) {
+    case 'SideBarShow': return { ...state, sideBar: action.payload };
+    default: return { ...state };
   }
-}
+};
 
 export default reducer;

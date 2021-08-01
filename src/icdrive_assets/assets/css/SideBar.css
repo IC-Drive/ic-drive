@@ -1,0 +1,74 @@
+  .side-bar-container{
+    background: #324851;
+    height: calc(100vh - 40px);
+    width: 225px;
+    z-index: 1;
+  }
+  .side-bar-content{
+    padding-top: 20px;
+  }
+  
+  .element-section{
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  .side-bar-text-part{
+    font-size: 20px;
+    font-weight: 400;
+    padding-left: 30px;
+  }
+  .side-bar-icon-part{
+    padding-left: 22.5px;
+  }
+  .element-section:hover{
+    cursor: pointer;
+    background: #425757;
+    border-radius: 10px;
+  }
+  .file_upload {
+    opacity: 0.0;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+    filter: alpha(opacity=0);
+    -moz-opacity: 0.0;
+    -khtml-opacity: 0.0;
+  }
+  #upload-file {
+    opacity: 0;
+    position: absolute;
+    z-index: -1;
+  }
+  #label-file:hover {
+    cursor: pointer;
+  }
+
+  .upload-button{
+    padding-top: 25px;
+    padding-left: 22.5px;
+  }
+  .upload-element-section{
+    border-radius: 20px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 170px;
+    height: 50px;
+  }
+  .active{
+    background: #eaeaea;
+  }
+  .inactive{
+    background: #7DA3A1;
+  }
+  .upload-text-part{
+    font-size: 20px;
+    font-weight: 400;
+    padding-left: 20px;
+  }
+  .upload-icon-part{
+    padding-left: 22.5px;
+  }

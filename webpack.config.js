@@ -1,8 +1,8 @@
-const path = require("path");
-const webpack = require("webpack");
+const path = require('path');
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const TerserPlugin = require("terser-webpack-plugin");
-const dfxJson = require("./dfx.json");
+const TerserPlugin = require('terser-webpack-plugin');
+const dfxJson = require('./dfx.json');
 
 // List of all aliases for canisters. This creates the module alias for
 // the `import ... from "@dfinity/ic/canisters/xyz"` where xyz is the name of a
@@ -10,63 +10,63 @@ const dfxJson = require("./dfx.json");
 const aliases = Object.entries(dfxJson.canisters).reduce(
   (acc, [name, _value]) => {
     // Get the network name, or `local` by default.
-    const networkName = process.env["DFX_NETWORK"] || "local";
+    const networkName = process.env.DFX_NETWORK || 'local';
     const outputRoot = path.join(
       __dirname,
-      ".dfx",
+      '.dfx',
       networkName,
-      "canisters",
-      name
+      'canisters',
+      name,
     );
 
     return {
       ...acc,
-      ["dfx-generated/" + name]: path.join(outputRoot, name + ".js"),
+      [`dfx-generated/${name}`]: path.join(outputRoot, `${name}.js`),
     };
   },
-  {}
+  {},
 );
 
 /**
  * Generate a webpack configuration for a canister.
  */
 function generateWebpackConfigForCanister(name, info) {
-  if (typeof info.frontend !== "object") {
+  if (typeof info.frontend !== 'object') {
     return;
   }
 
   return {
-    mode: "production",
+    mode: 'production',
     entry: {
       // The frontend.entrypoint points to the HTML file for this build, so we need
       // to replace the extension to `.js`.
-      index: path.join(__dirname, info.frontend.entrypoint).replace(/\.html$/, ".jsx"),
+      index: path.join(__dirname, info.frontend.entrypoint).replace(/\.html$/, '.jsx'),
     },
-    devtool: "source-map",
+    devtool: 'source-map',
     optimization: {
       minimize: true,
       minimizer: [new TerserPlugin()],
     },
     resolve: {
       alias: aliases,
-      extensions: [".js", ".ts", ".jsx", ".tsx"],
+      extensions: ['.js', '.ts', '.jsx', '.tsx'],
       fallback: {
-        "assert": require.resolve("assert/"),
-        "buffer": require.resolve("buffer/"),
-        "events": require.resolve("events/"),
-        "stream": require.resolve("stream-browserify/"),
-        "util": require.resolve("util/"),
+        assert: require.resolve('assert/'),
+        buffer: require.resolve('buffer/'),
+        events: require.resolve('events/'),
+        stream: require.resolve('stream-browserify/'),
+        util: require.resolve('util/'),
       },
     },
     output: {
-      filename: "[name].js",
-      path: path.join(__dirname, "dist", name),
+      filename: '[name].js',
+      path: path.join(__dirname, 'dist', name),
     },
     devServer: {
       proxy: {
-        "/api": "http://localhost:8000",
+        '/api': 'http://localhost:8000',
       },
-     },
+    },
     // Depending in the language or framework you are using for
     // front-end development, add module loaders to the default
     // webpack configuration. For example, if you are using React
@@ -74,9 +74,9 @@ function generateWebpackConfigForCanister(name, info) {
     // tutorial, uncomment the following lines:
     module: {
       rules: [
-        { test: /\.(ts|tsx|jsx)$/, loader: "ts-loader" },
-        { test: /\.css$/, use: ['style-loader','css-loader'] }
-      ]
+        { test: /\.(ts|tsx|jsx)$/, loader: 'ts-loader' },
+        { test: /\.css$/, use: ['style-loader', 'css-loader'] },
+      ],
     },
     plugins: [
       new HtmlWebpackPlugin({
@@ -96,8 +96,6 @@ function generateWebpackConfigForCanister(name, info) {
 //  as part of this configuration, add them to the section below.
 module.exports = [
   ...Object.entries(dfxJson.canisters)
-    .map(([name, info]) => {
-      return generateWebpackConfigForCanister(name, info);
-    })
+    .map(([name, info]) => generateWebpackConfigForCanister(name, info))
     .filter((x) => !!x),
 ];

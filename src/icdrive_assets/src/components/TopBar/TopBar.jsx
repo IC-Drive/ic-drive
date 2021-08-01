@@ -1,117 +1,112 @@
-import React from 'react'
-import styled from 'styled-components'
+import React from 'react';
 
 // custom imports
-import {updateState, switchProfile} from '../../state/actions'
+import '../../../assets/css/TopBar.css';
+import { SideBarShow, switchProfile, switchSearch, searchedFile } from '../../state/actions';
+import {sendFeedback} from '../../components/CenterPortion/Methods'
 
 // 3rd party imports
-import {useDispatch, useSelector} from 'react-redux'
-import {Input, Dropdown, Menu, Modal} from 'antd'
-import { AuthClient } from '@dfinity/auth-client'
-import { QuestionCircleOutlined } from '@ant-design/icons'
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  AutoComplete, Dropdown, Menu, Modal, Input, Button, message
+} from 'antd';
+import { AuthClient } from '@dfinity/auth-client';
+import { QuestionCircleOutlined, MenuOutlined, UserOutlined } from '@ant-design/icons';
 
-const TopBar = () =>{
-
+const TopBar = () => {
   const dispatch = useDispatch();
-  const sidebar = useSelector(state=>state.SideBarShow.state);
-  const [helpModal, setHelpModal] = React.useState(false)
+  const { TextArea } = Input;
+  const feedback = React.useRef('');
+  const sideBarShow = useSelector((state) => state.SideBarShow.sideBar);
+  const files = useSelector((state) => state.FileHandler.files);
+  const [helpModal, setHelpModal] = React.useState(false);
+  const [loadingFlag, setLoadingFlag] = React.useState(false);
 
   const menu = (
     <Menu>
-      <Menu.Item key="0">
-        <span onClick={()=>{dispatch(switchProfile("profile"))}}>Profile</span>
+      <Menu.Item key="0" onClick={() => { dispatch(switchProfile('profile')); }}>
+        <span role="button" tabIndex={0}>Profile</span>
       </Menu.Item>
-      <Menu.Item key="1">
-        <span onClick={async()=>{const authClient = await AuthClient.create();await authClient.logout();window.location.reload();}}>Logout</span>
+      <Menu.Item key="1" onClick={async () => { const authClient = await AuthClient.create(); await authClient.logout(); window.location.reload(); }}>
+        <span role="button" tabIndex={0}>Logout</span>
       </Menu.Item>
     </Menu>
   );
-  
-  return(
-    <Style>
-      <div className="top-bar-container">
-        <div className="left-section">
-          <span id="icdrive_top" onClick={()=>{dispatch(updateState(!sidebar))}}>IC Drive</span>
+
+  const [options, setOptions] = React.useState([]);
+
+  const searchFile = (str) => {
+    str = str.toLowerCase();
+    let temp = []
+    for(let i=0; i<files.length; i+=1){
+      if(files[i].name.toLowerCase().indexOf(str)>-1){
+        temp.push({value: files[i].name, id: files[i].id})
+      }
+      if(temp.length>5){
+        break
+      }
+    }
+    return(temp)
+  }
+
+  const sendFeed = async() =>{
+    setLoadingFlag(true)
+    await sendFeedback(feedback.current.resizableTextArea.props.value)
+    message.info("Thank you for the feedback !")
+    setHelpModal(false)
+    setLoadingFlag(false)
+  }
+
+  const onSearch = (searchText) => {
+    setOptions(
+      !searchText ? [] : searchFile(searchText),
+    );
+  };
+
+  const onSelect = (data) => {
+    dispatch(searchedFile(data));
+    dispatch(switchSearch('search'));
+  };
+
+  return (
+    <div className="top-bar-container">
+      <div className="top-bar-left-section">
+        <div className="slide-menu-mobile">
+          <div>
+            <MenuOutlined onClick={() => { dispatch(SideBarShow(!sideBarShow)); }} style={{ fontSize: '20px', color: '#fff' }} />
+&nbsp;&nbsp;
+          </div>
         </div>
-        <div className="right-section">
-          <span><Input placeholder="Search Files" /></span>
-          <span><QuestionCircleOutlined onClick={()=>setHelpModal(true)} style={{ fontSize: '25px' }} /></span>
-          <Dropdown overlay={menu}>
-            <span className="dot"></span>
-          </Dropdown>
-        </div>
+        <div id="top-bar-icdrive">IC Drive</div>
+      </div>
+      <div className="top-bar-right-section">
+        <span id="ant-input-span" style={{ marginRight: '10px' }}><AutoComplete options={options} onSelect={onSelect} onSearch={onSearch} placeholder="Search Files" /></span>
+        <span><QuestionCircleOutlined onClick={() => setHelpModal(true)} style={{ fontSize: '25px', marginRight: '10px' }} /></span>
+        <Dropdown overlay={menu}>
+          <UserOutlined style={{ fontSize: '25px', marginRight: '10px' }} />
+        </Dropdown>
       </div>
       <Modal
         visible={helpModal}
-        onCancel={()=>setHelpModal(false)}
+        onCancel={() => setHelpModal(false)}
         footer={null}
         title={null}
       >
+        <p>Report issues, Provide Feedback or Ideas to Improve</p>
         <span className="help-modal">
-          Please share your feedback at:<br/>
-          nanditmehra123@gmail.com<br/>
-          ravish1729@gmail.com
+          <TextArea
+            className="textArea"
+            ref={feedback}
+            autoSize={{ minRows: 6, maxRows: 6 }}
+            style={{minWidth: "100%"}}
+          />
         </span>
+        <br/><br/>
+        <Button type="primary" style={{ float: 'right', marginRight: '10px' }} loading={loadingFlag} onClick={()=>sendFeed()}>Send</Button>
+        <br/><br/><br/>
       </Modal>
-    </Style>
-  )
-}
+    </div>
+  );
+};
 
 export default TopBar;
-
-const Style = styled.div`
-
-  .top-bar-container {
-    height: 50px;
-    width: 100vw;
-    background: #21353E;
-    color: #fff;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .left-section {
-    font-size: 22.5px;
-    font-weight: 700;
-    padding-left: 22px;
-  }
-  .right-section{
-    width: 420px;
-    display: flex;
-    justify-content: space-evenly;
-    align-items: center;
-  }
-  .dot {
-    height: 25px;
-    width: 25px;
-    background-color: #324851;
-    border-radius: 50%;
-    display: inline-block;
-  }
-  #icdrive_top:hover{
-    cursor: pointer;
-  }
-  .icdrive_top{
-    
-  }
-
-  @media only screen and (min-width: 600px){
-    .ant-input {
-      height: 25px;
-      width: 250px;
-    }
-  }
-
-  @media only screen and (max-width: 600px){
-    .ant-input {
-      height: 25px;
-      width: 100px;
-    }
-    .right-section{
-      width: 250px;
-      display: flex;
-      justify-content: space-evenly;
-      align-items: center;
-    }
-  }
-`

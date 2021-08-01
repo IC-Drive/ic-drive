@@ -27,21 +27,19 @@ shared (msg) actor class FileHandle (){
   stable var chunkEntries : [(ChunkId, ChunkData)] = [];
   
   var state = FileTypes.empty();
-  stable var admin:Principal = msg.caller;
   stable var owner:Principal = msg.caller;
 
-  public query(msg) func getMyId() : async Principal {
-    admin
+  public query(msg) func getOwner() : async Principal{
+    owner
   };
-
   // Create owner of canister
-  public shared(msg) func makeAdmin() : async (){
-    admin := msg.caller;
+  public query(msg) func getCanisterID() : async Principal{
+    msg.caller;
   };
   public shared(msg) func createOwner(newOwner: Principal) : async Principal {
+    assert(msg.caller==owner);
     owner := newOwner;
-    await makeAdmin();
-    return admin
+    await getCanisterID();
   };
 
   // Create file
@@ -216,7 +214,7 @@ shared (msg) actor class FileHandle (){
         fileSize = file_info.fileSize;
         mimeType = file_info.mimeType ;
         marked = file_info.marked ;
-        sharedWith = file_info.sharedWith ;
+        sharedWith = [] ;
         madePublic = true;
         fileHash = file_hash;
       });
@@ -232,6 +230,32 @@ shared (msg) actor class FileHandle (){
         [];
       }
     };
+  };
+
+  // public shared(msg) func removeFilePublic(fileId : FileId) : async ?() {
+  //   do ? {
+  //     assert(msg.caller==owner);
+  //     Debug.print(fileId);
+  //     let file_info = state.files.get(fileId)!;
+  //     state.files.put(fileId, {
+  //       userName = file_info.userName;
+  //       createdAt = file_info.createdAt ;
+  //       fileId = fileId ;
+  //       name = file_info.name ;
+  //       chunkCount = file_info.chunkCount ;
+  //       fileSize = file_info.fileSize;
+  //       mimeType = file_info.mimeType ;
+  //       marked = file_info.marked ;
+  //       sharedWith = file_info.sharedWith ;
+  //       madePublic = false;
+  //       fileHash = "";
+  //     });
+  //   }
+  // };
+
+  //Get Cycles
+  public query(msg) func getCycles() : async Nat {
+    Cycles.balance()
   };
 
   //Backup and Recover
@@ -257,42 +281,6 @@ shared (msg) actor class FileHandle (){
     chunkEntries := [];
   };
 
-  //func deleteCorruptFile_(file_info : FileInfo) : () {
-  //  Debug.print(file_info.fileId);
-    //for (j in Iter.range(1, file_info.chunkCount)) {
-    //  state.chunks.delete(chunkId(file_info.fileId, j));
-    //};
-    //state.files.delete(file_info.fileId);
-  //};
-
-  /*public query(msg) func deleteCorruptFile(fileId : FileId) : async ?() {
-    do ? {
-      let file_info = getFileInfo_(fileId)!;
-      if(msg.caller==file_info.userId){
-        deleteCorruptFile_(file_info);
-      }
-    }
-  };*/
-
 ///////////////////////////////////////////////////// TEST  //////////////////////////////////////
 
-  type HeaderField = (Text, Text);
-
-  type HttpResponse = {
-      status_code: Nat16;
-      headers: [HeaderField];
-      body: Blob;
-  };
-
-  public query func http_request() : async HttpResponse {
-      //let data := state.chunks.get(chunkId(fileId, chunkNum));
-      Debug.print("Woah, it works!!");
-      return {
-          status_code = 200;
-          headers = [("Content-Type", "application/octet-stream; charset=utf-8"),("Content-Disposition", "attachment; filename*=UTF-8''abc.txt")];
-          body = Text.encodeUtf8("<b>Hello World!</b>");
-      };
-  };
-
 };
-

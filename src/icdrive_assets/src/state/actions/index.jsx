@@ -1,78 +1,62 @@
-export const filesUpdate = (payload) =>{
-  return{
-      type: 'filesUpdate',
-      payload
-  }
-}
-export const sharedUpdate = (payload) =>{
-  return{
-      type: 'sharedUpdate',
-      payload
-  }
-}
-export const uploadUpdate = (payload) =>{
-  return{
-      type: 'uploadUpdate',
-      payload
-  }
-}
-export const refreshFiles = (payload) =>{
-  return{
-      type: 'refreshFiles',
-      payload
-  }
-}
-export const uploadFileId = (payload) =>{
-  return{
-      type: 'uploadFileId',
-      payload
-  }
-}
+export const filesUpdate = (payload) => ({
+  type: 'filesUpdate',
+  payload,
+});
+export const sharedUpdate = (payload) => ({
+  type: 'sharedUpdate',
+  payload,
+});
+export const uploadUpdate = (payload) => ({
+  type: 'uploadUpdate',
+  payload,
+});
+export const refreshFiles = (payload) => ({
+  type: 'refreshFiles',
+  payload,
+});
+export const uploadFileId = (payload) => ({
+  type: 'uploadFileId',
+  payload,
+});
+export const searchedFile = (payload) => ({
+  type: 'searchedFile',
+  payload,
+});
 
-//-------------------------------------Switch Options-----------------------------------------//
-export const switchHome = (payload) =>{
-  return{
-      type: 'switchHome',
-      payload
-  }
-}
-export const switchMarked = (payload) =>{
-  return{
-      type: 'switchMarked',
-      payload
-  }
-}
-export const switchShared = (payload) =>{
-  return{
-      type: 'switchShared',
-      payload
-  }
-}
-export const switchProfile = (payload) =>{
-  return{
-      type: 'switchProfile',
-      payload
-  }
-}
+// -------------------------------------Switch Options-----------------------------------------//
+export const switchHome = (payload) => ({
+  type: 'switchHome',
+  payload,
+});
+export const switchMarked = (payload) => ({
+  type: 'switchMarked',
+  payload,
+});
+export const switchShared = (payload) => ({
+  type: 'switchShared',
+  payload,
+});
+export const switchProfile = (payload) => ({
+  type: 'switchProfile',
+  payload,
+});
+export const switchSearch = (payload) => ({
+  type: 'switchSearch',
+  payload,
+});
 
-//-------------------------------------Upload Progress-----------------------------------------//
-export const uploadProgress = (payload) =>{
-  return{
-      type: 'progressUpdate',
-      payload
-  }
-}
-export const sizeUpdate = (payload) =>{
-  return{
-      type: 'sizeUpdate',
-      payload
-  }
-}
+// -------------------------------------Upload Progress-----------------------------------------//
+export const uploadProgress = (payload) => ({
+  type: 'progressUpdate',
+  payload,
+});
+export const sizeUpdate = (payload) => ({
+  type: 'sizeUpdate',
+  payload,
+});
 
-//---------------------------------------Side Bar----------------------------------------------//
-export const updateState = (payload) =>{
-  return{
-      type: 'updateState',
-      payload
-  }
-}
+// ---------------------------------------Side Bar----------------------------------------------//
+export const SideBarShow = (payload) => ({
+  type: 'SideBarShow',
+  payload,
+});

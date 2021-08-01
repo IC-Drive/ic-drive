@@ -1,22 +1,23 @@
 import React from 'react';
 
 // custom imports
-import { imageTypes, pdfType } from '../MimeTypes';
-import '../../../../assets/css/GridView.css';
+import '../../../../assets/css/ListView.css'
 
 // 3rd party imports
-import {
-  Modal, message, Button, Input, Menu, Dropdown, Tag
-} from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import {
-  downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, removeFilePublic,
+  Table, Popconfirm, Space, Modal, message, Button, Input, Tag
+} from 'antd';
+import {
+  DownloadOutlined, DeleteOutlined, ShareAltOutlined,
+} from '@ant-design/icons';
+import {
+  downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, removeFilePublic, bytesToSize,
 } from '../Methods';
 import { filesUpdate, refreshFiles } from '../../../state/actions';
 
-const GridViewMarked = () => {
+const ListView = () => {
   const files = useSelector((state) => state.FileHandler.files);
-  const [data, setData] = React.useState([]);
   const dispatch = useDispatch();
 
   const fileObj = React.useRef({});
@@ -28,36 +29,26 @@ const GridViewMarked = () => {
   const userName = React.useRef('');
 
   // Functions
-  React.useEffect(() => {
-    const temp = [];
-    for (let i = 0; i < files.length; i+=1) {
-      if (files[i].marked) {
-        temp.push(files[i]);
-      }
-    }
-    setData(temp);
-  }, []);
-
-  const handleDownload = async () => {
-    await downloadFile(fileObj.current);
+  const handleDownload = async (record) => {
+    await downloadFile(record);
   };
 
-  const handleMarked = async () => {
+  const handleMarked = async (record) => {
     const temp = [...files];
     for (let i = 0; i < temp.length; i += 1) {
-      if (temp[i].fileId === fileObj.current.fileId) {
-        temp[i].marked = false;
-        break
+      if (temp[i].fileId === record.fileId) {
+        temp[i].marked = !temp[i].marked;
+        break;
       }
     }
     dispatch(filesUpdate(temp));
-    markFile(fileObj.current);
+    await markFile(record);
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async (record) => {
     if(!deletingFlag){
       setDeletingFlag(true);
-      await deleteFile(fileObj.current);
+      await deleteFile(record);
       dispatch(refreshFiles(true));
       setDeletingFlag(false);
     } else{
@@ -65,8 +56,8 @@ const GridViewMarked = () => {
     }
   };
 
-  const handleView = async () => {
-    const response = await viewFile(fileObj.current);
+  const handleView = async (record) => {
+    const response = await viewFile(record);
     if (!response) {
       message.info('Only PDF and Images can be viewed');
     }
@@ -105,68 +96,62 @@ const GridViewMarked = () => {
     setRemoveLoadingFlag(false);
   };
 
-  const menu = (
-    <Menu>
-      <Menu.Item key="1" onClick={() => { handleDownload(); }}>
-        <span id="context-download" role="button" tabIndex={0}>Download</span>
-      </Menu.Item>
-      <Menu.Item key="2" onClick={() => { handleView(); }}>
-        <span id="context-view" role="button" tabIndex={0}>View</span>
-      </Menu.Item>
-      <Menu.Item key="3" onClick={() => { setShareModal(true); }}>
-        <span id="context-share" role="button" tabIndex={0}>Share</span>
-      </Menu.Item>
-      <Menu.Item key="4" onClick={() => { handleMarked(); }}>
-        <span id="context-mark" role="button" tabIndex={0}>Mark</span>
-      </Menu.Item>
-      <Menu.Item key="5" onClick={() => { handleDelete(); }}>
-        <span id="context-delete" role="button" tabIndex={0}>Delete</span>
-      </Menu.Item>
-    </Menu>
-  );
-
-  const isImage = (mimeType) =>{
-    let flag = false
-    for(let i=0; i<imageTypes.length;i++){
-      if(mimeType===imageTypes[i]){
-        flag=true
-        break
-      }
-    }
-    return(flag)
-  }
-  const isPdf = (mimeType) =>{
-    let flag = false
-    if(mimeType===pdfType){
-      flag = true
-    }
-    return(flag)
-  }
+  // Defining Columns of Table
+  const columns = [
+    {
+      title: 'File Name',
+      dataIndex: 'name',
+      key: 'name',
+      editable: true,
+      render: (text, record) => <div onDoubleClick={() => { handleView(record); }}>{text}</div>,
+    },
+    {
+      title: 'File Size',
+      dataIndex: 'fileSize',
+      key: 'fileSize',
+      render: (text) => <div>{(bytesToSize(Number(text)))}</div>,
+    },
+    {
+      title: 'Created',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+    },
+    {
+      title: 'Mark',
+      dataIndex: 'marked',
+      key: 'marked',
+      render: (_, record) => <div>{record.marked ? <img src="./icons/mark-blue.svg" alt="mark icon" style={{ height: '14px' }} onClick={() => handleMarked(record)} /> : <img src="./icons/mark-gray.svg" alt="mark icon" style={{ height: '14px' }} onClick={() => handleMarked(record)} />}</div>,
+    },
+    {
+      title: '',
+      key: 'operation',
+      render: (_, record) => (
+        <Space size="middle">
+          <span>
+            <DownloadOutlined style={{ color: '#4D85BD' }} onClick={() => handleDownload(record)} />
+          </span>
+          <Popconfirm className="popconfirm" title="Sure to delete?" onConfirm={() => { handleDelete(record); }}>
+            <span>
+              <DeleteOutlined style={{ color: '#4D85BD' }} />
+            </span>
+          </Popconfirm>
+          <span>
+            <ShareAltOutlined style={{ color: '#4D85BD' }} onClick={() => { setShareModal(true); fileObj.current = record; }} />
+          </span>
+        </Space>
+      ),
+    },
+  ];
 
   return (
-    <div className="grid-container">
-      {
-          data.map((value) => (
-            <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
-              <div className="file-div" onDoubleClick={()=>{fileObj.current = value; handleView() }} onContextMenu={() => { fileObj.current = value; }}>
-                <div className="grid-view-icon-part">
-                  {
-                    isImage(value.mimeType)?
-                    <img src="./icons/image-icon.svg" alt="file icon" style={{ width: '60px' }} />
-                    :
-                    isPdf(value.mimeType)?
-                    <img src="./icons/pdf-icon.svg" alt="file icon" style={{ width: '60px' }} />
-                    :
-                    <img src="./icons/file-icon.svg" alt="file icon" style={{ width: '60px' }} />
-                  }
-                </div>
-                <div className="grid-view-text-part truncate-overflow">
-                  {value.name}
-                </div>
-              </div>
-            </Dropdown>
-          ))
-      }
+    <div>
+      <div>
+        <Table dataSource={files} columns={columns} pagination={{
+          defaultPageSize: 50
+        }} />
+      </div>
+
+      {/* Modal For Input User Name */}
       <Modal
         footer={null}
         title={false}
@@ -223,8 +208,9 @@ const GridViewMarked = () => {
           <br />
         </div>
       </Modal>
+
     </div>
   );
 };
 
-export default GridViewMarked;
+export default ListView;

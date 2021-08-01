@@ -1,106 +1,96 @@
-import React from 'react'
-import styled from 'styled-components'
-
-// custom imports
-import Profile from './Profile'
-import TopBar from './TopBar/TopBar.jsx'
-import SideBar from './SideBar/SideBar.jsx'
-import { canisterHttpAgent } from '../httpAgent'
-import CenterPortion from './CenterPortion/CenterPortion.jsx'
+import React from 'react';
 
 // 3rd party imports
-import { useDispatch, useSelector } from 'react-redux'
-import { filesUpdate, sharedUpdate, refreshFiles } from '../state/actions'
+import { useDispatch, useSelector } from 'react-redux';
+import { filesUpdate, sharedUpdate, refreshFiles } from '../state/actions';
 
-const Dashboard = () =>{
+// custom imports
+import TopBar from './TopBar/TopBar';
+import ProfilePage from './ProfilePage';
+import SideBar from './SideBar/SideBar';
+import '../../assets/css/Dashboard.css';
+import { canisterHttpAgent } from '../httpAgent';
+import CenterPortion from './CenterPortion/CenterPortion';
 
-  const refresh_files = useSelector(state=>state.FileHandler.refresh_files);
-  const optionSelected = useSelector(state=>state.OptionSelected.option);
-  const sidebar = useSelector(state=>state.SideBarShow.state);
+const Dashboard = () => {
+  const refreshFilesData = useSelector((state) => state.FileHandler.refreshFiles);
+  const optionSelected = useSelector((state) => state.OptionSelected.option);
+  const sideBarShow = useSelector((state) => state.SideBarShow.sideBar);
   const dispatch = useDispatch();
 
-  React.useEffect(async () => {
-    dispatch(refreshFiles(false))
-    const userAgent = await canisterHttpAgent()
-    const file_list = await userAgent.getFiles()
-    console.log("here")
-    let files = []
-    let sharedFiles = []
-    if(file_list.length>0){
-      for(let i=0; i<file_list[0].length; i++){
-        file_list[0][i]["chunkCount"] = file_list[0][i]["chunkCount"]
-        let temp = new Date(parseInt(Number(file_list[0][i]["createdAt"]).toString().slice(0, -6)))
-        file_list[0][i]["createdAt"] = temp.getDate() + "-" + (temp.getMonth()+1) + "-" + temp.getFullYear()
-        if(localStorage.getItem("userName")===file_list[0][i]["userName"]){
-          files.push(file_list[0][i])
-        } else{
-          sharedFiles.push(file_list[0][i])
-        }
-      }
-      console.log(files)
-      dispatch(filesUpdate(files))
-      dispatch(sharedUpdate(sharedFiles))
-    }
-  }, [refresh_files])
+  React.useEffect(() => {
+    dispatch(refreshFiles(false));
+    const fileJSON = async () => {
+      const userAgent = await canisterHttpAgent();
+      const fileList = await userAgent.getFiles();
 
-  return(
-    <Style>
+      const files = [];
+      const sharedFiles = [];
+      if (fileList.length > 0) {
+        for (let i = 0; i < fileList[0].length; i += 1) {
+          const dateNumber = Number(fileList[0][i].createdAt);
+          const temp = new Date(parseInt(dateNumber.toString().slice(0, -6), 10));
+          fileList[0][i].createdAt = `${temp.getDate()}-${temp.getMonth() + 1}-${temp.getFullYear()}`;
+          if (localStorage.getItem('userName') === fileList[0][i].userName) {
+            files.push(fileList[0][i]);
+          } else {
+            sharedFiles.push(fileList[0][i]);
+          }
+        }
+        dispatch(filesUpdate(files));
+        dispatch(sharedUpdate(sharedFiles));
+      }
+    };
+    fileJSON();
+  }, [refreshFilesData]);
+
+  return (
+    <div className="dashboard-div">
       <TopBar />
       {
-        optionSelected==="profile"?
-        <div>
-          <div className="side-center">
-            <SideBar />
-            <Profile/>
-          </div>
-          <div className="side-center-mobile">
-            {
-              sidebar?
+        optionSelected === 'profile' ? (
+          <div>
+            <div className="dashboard-side-center">
               <SideBar />
-              :
-              <Profile/>
+              <ProfilePage />
+            </div>
+            <div className="dashboard-side-center-mobile">
+              {
+              sideBarShow
+                ? (
+                  <div>
+                    <SideBar />
+                    <ProfilePage />
+                  </div>
+                )
+                : <ProfilePage />
             }
+            </div>
           </div>
-        </div>
-        :
-        <div>
-          <div className="side-center">
-            <SideBar />
-            <CenterPortion/>
-          </div>
-          <div className="side-center-mobile">
-            {
-              sidebar?
-              <SideBar />
-              :
-              <CenterPortion/>
+        )
+          : (
+            <div>
+              <div className="dashboard-side-center">
+                <SideBar />
+                <CenterPortion />
+              </div>
+              <div className="dashboard-side-center-mobile">
+                {
+              sideBarShow
+                ? (
+                  <div>
+                    <SideBar />
+                    <CenterPortion />
+                  </div>
+                )
+                : <CenterPortion />
             }
-          </div>
-        </div>
+              </div>
+            </div>
+          )
       }
-    </Style>
-  )
-}
+    </div>
+  );
+};
 
 export default Dashboard;
-
-const Style = styled.div`
-  font-style: sans-serif;
-    
-  @media only screen and (max-width: 600px){
-    .side-center{
-      display: none;
-    }
-    .side-center-mobile{
-      display: block;
-    }
-  }
-  @media only screen and (min-width: 600px){
-    .side-center{
-      display: flex;
-    }
-    .side-center-mobile{
-      display: none;
-    }
-  }
-`

@@ -1,0 +1,129 @@
+.login-div{
+  margin-top: calc(100vh/2 - 50px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 16px;
+}
+#login-button{
+  height: 40px;
+  width: 200px;
+  background: #2A3132;
+  border-radius: 10px;
+  padding-top: 8px;
+  padding-left: 35px;
+}
+#login-button-loading{
+  height: 40px;
+  width: 200px;
+  background: #C7C7C7;
+  border-radius: 10px;
+  padding-top: 8px;
+  padding-left: 35px;
+}
+#login-button:hover{
+  cursor: pointer;
+}
+#social-button:hover{
+  cursor: pointer;
+}
+.social-div{
+  margin-top: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 16px;
+}
+#social-button{
+  height: 40px;
+  width: 200px;
+  background: #2a3231;
+  border-radius: 10px;
+  padding-top: 8px;
+  padding-left: 35px;
+}
+
+@media only screen and (max-width: 600px) {
+  .login{
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 0 vw 100vw;
+  }
+  .login-div{
+    margin-top: calc(10vh);
+    display: flex;
+    flex-direction: column;
+  }
+  .login-LHS{
+      display: none;
+  }
+  .login-RHS{
+      display: none;
+  }
+  .RHS-mobile{
+    background: #324851;
+  }
+  .block{
+    display: flex;
+    flex-direction: column; 
+  }
+  .top{
+    margin-top: 10vh;
+  }
+  #ic-title{
+    font-size: 72px;
+    margin-bottom: 0;
+    font-family: Times New Roman;
+    text-align: center;
+    font-weight: 600;
+    color: #fff;
+    line-height: 90px;
+  }
+  #ic-footer{
+    font-size: 24px;
+    text-align: center;
+    font-family: Times New Roman;
+    font-weight: 400;
+    color: #fff;
+  }
+}
+@media only screen and (min-width: 600px) {
+  .login{
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 60vw 40vw;
+  }
+  .login-LHS{
+    background: #324851;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .login-RHS{
+    background: #FFFFFF;
+  }
+  .RHS-mobile{
+    display: none;
+  }
+  #login-content{
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    justify-content: center;
+  }
+  #ic-title{
+    font-size: 72px;
+    font-family: Times New Roman;
+    font-weight: 600;
+    color: #fff;
+    line-height: 90px;
+  }
+  #ic-footer{
+    font-size: 24px;
+    font-family: Times New Roman;
+    font-weight: 400;
+    color: #fff;
+  }
+}
