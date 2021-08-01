@@ -31,7 +31,7 @@ const Login = () => {
       onSuccess: async () => {
         handleAuthenticated(authClient);
       },
-      identityProvider: 'http://localhost:8000/?canisterId=rwlgt-iiaaa-aaaaa-aaaaa-cai',
+      identityProvider: 'https://identity.ic0.app/',
     });
   };
 
@@ -103,8 +103,8 @@ const Login = () => {
                     <p id="ic-title">IC Drive</p>
                     <p id="ic-footer">Secure and Private Decentralized Storage App</p>
                   </div>
-                  <div className="login-div" role="button" tabIndex={0} onClick={() => handleLogin()}>
-                    <div id="login-button">
+                  <div className="login-div" role="button" tabIndex={0}>
+                    <div id="login-button" onClick={() => handleLogin()}>
                       Login with &nbsp;&nbsp;
                       {' '}
                       <img src="./icons/dfinity.png" alt="dfinity logo" style={{ height: '16px' }} />
