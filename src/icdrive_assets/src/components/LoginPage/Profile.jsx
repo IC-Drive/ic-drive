@@ -36,7 +36,7 @@ const Profile = () => {
           setLoadingFlag(false);
           setDashboardFlag(true);
         } else {
-          message.error('Something Went Wrong!');
+          message.error('Cant access using this Email!');
           setLoadingFlag(false);
         }
       } else {
@@ -47,20 +47,10 @@ const Profile = () => {
   };
 
   const checkEmail = () =>{
-    let email = [];
-    let flag = 1
-    for(let i=0; i<email.length; i+=1){
-      if(userEmail.current.state.value===email[i]){
-        setEmailId(userEmail.current.state.value)
-        setEmailFlag(false);
-        setUserNameFlag(true);
-        flag = 0
-        break
-      }
-    }
-    if(flag){
-      message.info("App is currently rolled out for first 50 sign up's.")
-    }
+    setEmailId(userEmail.current.state.value)
+    setEmailFlag(false);
+    userEmail.current.state.value = '';
+    setUserNameFlag(true);
   }
 
   React.useEffect(() => {
