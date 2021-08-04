@@ -28,10 +28,14 @@ const Login = () => {
     setLoading(true);
     const authClient = await AuthClient.create();
     await authClient.login({
+      maxTimeToLive: 9999999999999999999,
       onSuccess: async () => {
         handleAuthenticated(authClient);
       },
-      identityProvider: 'https://identity.ic0.app/',
+      identityProvider:
+        process.env.DFX_NETWORK === "ic"
+          ? "https://identity.ic0.app/#authorize"
+          : 'http://localhost:8000/?canisterId=rwlgt-iiaaa-aaaaa-aaaaa-cai',
     });
   };
 

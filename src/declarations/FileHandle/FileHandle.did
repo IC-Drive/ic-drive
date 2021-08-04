@@ -1,0 +1,48 @@
+type UserName__1 = text;
+type UserName = text;
+type FileInit = 
+ record {
+   chunkCount: nat;
+   fileSize: nat;
+   marked: bool;
+   mimeType: text;
+   name: text;
+   sharedWith: vec UserName__1;
+ };
+type FileInfo = 
+ record {
+   chunkCount: nat;
+   createdAt: int;
+   fileHash: text;
+   fileId: FileId__1;
+   fileSize: nat;
+   madePublic: bool;
+   marked: bool;
+   mimeType: text;
+   name: text;
+   sharedWith: vec UserName__1;
+   userName: UserName__1;
+ };
+type FileId__1 = text;
+type FileId = text;
+type FileHandle = 
+ service {
+   addSharedFile: (FileInfo) -> ();
+   createFile: (FileInit, UserName) -> (opt FileId);
+   createOwner: (principal) -> (principal);
+   deleteFile: (FileId) -> (opt null);
+   deleteSharedFile: (FileId) -> (opt null);
+   getCanisterID: () -> (principal) query;
+   getCycles: () -> (nat) query;
+   getFileChunk: (FileId, nat) -> (opt vec nat8) query;
+   getFiles: () -> (opt vec FileInfo) query;
+   getOwner: () -> (principal) query;
+   getPublicFileChunk: (FileId, nat) -> (opt vec nat8) query;
+   getSharedFileChunk: (FileId, nat, UserName) -> (opt vec nat8) query;
+   makeFilePublic: (FileId, text) -> (opt null);
+   markFile: (FileId) -> (opt null);
+   putFileChunk: (FileId, nat, vec nat8) -> ();
+   removeFilePublic: (FileId) -> (opt null);
+   shareFile: (FileId, UserName, UserName) -> (opt text);
+ };
+service : () -> FileHandle

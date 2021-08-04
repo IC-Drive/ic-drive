@@ -9,8 +9,8 @@ import TopBar from './TopBar/TopBar';
 import ProfilePage from './ProfilePage';
 import SideBar from './SideBar/SideBar';
 import '../../assets/css/Dashboard.css';
-import { canisterHttpAgent } from '../httpAgent';
 import CenterPortion from './CenterPortion/CenterPortion';
+import { createActor } from "../../../declarations/FileHandle";
 
 const Dashboard = () => {
   const refreshFilesData = useSelector((state) => state.FileHandler.refreshFiles);
@@ -21,7 +21,7 @@ const Dashboard = () => {
   React.useEffect(() => {
     dispatch(refreshFiles(false));
     const fileJSON = async () => {
-      const userAgent = await canisterHttpAgent();
+      const userAgent = createActor(localStorage.getItem('fileCanister'));
       const fileList = await userAgent.getFiles();
 
       const files = [];

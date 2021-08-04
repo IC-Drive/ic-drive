@@ -3,13 +3,15 @@ import styled from 'styled-components';
 import { Helmet } from "react-helmet";
 
 // custom imports
-import { idlFactory as FileHandleIdl } from 'dfx-generated/FileHandle';
+//import { idlFactory as FileHandleIdl } from 'dfx-generated/FileHandle/FileHandle.did.js';
 import { imageTypes, pdfType } from './CenterPortion/MimeTypes';
 
 // 3rd party imports
 import { Result } from 'antd';
-import { Actor } from '@dfinity/agent';
-import { httpAgent, httpAgentIdentity } from '../httpAgent';
+//import { Actor } from '@dfinity/agent';
+//import { httpAgent, httpAgentIdentity } from '../httpAgent';
+import { icdrive } from "../../../declarations/icdrive";
+import { createActor } from "../../../declarations/FileHandle";
 
 const PublicUrl = () => {
   const [notFound, setNotFound] = React.useState(false);
@@ -26,7 +28,6 @@ const PublicUrl = () => {
 
   React.useEffect(() => {
     const getFiles = async () => {
-      const icdrive = await httpAgent();
       const temp = window.location.href.split('/');
       const hash = temp[temp.length - 1];
       
@@ -56,8 +57,7 @@ const PublicUrl = () => {
         if (flag) {
           const chunkCount = parseInt(metaData[1], 10);
           const fileCanister = metaData[2];
-          const identityAgent = await httpAgentIdentity();
-          const userAgentShare = Actor.createActor(FileHandleIdl, { agent: identityAgent, canisterId: fileCanister });
+          const userAgentShare = createActor(fileCanister);
           const chunkBuffers = [];
           for (let j = 0; j < chunkCount; j += 1) {
             const bytes = await userAgentShare.getPublicFileChunk(fileId, j + 1);

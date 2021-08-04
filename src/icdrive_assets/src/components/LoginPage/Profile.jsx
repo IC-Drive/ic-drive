@@ -2,13 +2,16 @@ import React from 'react';
 
 // 3rd party imports
 import { message, Button, Input } from 'antd';
-import { httpAgent, httpAgentIdentity } from '../../httpAgent';
-import { Actor } from '@dfinity/agent';
+//import { httpAgent, httpAgentIdentity } from '../../httpAgent';
+import { Actor, HttpAgent } from '@dfinity/agent';
+import { AuthClient } from '@dfinity/auth-client';
 
 // custom imports
 import Dashboard from '../Dashboard';
 import '../../../assets/css/Profile.css';
-import { idlFactory as FileHandleIdl } from 'dfx-generated/FileHandle';
+//import { idlFactory as FileHandleIdl } from 'dfx-generated/FileHandle/FileHandle.did.js';
+import { icdrive } from "../../../../declarations/icdrive";
+import { createActor } from "../../../../declarations/FileHandle";
 
 const Profile = () => {
   const [dashboardFlag, setDashboardFlag] = React.useState(false);
@@ -25,7 +28,6 @@ const Profile = () => {
       message.error('Enter User Name');
       setLoadingFlag(false);
     } else {
-      const icdrive = await httpAgent();
       const checkName = await icdrive.checkUserName(userName.current.state.value);
       if (!checkName) {
         const create = await icdrive.createProfile(userName.current.state.value, emailId);
@@ -55,9 +57,7 @@ const Profile = () => {
 
   React.useEffect(() => {
     const createGetProfile = async () => {
-      const icdrive = await httpAgent();
       const profile = await icdrive.getProfile();
-      //console.log(profile)
       // Check if user already exist else create his canister
       if (profile.length === 0) {
         setEmailFlag(true);
@@ -65,13 +65,17 @@ const Profile = () => {
       } else {
         if(profile[0].updateCanister){
           //Update canister
-          //console.log(profile[0].fileCanister.toText());
-          const agent = await httpAgentIdentity();
+          const authClient = await AuthClient.create();
+          const identity = await authClient.getIdentity();
+          const identityAgent = new HttpAgent({ identity });
+
+          const agent = createActor(localStorage.getItem('fileCanister'));
           const wasm_file = await fetch("./FileHandle.wasm");
           const buffer = await wasm_file.arrayBuffer();
           const buffToArray = new Uint8Array(buffer);
-          await Actor.install({mode: "upgrade", module: buffToArray }, {agent: agent, canisterId: profile[0].fileCanister.toText()});
-          await Actor.createActor(FileHandleIdl, {agent: agent, canisterId: profile[0].fileCanister.toText()});
+          
+          await Actor.install({mode: "upgrade", module: buffToArray }, {agent: identityAgent, canisterId: profile[0].fileCanister.toText()});
+          agent = createActor(localStorage.getItem('fileCanister'));
           await icdrive.updateDone();
           localStorage.setItem('userName', profile[0].userName);
           localStorage.setItem('fileCanister', profile[0].fileCanister.toText());

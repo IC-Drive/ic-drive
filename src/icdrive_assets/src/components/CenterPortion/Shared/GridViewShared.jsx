@@ -78,7 +78,7 @@ const GridViewShared = () => {
     <div className="grid-container">
       {
           shared.map((value) => (
-            <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
+            <Dropdown key={value.fileId} overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
               <div className="file-div" onDoubleClick={()=>{fileObj.current = value; handleView() }} onContextMenu={() => { fileObj.current = value; }}>
                 <div className="grid-view-icon-part">
                   {

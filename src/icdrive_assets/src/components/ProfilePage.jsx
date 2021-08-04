@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 // custom imports
 import {bytesToSize} from './CenterPortion/Methods';
-import { canisterHttpAgent } from '../httpAgent';
+import { createActor } from "../../../declarations/FileHandle";
 
 // 3rd party imports
 import { useSelector } from 'react-redux';
@@ -22,7 +22,7 @@ const ProfilePage = () => {
 
     setStorage(bytesToSize(size))
     const getBalance = async()=>{
-      let userAgent = await canisterHttpAgent()
+      const userAgent = createActor(localStorage.getItem('fileCanister'));
       let userCycles = await userAgent.getCycles()
       setCycles(Number(userCycles))
     }
@@ -34,20 +34,10 @@ const ProfilePage = () => {
       <div className="profile-page-container">
         <div className="profile-block">
           <div className="details">
-            <table>
-              <tr>
-                <td>username:&nbsp;&nbsp;&nbsp;{localStorage.getItem("userName")}</td>
-              </tr>
-              <tr>
-                <td>cycles:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{cycles}</td>
-              </tr>
-              <tr>
-                <td>storage:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{storage} / 4 GB</td>
-              </tr>
-              <tr>
-                <td>Canister ID:&nbsp;&nbsp;&nbsp;&nbsp;{localStorage.getItem("fileCanister")}</td>
-              </tr>
-            </table>
+            <strong>username:</strong>&nbsp;&nbsp;&nbsp;{localStorage.getItem("userName")}<br />
+            <strong>cycles:</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{cycles}<br />
+            <strong>storage:</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{storage} / 4 GB<br />
+            <strong>Canister ID:</strong>&nbsp;&nbsp;&nbsp;{localStorage.getItem("fileCanister")}<br />
           </div>
         </div>
       </div>

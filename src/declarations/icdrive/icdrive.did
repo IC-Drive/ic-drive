@@ -1,0 +1,38 @@
+type icdrive = 
+ service {
+   addFeedback: (text) -> ();
+   checkUserName: (UserName__1) -> (bool) query;
+   createProfile: (UserName__1, text) -> (opt principal);
+   getAdmin: () -> (principal) query;
+   getCanister: (UserId) -> (opt FileCanister__1) query;
+   getFeedback: (text) -> (vec text) query;
+   getProfile: () -> (opt Profile) query;
+   getPublicFileLocation: (text) -> (opt text) query;
+   getTempNewEmails: (text) -> (vec text) query;
+   getUserCanister: (UserName__1) -> (opt FileCanister__1) query;
+   getUserCount: (text) -> (nat) query;
+   getUserName: (UserId) -> (opt UserName__1) query;
+   makeFilePublic: (text, text) -> ();
+   updateDone: () -> (opt null);
+   userProfile: (text) -> (vec record {
+                                 UserId;
+                                 Profile;
+                               }) query;
+ };
+type UserName__1 = text;
+type UserName = text;
+type UserId__1 = principal;
+type UserId = principal;
+type Profile = 
+ record {
+   createdAt: int;
+   email: text;
+   fileCanister: FileCanister;
+   id: UserId__1;
+   name: text;
+   updateCanister: bool;
+   userName: UserName;
+ };
+type FileCanister__1 = principal;
+type FileCanister = principal;
+service : () -> icdrive

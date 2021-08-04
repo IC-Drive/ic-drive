@@ -1,18 +1,22 @@
 // custom imports
-import { idlFactory as FileHandleIdl } from 'dfx-generated/FileHandle';
+//import { idlFactory as FileHandleIdl } from 'dfx-generated/FileHandle/FileHandle.did.js';
 
 // 3rd party imports
 // import * as streamSaver from 'streamsaver';
 // import { WritableStream } from 'web-streams-polyfill/ponyfill'
 import sha256 from 'sha256';
-import { Actor } from '@dfinity/agent';
+//import { Actor } from '@dfinity/agent';
 import { imageTypes, pdfType } from './MimeTypes';
-import { httpAgent, canisterHttpAgent, httpAgentIdentity } from '../../httpAgent';
+//import { httpAgent, canisterHttpAgent, httpAgentIdentity } from '../../httpAgent';
+
+import { icdrive } from "../../../../declarations/icdrive";
+import { createActor } from "../../../../declarations/FileHandle";
+
 /* Contain Download, File View, Mark File, Delete File and File Share Implementation */
 
 // Temporary method works well on small files
 export const downloadFile = async (fileInfo) => {
-  const userAgent = await canisterHttpAgent();
+  const userAgent = createActor(localStorage.getItem('fileCanister'));
   const chunkBuffers = [];
   for (let j = 0; j < fileInfo.chunkCount; j += 1) {
     const bytes = await userAgent.getFileChunk(fileInfo.fileId, j + 1);
@@ -46,7 +50,7 @@ export const viewFile = async (fileInfo) => {
 
   // If file is image or pdf
   if (flag) {
-    const userAgent = await canisterHttpAgent();
+    const userAgent = createActor(localStorage.getItem('fileCanister'));
     const chunkBuffers = [];
     for (let j = 0; j < fileInfo.chunkCount; j += 1) {
       const bytes = await userAgent.getFileChunk(fileInfo.fileId, j + 1);
@@ -64,12 +68,12 @@ export const viewFile = async (fileInfo) => {
 };
 
 export const markFile = async (fileInfo) => {
-  const userAgent = await canisterHttpAgent();
+  const userAgent = createActor(localStorage.getItem('fileCanister'));
   await userAgent.markFile(fileInfo.fileId);
 };
 
 export const deleteFile = async (fileInfo) => {
-  const userAgent = await canisterHttpAgent();
+  const userAgent = createActor(localStorage.getItem('fileCanister'));
   await userAgent.deleteFile(fileInfo.fileId);
 };
 
@@ -82,16 +86,14 @@ export function bytesToSize(bytes) {
 
 // Temporary, relook the logic
 export const shareFile = async (fileObj, userName) => {
-  const icdrive = await httpAgent();
-  const userAgent = await canisterHttpAgent();
+  const userAgent = createActor(localStorage.getItem('fileCanister'));
 
   const canisterIdShared = await icdrive.getUserCanister(userName);
   try {
     if (canisterIdShared.length === 1) {
       const respShare = await userAgent.shareFile(fileObj.fileId, userName, localStorage.getItem('userName'));
       if (respShare[0] === 'Success') {
-        const identityAgent = await httpAgentIdentity();
-        const userAgentShare = Actor.createActor(FileHandleIdl, { agent: identityAgent, canisterId: canisterIdShared[0] });
+        const userAgentShare = createActor(canisterIdShared[0]);
         const fileInfo = {
           fileId: fileObj.fileId,
           userName: fileObj.userName,
@@ -128,8 +130,7 @@ export const shareFilePublic = async (fileObj) => {
     flag = 1;
   }
   if (flag) {
-    const icdrive = await httpAgent();
-    const userAgent = await canisterHttpAgent();
+    const userAgent = createActor(localStorage.getItem('fileCanister'));
     const data = `${fileObj.mimeType}$${fileObj.chunkCount.toString()}$${localStorage.getItem('fileCanister')}$${fileObj.fileId}`;
     const fileHash = sha256(data);
     await icdrive.makeFilePublic(fileHash, data);
@@ -140,19 +141,16 @@ export const shareFilePublic = async (fileObj) => {
 };
 
 export const removeFilePublic = async (fileObj) => {
-  const icdrive = await httpAgent();
-  const userAgent = await canisterHttpAgent();
+  const userAgent = createActor(localStorage.getItem('fileCanister'));
   await icdrive.removeFilePublic(fileObj.fileHash);
   await userAgent.removeFilePublic(fileObj.fileId);
   return (true);
 };
 
 export const downloadSharedFile = async (fileInfo, userName) => {
-  const icdrive = await httpAgent();
   const canisterIdShared = await icdrive.getUserCanister(fileInfo.userName); // Canister id of owner
 
-  const identityAgent = await httpAgentIdentity();
-  const userAgentShare = Actor.createActor(FileHandleIdl, { agent: identityAgent, canisterId: canisterIdShared[0] });
+  const userAgentShare = createActor(canisterIdShared[0]);
 
   const chunkBuffers = [];
   for (let j = 0; j < fileInfo.chunkCount; j += 1) {
@@ -187,11 +185,9 @@ export const viewSharedFile = async (fileInfo, userName) => {
 
   // If file is image or pdf
   if (flag) {
-    const icdrive = await httpAgent();
     const canisterIdShared = await icdrive.getUserCanister(fileInfo.userName); // Canister id of owner
 
-    const identityAgent = await httpAgentIdentity();
-    const userAgentShare = Actor.createActor(FileHandleIdl, { agent: identityAgent, canisterId: canisterIdShared[0] });
+    const userAgentShare = createActor(canisterIdShared[0]);
 
     const chunkBuffers = [];
     for (let j = 0; j < fileInfo.chunkCount; j += 1) {
@@ -210,12 +206,11 @@ export const viewSharedFile = async (fileInfo, userName) => {
 };
 
 export const deleteSharedFile = async (fileInfo) => {
-  const userAgent = await canisterHttpAgent();
+  const userAgent = createActor(localStorage.getItem('fileCanister'));
   await userAgent.deleteSharedFile(fileInfo.fileId);
 };
 
 export const sendFeedback = async (feed) => {
-  const icdrive = await httpAgent();
   await icdrive.addFeedback(feed);
 };
 

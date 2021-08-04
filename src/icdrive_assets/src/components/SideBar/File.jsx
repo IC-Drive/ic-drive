@@ -1,4 +1,4 @@
-import { canisterHttpAgent } from '../../httpAgent';
+import { createActor } from "../../../../declarations/FileHandle";
 
 const MAX_CHUNK_SIZE = 1024 * 1024 * 2; // 4MB
 
@@ -18,7 +18,8 @@ function getFileInit(
   };
 }
 
-export async function uploadFile(file, userAgent, dispatch, uploadProgress, uploadFileId) {
+export async function uploadFile(file, dispatch, uploadProgress, uploadFileId) {
+  const userAgent = createActor(localStorage.getItem('fileCanister'));
   const fileInit = getFileInit(file);
   const [fileId] = await userAgent.createFile(fileInit, localStorage.getItem('userName'));
   dispatch(uploadFileId(fileId.toString()));
@@ -55,11 +56,10 @@ export async function uploadFile(file, userAgent, dispatch, uploadProgress, uplo
 }
 
 export async function useUploadFile(file, dispatch, uploadProgress, uploadFileId) {
-  const userAgent = await canisterHttpAgent();
   console.info('Storing File...');
   try {
     console.time('Stored in');
-    await uploadFile(file, userAgent, dispatch, uploadProgress, uploadFileId);
+    await uploadFile(file, dispatch, uploadProgress, uploadFileId);
     console.timeEnd('Stored in');
   } catch (error) {
     console.error('Failed to store file.', error);
