@@ -3,13 +3,10 @@ import styled from 'styled-components';
 import { Helmet } from "react-helmet";
 
 // custom imports
-//import { idlFactory as FileHandleIdl } from 'dfx-generated/FileHandle/FileHandle.did.js';
 import { imageTypes, pdfType } from './CenterPortion/MimeTypes';
 
 // 3rd party imports
-import { Result, Image } from 'antd';
-//import { Actor } from '@dfinity/agent';
-//import { httpAgent, httpAgentIdentity } from '../httpAgent';
+import { Result } from 'antd';
 import { icdrive } from "../../../declarations/icdrive";
 import { createActor } from "../../../declarations/FileHandle";
 
@@ -119,9 +116,6 @@ const PublicUrl = () => {
     </Style>
   );
 };
-{/*<Image src={data} preview={{
-              src: {data},
-            }}/>*/}
 
 export default PublicUrl;
 

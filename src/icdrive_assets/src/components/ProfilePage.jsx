@@ -34,8 +34,8 @@ const ProfilePage = () => {
       <div className="profile-page-container">
         <div className="profile-block">
           <div className="details">
-            <strong>username:</strong>&nbsp;&nbsp;&nbsp;{localStorage.getItem("userName")}<br />
-            <strong>cycles:</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{cycles}<br />
+            <strong>username:</strong>&nbsp;&nbsp;&nbsp;&nbsp;{localStorage.getItem("userName")}<br />
+            <strong>cycles:</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{cycles}<br />
             <strong>storage:</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{storage} / 4 GB<br />
             <strong>Canister ID:</strong>&nbsp;&nbsp;&nbsp;{localStorage.getItem("fileCanister")}<br />
           </div>
