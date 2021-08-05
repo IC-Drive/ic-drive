@@ -12,7 +12,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, removeFilePublic, bytesToSize
 } from '../Methods';
-import { filesUpdate, refreshFiles } from '../../../state/actions';
+import { filesUpdate } from '../../../state/actions';
 
 const GridViewMarked = () => {
   const files = useSelector((state) => state.FileHandler.files);
@@ -21,14 +21,15 @@ const GridViewMarked = () => {
 
   const fileObj = React.useRef({});
   const [shareModal, setShareModal] = React.useState(false);
+  const [refreshData, setRefreshData] = React.useState(true);
   const [ShareLoadingFlag, setShareLoadingFlag] = React.useState(false);
   const [removeFlag, setRemoveLoadingFlag] = React.useState(false);
   const [PublicLoadingFlag, setPublicLoadingFlag] = React.useState(false);
-  const [deletingFlag, setDeletingFlag] = React.useState(false);
   const userName = React.useRef('');
 
   // Functions
   React.useEffect(() => {
+    setRefreshData(false)
     const temp = [];
     for (let i = 0; i < files.length; i+=1) {
       if (files[i].marked) {
@@ -36,7 +37,7 @@ const GridViewMarked = () => {
       }
     }
     setData(temp);
-  }, []);
+  }, [refreshData]);
 
   const handleDownload = async () => {
     await downloadFile(fileObj.current);
@@ -52,17 +53,22 @@ const GridViewMarked = () => {
     }
     dispatch(filesUpdate(temp));
     markFile(fileObj.current);
+    setRefreshData(true);
   };
 
   const handleDelete = async () => {
-    if(!deletingFlag){
-      setDeletingFlag(true);
-      await deleteFile(fileObj.current);
-      dispatch(refreshFiles(true));
-      setDeletingFlag(false);
-    } else{
-      message.info('Please wait for previous file to delete!!!');
+    const temp = [...files];
+    const newFiles = []
+    for (let i = 0; i < temp.length; i += 1) {
+      if (temp[i].fileId === fileObj.current.fileId) {
+        continue;
+      } else{
+        newFiles.push(temp[i]);
+      }
     }
+    dispatch(filesUpdate(newFiles));
+    deleteFile(fileObj.current);
+    setRefreshData(true);
   };
 
   const handleView = async () => {
