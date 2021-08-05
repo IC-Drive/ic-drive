@@ -6,7 +6,7 @@ import '../../../../assets/css/GridView.css';
 
 // 3rd party imports
 import {
-  Modal, message, Button, Input, Menu, Dropdown, Tag, Tooltip
+  Modal, message, Button, Input, Menu, Dropdown, Tag, Tooltip, Popconfirm
 } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import {
@@ -119,9 +119,11 @@ const GridViewMarked = () => {
       <Menu.Item key="4" onClick={() => { handleMarked(); }}>
         <span id="context-mark" role="button" tabIndex={0}>Mark</span>
       </Menu.Item>
-      <Menu.Item key="5" onClick={() => { handleDelete(); }}>
-        <span id="context-delete" role="button" tabIndex={0}>Delete</span>
-      </Menu.Item>
+      <Popconfirm className="popconfirm" title="Sure to delete?" onConfirm={() => { handleDelete(); }}>
+        <Menu.Item key="5">
+          <span id="context-delete" role="button" tabIndex={0}>Delete</span>
+        </Menu.Item>
+      </Popconfirm>
     </Menu>
   );
 

@@ -6,7 +6,7 @@ import '../../../../assets/css/GridView.css';
 
 // 3rd party imports
 import {
-  message, Menu, Dropdown, Tooltip
+  message, Menu, Dropdown, Tooltip, Popconfirm
 } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import {
@@ -50,9 +50,11 @@ const GridViewShared = () => {
       <Menu.Item key="2" onClick={() => { handleView(); }}>
         <span id="context-view" role="button" tabIndex={0}>View</span>
       </Menu.Item>
-      <Menu.Item key="3" onClick={() => { handleDelete(); }}>
-        <span id="context-delete" role="button" tabIndex={0}>Delete</span>
-      </Menu.Item>
+      <Popconfirm className="popconfirm" title="Sure to delete?" onConfirm={() => { handleDelete(); }}>
+        <Menu.Item key="3">
+          <span id="context-delete" role="button" tabIndex={0}>Delete</span>
+        </Menu.Item>
+      </Popconfirm>        
     </Menu>
   );
 
