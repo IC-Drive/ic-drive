@@ -19,6 +19,7 @@ shared (msg) actor class icdrive (){
   type Profile = ProfileTypes.Profile;
   type UserId = ProfileTypes.UserId;
   type UserName = ProfileTypes.UserName;
+  type PublicUrl = ProfileTypes.PublicUrl;
   type FileCanister = ProfileTypes.FileCanister;
   type FileId = FileTypes.FileId;
   type FileInfo = FileTypes.FileInfo;
@@ -33,7 +34,7 @@ shared (msg) actor class icdrive (){
 
   stable var user_entries : [(UserId, Profile)] = [];
   stable var user_name_entries : [(UserName, UserId)] = [];
-  stable var file_url_entries : [(Text, Text)] = [];
+  stable var public_file_url_entries : [(Text, PublicUrl)] = [];
 
   stable var feedback : [Text] = [];
   stable var emailList : [Text] = [];
@@ -41,7 +42,7 @@ shared (msg) actor class icdrive (){
   stable var userCount : Nat = 0;
   stable var tempNewEmails : [Text] = [];
 
-  var fileUrlTrieMap = TrieMap.TrieMap<Text, Text>(Text.equal, Text.hash);
+  var fileUrlTrieMap = TrieMap.TrieMap<Text, PublicUrl>(Text.equal, Text.hash);
 
   public shared(msg) func createProfile(userName: UserName, email: Text) : async ?Principal {
     for (e in emailList.vals()) {
@@ -123,16 +124,27 @@ shared (msg) actor class icdrive (){
 
   //Public File
   public shared(msg) func makeFilePublic(hash: Text, data: Text) : async() {
-    fileUrlTrieMap.put(hash, data);
+    fileUrlTrieMap.put(hash, {
+      data = data;
+      id = msg.caller;
+    });
   };
 
   public query(msg) func getPublicFileLocation(hash: Text) : async ?Text {
-    fileUrlTrieMap.get(hash);
+    do?{
+      let publicUrlData = fileUrlTrieMap.get(hash)!;
+      publicUrlData.data
+    }
   };
 
-  // public shared(msg) func removeFilePublic(hash: Text) : async() {
-  //   fileUrlTrieMap.delete(hash);
-  // };
+  public shared(msg) func removeFilePublic(hash: Text) : async?() {
+    do?{
+      let publicUrlData = fileUrlTrieMap.get(hash)!;
+      if(msg.caller==publicUrlData.id){
+        fileUrlTrieMap.delete(hash);
+      }
+    }
+  };
 
   //Feedback
   public shared(msg) func addFeedback(feed: Text) : async() {
@@ -191,7 +203,7 @@ shared (msg) actor class icdrive (){
   system func preupgrade() {
     user_entries := user.getAllUsers();
     user_name_entries := user.getAllUsersNames();
-    file_url_entries := Iter.toArray(fileUrlTrieMap.entries());
+    public_file_url_entries := Iter.toArray(fileUrlTrieMap.entries());
   };
 
   system func postupgrade () {
@@ -212,13 +224,13 @@ shared (msg) actor class icdrive (){
       user.insertUsersNames(userName, userId);
     };
     //Restore URL Hash and Data
-    for ((hash, data) in file_url_entries.vals()) {
+    for ((hash, data) in public_file_url_entries.vals()) {
       fileUrlTrieMap.put(hash, data);
     };
     
     user_entries := [];
     user_name_entries := [];
-    file_url_entries := [];
+    public_file_url_entries := [];
   };
 
   ////////////////////////////////////Testing/////////////////////////////////////////////
