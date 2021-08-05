@@ -23,14 +23,15 @@ const ListViewMarked = () => {
 
   const fileObj = React.useRef({});
   const [shareModal, setShareModal] = React.useState(false);
+  const [refreshData, setRefreshData] = React.useState(true);
   const [ShareLoadingFlag, setShareLoadingFlag] = React.useState(false);
   const [removeFlag, setRemoveLoadingFlag] = React.useState(false);
   const [PublicLoadingFlag, setPublicLoadingFlag] = React.useState(false);
-  const [deletingFlag, setDeletingFlag] = React.useState(false);
   const userName = React.useRef('');
 
   // Functions
   React.useEffect(async () => {
+    setRefreshData(false)
     const temp = [];
     for (let i = 0; i < files.length; i += 1) {
       if (files[i].marked) {
@@ -38,7 +39,7 @@ const ListViewMarked = () => {
       }
     }
     setData(temp);
-  }, []);
+  }, [refreshData]);
 
   const handleDownload = async (record) => {
     await downloadFile(record);
@@ -49,22 +50,27 @@ const ListViewMarked = () => {
     for (let i = 0; i < temp.length; i += 1) {
       if (temp[i].fileId === record.fileId) {
         temp[i].marked = false;
-        break;
+        break
       }
     }
     dispatch(filesUpdate(temp));
     markFile(record);
+    setRefreshData(true);
   };
 
   const handleDelete = async (record) => {
-    if(!deletingFlag){
-      setDeletingFlag(true);
-      await deleteFile(record);
-      dispatch(refreshFiles(true));
-      setDeletingFlag(false);
-    } else{
-      message.info('Please wait for previous file to delete!!!');
+    const temp = [...files];
+    const newFiles = []
+    for (let i = 0; i < temp.length; i += 1) {
+      if (temp[i].fileId === record.fileId) {
+        continue;
+      } else{
+        newFiles.push(temp[i]);
+      }
     }
+    dispatch(filesUpdate(newFiles));
+    deleteFile(record);
+    setRefreshData(true);
   };
 
   const handleView = async (record) => {

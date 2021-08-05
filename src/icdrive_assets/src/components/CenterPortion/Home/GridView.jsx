@@ -12,7 +12,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, removeFilePublic, bytesToSize
 } from '../Methods';
-import { filesUpdate, refreshFiles } from '../../../state/actions';
+import { filesUpdate } from '../../../state/actions';
 
 const GridView = () => {
   const files = useSelector((state) => state.FileHandler.files);
@@ -23,7 +23,6 @@ const GridView = () => {
   const [ShareLoadingFlag, setShareLoadingFlag] = React.useState(false);
   const [removeFlag, setRemoveLoadingFlag] = React.useState(false);
   const [PublicLoadingFlag, setPublicLoadingFlag] = React.useState(false);
-  const [deletingFlag, setDeletingFlag] = React.useState(false);
   const userName = React.useRef('');
 
   const handleDownload = async () => {
@@ -43,14 +42,17 @@ const GridView = () => {
   };
 
   const handleDelete = async () => {
-    if(!deletingFlag){
-      setDeletingFlag(true);
-      await deleteFile(fileObj.current);
-      dispatch(refreshFiles(true));
-      setDeletingFlag(false);
-    } else{
-      message.info('Please wait for previous file to delete!!!');
+    const temp = [...files];
+    const newFiles = []
+    for (let i = 0; i < temp.length; i += 1) {
+      if (temp[i].fileId === fileObj.current.fileId) {
+        continue;
+      } else{
+        newFiles.push(temp[i]);
+      }
     }
+    dispatch(filesUpdate(newFiles));
+    deleteFile(fileObj.current);
   };
 
   const handleView = async () => {
