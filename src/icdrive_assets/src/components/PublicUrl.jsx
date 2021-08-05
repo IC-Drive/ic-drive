@@ -75,10 +75,11 @@ const PublicUrl = () => {
             setData(fileURL);
           } else{
             let reader = new FileReader();
-            reader.readAsDataURL(fileBlob);
-            reader.onloadend = function() {
-              setData(reader.result);
-            }
+            //reader.readAsDataURL(fileBlob);
+            setData(fileURL);
+            //reader.onloadend = function() {
+            //  setData(reader.result);
+            //}
             setType(mimeType);
           }
           //window.open(fileURL, '_self');
@@ -124,7 +125,6 @@ export default PublicUrl;
 const Style = styled.div`
   font-style: sans-serif;
   height: 100vh;
-  width: 100vw;
 
   .show-pdf{
     height: 100%;
@@ -135,14 +135,16 @@ const Style = styled.div`
   }
   .show-image{
     display: flex;
-    margin: 0px;
+    margin: 0px !important;
     background: #0e0e0e;
-    height: 100%;
+    height: 100% !important;
   }
   #the-image{
     -webkit-user-select: none;
     margin: auto;
     background-color: hsl(0, 0%, 90%);
     transition: background-color 300ms;
+    max-width: 100%;
+    max-height: 100%;
   }
 `;

@@ -1,4 +1,5 @@
 import Array "mo:base/Array";
+import Blob "mo:base/Blob";
 import Cycles "mo:base/ExperimentalCycles";
 import Database "./backend/database";
 import Debug "mo:base/Debug";
@@ -36,7 +37,7 @@ shared (msg) actor class icdrive (){
 
   stable var feedback : [Text] = [];
   stable var emailList : [Text] = [];
-  stable var emailIdList : [Text] = process.env.emailList;
+  stable var emailIdList : [Text] = [];
   stable var userCount : Nat = 0;
   stable var tempNewEmails : [Text] = [];
 
@@ -48,17 +49,18 @@ shared (msg) actor class icdrive (){
         return null
       };
     };
-    var flag = 0;
-    for (e in emailIdList.vals()) {
+    var flag = 1;
+    /*for (e in emailIdList.vals()) {
       if(e==email){
         flag := 1
       };
-    };
+    };*/
     if(flag==1){
       switch(user.findOne(msg.caller)){
         case null{
           Cycles.add(600_000_000_000);
           let fileHandleObj = await FileHandle.FileHandle(); // dynamically install a new Canister
+          
           let canId = await fileHandleObj.createOwner(msg.caller);
           user.createOne(msg.caller, userName, canId, email);
           
@@ -138,7 +140,7 @@ shared (msg) actor class icdrive (){
   };
 
   public query(msg) func getFeedback(password: Text) : async [Text] {
-    if (password == process.env.password) {
+    if (password == "process.env.password") {
         feedback
     } else {
         []
@@ -146,7 +148,7 @@ shared (msg) actor class icdrive (){
   };
 
   public query(msg) func getTempNewEmails(password: Text) : async [Text] {
-    if (password == process.env.password) {
+    if (password == "process.env.password") {
         tempNewEmails
     } else {
         []
@@ -155,7 +157,7 @@ shared (msg) actor class icdrive (){
 
   //user count
   public query(msg) func getUserCount(password: Text) : async Nat {
-    if (password == process.env.password) {
+    if (password == "process.env.password") {
         userCount
     } else {
         0
@@ -163,7 +165,7 @@ shared (msg) actor class icdrive (){
   };
 
   public query(msg) func userProfile(password: Text) : async [(UserId, Profile)] {
-    if (password == process.env.password) {
+    if (password == "process.env.password") {
         user.getAllUsers()
     } else {
         []

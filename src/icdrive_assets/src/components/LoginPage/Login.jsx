@@ -31,7 +31,10 @@ const Login = () => {
       onSuccess: async () => {
         handleAuthenticated(authClient);
       },
-      identityProvider: 'https://identity.ic0.app/',
+      identityProvider:
+        process.env.DFX_NETWORK === "ic"
+          ? "https://identity.ic0.app/#authorize"
+          : 'http://localhost:8000/?canisterId=rwlgt-iiaaa-aaaaa-aaaaa-cai',
     });
   };
 
