@@ -53,6 +53,7 @@ const TopBar = () => {
     setLoadingFlag(true)
     await sendFeedback(feedback.current.resizableTextArea.props.value)
     message.info("Thank you for the feedback !")
+    feedback.current.resizableTextArea.props.value = ''
     setHelpModal(false)
     setLoadingFlag(false)
   }
