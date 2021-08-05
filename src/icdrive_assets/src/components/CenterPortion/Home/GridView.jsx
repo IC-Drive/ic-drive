@@ -6,11 +6,11 @@ import '../../../../assets/css/GridView.css';
 
 // 3rd party imports
 import {
-  Modal, message, Button, Input, Menu, Dropdown, Tag
+  Modal, message, Button, Input, Menu, Dropdown, Tag, Tooltip
 } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import {
-  downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, removeFilePublic,
+  downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, removeFilePublic, bytesToSize
 } from '../Methods';
 import { filesUpdate, refreshFiles } from '../../../state/actions';
 
@@ -130,12 +130,16 @@ const GridView = () => {
     }
     return(flag)
   }
+  const getToolTipText = (value) =>{
+    return(value.name+' - '+ bytesToSize(Number(value.fileSize)) + ' - ' + value.createdAt)
+  }
 
   return (
     <div className="grid-container">
       {
           files.map((value) => (
             <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
+              <Tooltip placement="bottom" title={()=>getToolTipText(value)}>
               <div className="file-div" onDoubleClick={()=>{fileObj.current = value; handleView() }} onContextMenu={() => { fileObj.current = value; }}>
                 <div className="grid-view-icon-part">
                   {
@@ -152,6 +156,7 @@ const GridView = () => {
                   {value.name}
                 </div>
               </div>
+              </Tooltip>
             </Dropdown>
           ))
       }
