@@ -28,4 +28,9 @@ module {
     updateCanister: Bool;
   };
 
+  public type PublicUrl = {
+    data: Text;
+    id: Principal;
+  };
+
 };

@@ -171,7 +171,7 @@ const GridViewMarked = () => {
         footer={null}
         title={false}
         visible={shareModal}
-        onCancel={() => { setShareModal(false); fileObj.current = {}; }}
+        onCancel={() => { setShareModal(false); fileObj.current = {}; setRemoveLoadingFlag(false); }}
       >
         <div>
           {
@@ -214,7 +214,7 @@ const GridViewMarked = () => {
                   {fileObj.current.fileHash}
                 </span>
                 <br />
-                {/* <Button type="primary" style={{ float: 'right', marginRight: '10px' }} loading={removeFlag} onClick={()=>removeSharePublic()}>Remove</Button> */}
+                <Button type="primary" style={{ float: 'right', marginRight: '10px' }} loading={removeFlag} onClick={()=>removeSharePublic()}>Remove</Button>
                 <br />
                 <br />
               </div>

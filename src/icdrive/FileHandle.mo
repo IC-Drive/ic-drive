@@ -232,26 +232,25 @@ shared (msg) actor class FileHandle (){
     };
   };
 
-  // public shared(msg) func removeFilePublic(fileId : FileId) : async ?() {
-  //   do ? {
-  //     assert(msg.caller==owner);
-  //     Debug.print(fileId);
-  //     let file_info = state.files.get(fileId)!;
-  //     state.files.put(fileId, {
-  //       userName = file_info.userName;
-  //       createdAt = file_info.createdAt ;
-  //       fileId = fileId ;
-  //       name = file_info.name ;
-  //       chunkCount = file_info.chunkCount ;
-  //       fileSize = file_info.fileSize;
-  //       mimeType = file_info.mimeType ;
-  //       marked = file_info.marked ;
-  //       sharedWith = file_info.sharedWith ;
-  //       madePublic = false;
-  //       fileHash = "";
-  //     });
-  //   }
-  // };
+  public shared(msg) func removeFilePublic(fileId : FileId) : async ?() {
+    do ? {
+      assert(msg.caller==owner);
+      let file_info = state.files.get(fileId)!;
+      state.files.put(fileId, {
+        userName = file_info.userName;
+        createdAt = file_info.createdAt ;
+        fileId = fileId ;
+        name = file_info.name ;
+        chunkCount = file_info.chunkCount ;
+        fileSize = file_info.fileSize;
+        mimeType = file_info.mimeType ;
+        marked = file_info.marked ;
+        sharedWith = file_info.sharedWith ;
+        madePublic = false;
+        fileHash = "";
+      });
+    }
+  };
 
   //Get Cycles
   public query(msg) func getCycles() : async Nat {
