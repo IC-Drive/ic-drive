@@ -159,7 +159,7 @@ const GridViewMarked = () => {
       {
           data.map((value) => (
             <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
-              <Tooltip placement="bottom" title={()=>getToolTipText(value)}>
+              <Tooltip placement="right" title={()=>getToolTipText(value)}>
               <div className="file-div" onDoubleClick={()=>{fileObj.current = value; handleView() }} onContextMenu={() => { fileObj.current = value; }}>
                 <div className="grid-view-icon-part">
                   {
