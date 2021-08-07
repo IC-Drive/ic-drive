@@ -154,7 +154,14 @@ const GridViewSearch = () => {
                 <div className="grid-view-icon-part">
                   {
                     isImage(value.mimeType)?
-                    <img src="./icons/image-icon.svg" alt="file icon" style={{ width: '60px' }} />
+                    <div>
+                      {
+                        value.thumbnail===''?
+                        <img src="./icons/image-icon.svg" alt="file icon" style={{ width: '60px' }} />
+                        :
+                        <img src={value.thumbnail} alt="file icon" style={{ width: '60px' }} />
+                      }
+                    </div>
                     :
                     isPdf(value.mimeType)?
                     <img src="./icons/pdf-icon.svg" alt="file icon" style={{ width: '60px' }} />

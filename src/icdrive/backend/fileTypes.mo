@@ -19,6 +19,7 @@ module {
     chunkCount: Nat;
     fileSize: Nat;
     mimeType: Text;
+    thumbnail: Text;
     marked: Bool;
     sharedWith: [UserName];
   };
@@ -31,6 +32,7 @@ module {
     chunkCount: Nat;
     fileSize: Nat;
     mimeType: Text;
+    thumbnail: Text;
     marked: Bool;
     sharedWith: [UserName];
     madePublic: Bool;

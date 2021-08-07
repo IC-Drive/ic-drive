@@ -58,6 +58,7 @@ shared (msg) actor class FileHandle (){
               chunkCount = fileData.chunkCount;
               fileSize = fileData.fileSize;
               mimeType = fileData.mimeType;
+              thumbnail = fileData.thumbnail;
               marked = fileData.marked;
               sharedWith = [];
               madePublic = false;
@@ -93,19 +94,20 @@ shared (msg) actor class FileHandle (){
   public shared(msg) func markFile(fileId : FileId) : async ?() {
     do ? {
       assert(msg.caller==owner);
-      var file_info = state.files.get(fileId)!;
+      var fileInfo = state.files.get(fileId)!;
       state.files.put(fileId, {
-        userName = file_info.userName;
-        createdAt = file_info.createdAt ;
+        userName = fileInfo.userName;
+        createdAt = fileInfo.createdAt ;
         fileId = fileId ;
-        name = file_info.name ;
-        chunkCount = file_info.chunkCount ;
-        fileSize = file_info.fileSize;
-        mimeType = file_info.mimeType ;
-        marked= not(file_info.marked) ;
-        sharedWith = file_info.sharedWith ;
-        madePublic = file_info.madePublic;
-        fileHash = file_info.fileHash;
+        name = fileInfo.name ;
+        chunkCount = fileInfo.chunkCount ;
+        fileSize = fileInfo.fileSize;
+        mimeType = fileInfo.mimeType ;
+        thumbnail = fileInfo.thumbnail;
+        marked= not(fileInfo.marked) ;
+        sharedWith = fileInfo.sharedWith ;
+        madePublic = fileInfo.madePublic;
+        fileHash = fileInfo.fileHash;
       });
     }
   };
@@ -139,8 +141,8 @@ shared (msg) actor class FileHandle (){
   public shared(msg) func deleteFile(fileId : FileId) : async ?() {
     do ? {
       assert(msg.caller==owner);
-      let file_info = state.files.get(fileId)!;
-      deleteFile_(file_info);
+      let fileInfo = state.files.get(fileId)!;
+      deleteFile_(fileInfo);
     }
   };
 
@@ -164,6 +166,7 @@ shared (msg) actor class FileHandle (){
         chunkCount = fileInfo.chunkCount ;
         fileSize = fileInfo.fileSize;
         mimeType = fileInfo.mimeType ;
+        thumbnail = fileInfo.thumbnail;
         marked = fileInfo.marked ;
         sharedWith = Array.append<Text>(fileInfo.sharedWith, [userNameShared]);
         madePublic = fileInfo.madePublic;
@@ -195,8 +198,8 @@ shared (msg) actor class FileHandle (){
   public shared(msg) func deleteSharedFile(fileId : FileId) : async ?() {
     do ? {
       assert(msg.caller==owner);
-      let file_info = state.files.get(fileId)!;
-      state.files.delete(file_info.fileId);
+      let fileInfo = state.files.get(fileId)!;
+      state.files.delete(fileInfo.fileId);
     }
   };
 
@@ -204,16 +207,17 @@ shared (msg) actor class FileHandle (){
   public shared(msg) func makeFilePublic(fileId : FileId, file_hash: Text) : async ?() {
     do ? {
       assert(msg.caller==owner);
-      let file_info = state.files.get(fileId)!;
+      let fileInfo = state.files.get(fileId)!;
       state.files.put(fileId, {
-        userName = file_info.userName;
-        createdAt = file_info.createdAt ;
+        userName = fileInfo.userName;
+        createdAt = fileInfo.createdAt ;
         fileId = fileId ;
-        name = file_info.name ;
-        chunkCount = file_info.chunkCount ;
-        fileSize = file_info.fileSize;
-        mimeType = file_info.mimeType ;
-        marked = file_info.marked ;
+        name = fileInfo.name ;
+        chunkCount = fileInfo.chunkCount ;
+        fileSize = fileInfo.fileSize;
+        mimeType = fileInfo.mimeType ;
+        thumbnail = fileInfo.thumbnail;
+        marked = fileInfo.marked ;
         sharedWith = [] ;
         madePublic = true;
         fileHash = file_hash;
@@ -235,17 +239,18 @@ shared (msg) actor class FileHandle (){
   public shared(msg) func removeFilePublic(fileId : FileId) : async ?() {
     do ? {
       assert(msg.caller==owner);
-      let file_info = state.files.get(fileId)!;
+      let fileInfo = state.files.get(fileId)!;
       state.files.put(fileId, {
-        userName = file_info.userName;
-        createdAt = file_info.createdAt ;
+        userName = fileInfo.userName;
+        createdAt = fileInfo.createdAt ;
         fileId = fileId ;
-        name = file_info.name ;
-        chunkCount = file_info.chunkCount ;
-        fileSize = file_info.fileSize;
-        mimeType = file_info.mimeType ;
-        marked = file_info.marked ;
-        sharedWith = file_info.sharedWith ;
+        name = fileInfo.name ;
+        chunkCount = fileInfo.chunkCount ;
+        fileSize = fileInfo.fileSize;
+        mimeType = fileInfo.mimeType ;
+        thumbnail = fileInfo.thumbnail;
+        marked = fileInfo.marked ;
+        sharedWith = fileInfo.sharedWith ;
         madePublic = false;
         fileHash = "";
       });
@@ -259,17 +264,27 @@ shared (msg) actor class FileHandle (){
 
   //Backup and Recover
   system func preupgrade() {
-    Debug.print("hello");
     fileEntries := Iter.toArray(state.files.entries());
     chunkEntries := Iter.toArray(state.chunks.entries());
   };
 
   system func postupgrade() {
-    Debug.print("hello again");
     for ((fileId, fileInfo) in fileEntries.vals()) {
-      Debug.print(fileId);
-      Debug.print(Bool.toText(fileInfo.madePublic));
-      state.files.put(fileId, fileInfo);
+      let fileMetaData = {
+        userName = fileInfo.userName;
+        createdAt = fileInfo.createdAt;
+        fileId = fileId;
+        name = fileInfo.name;
+        chunkCount = fileInfo.chunkCount;
+        fileSize = fileInfo.fileSize;
+        mimeType = fileInfo.mimeType;
+        thumbnail = "";
+        marked = fileInfo.marked;
+        sharedWith = fileInfo.sharedWith;
+        madePublic = fileInfo.madePublic;
+        fileHash = fileInfo.fileHash;
+      };
+      state.files.put(fileId, fileMetaData);
     };
 
     for ((chunkId, chunkData) in chunkEntries.vals()) {

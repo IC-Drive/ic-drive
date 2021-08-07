@@ -94,8 +94,13 @@ const PublicUrl = () => {
   return (
     <Style>
       <Helmet>
+        <meta charSet="utf-8" />
         <title>IC Drive</title>
-        <meta name="viewport" content="width=device-width, minimum-scale=0.1" />
+        <meta property="og:title" content="The Rock" />
+        <meta property="og:type" content={type} />
+        <meta property="og:url" content={window.location.href} />
+        <meta property="og:image" content={data} />
+        <link rel="canonical" href={window.location.href} />
       </Helmet>
       {
         notFound
