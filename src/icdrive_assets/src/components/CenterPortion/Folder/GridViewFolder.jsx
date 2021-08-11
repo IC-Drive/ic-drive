@@ -12,31 +12,35 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, removeFilePublic, bytesToSize
 } from '../Methods';
-import { filesUpdate, switchFolder } from '../../../state/actions';
+import { filesUpdate } from '../../../state/actions';
 
-const GridView = () => {
+const GridViewMarked = () => {
+
+  const optionSelected = useSelector((state) => state.OptionSelected.option);
   const files = useSelector((state) => state.FileHandler.files);
-  const folders = useSelector((state) => state.FolderHandle.folders);
-
+  const [previousFileObjectLength, setPreviousFileObjectLength] = React.useState(0);
+  const [data, setData] = React.useState([]);
   const dispatch = useDispatch();
 
   const fileObj = React.useRef({});
-  const [data, setData] = React.useState([]);
   const [shareModal, setShareModal] = React.useState(false);
+  const [refreshData, setRefreshData] = React.useState(true);
   const [ShareLoadingFlag, setShareLoadingFlag] = React.useState(false);
   const [removeFlag, setRemoveLoadingFlag] = React.useState(false);
   const [PublicLoadingFlag, setPublicLoadingFlag] = React.useState(false);
   const userName = React.useRef('');
 
+  // Functions
   React.useEffect(() => {
+    setPreviousFileObjectLength(files.length)
     const temp = [];
     for (let i = 0; i < files.length; i+=1) {
-      if (files[i].folder==='') {
+      if (files[i].folder===optionSelected) {
         temp.push(files[i]);
       }
     }
     setData(temp);
-  }, [files.length!=(data.length+folders.length)]);
+  }, [previousFileObjectLength!=files.length]);
 
   const handleDownload = async () => {
     await downloadFile(fileObj.current);
@@ -46,12 +50,13 @@ const GridView = () => {
     const temp = [...files];
     for (let i = 0; i < temp.length; i += 1) {
       if (temp[i].fileId === fileObj.current.fileId) {
-        temp[i].marked = !temp[i].marked;
-        break;
+        temp[i].marked = false;
+        break
       }
     }
     dispatch(filesUpdate(temp));
-    await markFile(fileObj.current);
+    markFile(fileObj.current);
+    setRefreshData(true);
   };
 
   const handleDelete = async () => {
@@ -66,6 +71,7 @@ const GridView = () => {
     }
     dispatch(filesUpdate(newFiles));
     deleteFile(fileObj.current);
+    setRefreshData(true);
   };
 
   const handleView = async () => {
@@ -151,25 +157,8 @@ const GridView = () => {
     return(value.name+' - '+ bytesToSize(Number(value.fileSize)) + ' - ' + value.createdAt)
   }
 
-  const switchToFolder = (value) =>{
-    dispatch(switchFolder(value))
-  }
-
   return (
     <div className="grid-container">
-      {
-        folders.map((value) => (
-          <div className="file-div" onDoubleClick={()=>{ switchToFolder(value) }} onContextMenu={() => {  }}>
-            <div className="grid-view-icon-part">
-              <img src="./icons/folder.svg" alt="file icon" style={{ width: '60px' }} />
-            </div>
-            <div className="grid-view-text-part truncate-overflow">
-              {value}
-            </div>
-          </div>
-        ))
-      }
-      <br/><br/>
       {
           data.map((value) => (
             <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
@@ -261,4 +250,4 @@ const GridView = () => {
   );
 };
 
-export default GridView;
+export default GridViewMarked;

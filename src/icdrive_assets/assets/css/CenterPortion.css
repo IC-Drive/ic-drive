@@ -5,6 +5,9 @@
   overflow-y: auto;
   z-index: 0;
 }
+.content-area{
+  height: calc(100% - 32px);
+}
 
 @media only screen and (max-width: 600px){
   .central-portion-container{

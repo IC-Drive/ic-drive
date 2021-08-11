@@ -63,6 +63,7 @@ shared (msg) actor class FileHandle (){
               sharedWith = [];
               madePublic = false;
               fileHash = "";
+              folder = fileData.folder;
             });
 
           ?fileId
@@ -108,6 +109,7 @@ shared (msg) actor class FileHandle (){
         sharedWith = fileInfo.sharedWith ;
         madePublic = fileInfo.madePublic;
         fileHash = fileInfo.fileHash;
+        folder = fileInfo.folder;
       });
     }
   };
@@ -171,6 +173,7 @@ shared (msg) actor class FileHandle (){
         sharedWith = Array.append<Text>(fileInfo.sharedWith, [userNameShared]);
         madePublic = fileInfo.madePublic;
         fileHash = fileInfo.fileHash;
+        folder = fileInfo.folder;
       });
       return(?"Success")
     }
@@ -221,6 +224,7 @@ shared (msg) actor class FileHandle (){
         sharedWith = [] ;
         madePublic = true;
         fileHash = file_hash;
+        folder = fileInfo.folder;
       });
     }
   };
@@ -253,6 +257,7 @@ shared (msg) actor class FileHandle (){
         sharedWith = fileInfo.sharedWith ;
         madePublic = false;
         fileHash = "";
+        folder = fileInfo.folder;
       });
     }
   };
@@ -283,7 +288,9 @@ shared (msg) actor class FileHandle (){
         sharedWith = fileInfo.sharedWith;
         madePublic = fileInfo.madePublic;
         fileHash = fileInfo.fileHash;
+        folder = "";
       };
+      Debug.print(fileId);
       state.files.put(fileId, fileMetaData);
     };
 

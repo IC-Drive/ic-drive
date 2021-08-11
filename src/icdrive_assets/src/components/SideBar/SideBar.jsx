@@ -15,6 +15,7 @@ const SideBar = () => {
   const dispatch = useDispatch();
   const [uploadFlag, setUploadFlag] = React.useState(false);
   const [importModal, setImportModal] = React.useState(false);
+  const optionSelected = useSelector((state) => state.OptionSelected.option);
   const uploadInProgress = useSelector((state) => state.FileHandler.upload);
   const sideBarShow = useSelector((state) => state.SideBarShow.sideBar);
 
@@ -25,11 +26,18 @@ const SideBar = () => {
     } else{
       setUploadFlag(true);
       const fileList = evt.target.files;
+      let folder = '';
+      if(optionSelected==='home' || optionSelected==='marked' || optionSelected==='shared' || optionSelected==='search'){
+        folder = '';
+      } else{
+        folder = optionSelected;
+      }
+      console.log(folder)
       for (let i = 0; i < fileList.length; i += 1) {
         const file = fileList[i];
         dispatch(uploadUpdate({ file_uploading: file.name, file_count: fileList.length, completed: i + 1 }));
         dispatch(sizeUpdate(file.size));
-        await useUploadFile(file, dispatch, uploadProgress, uploadFileId);
+        await useUploadFile(file, folder, dispatch, uploadProgress, uploadFileId);
       }
       dispatch(uploadUpdate({ file_uploading: '', file_count: 0, completed: 0 }));
       dispatch(refreshFiles(true));

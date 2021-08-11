@@ -34,7 +34,7 @@ const isImage = (mimeType) =>{
 }
 
 async function getFileInit(
-  file,
+  file, folder
 ) {
   const chunkCount = Number(Math.ceil(file.size / MAX_CHUNK_SIZE));
   if(isImage(file.type)){
@@ -46,6 +46,7 @@ async function getFileInit(
       marked: false,
       sharedWith: [],
       thumbnail: await resizeFile(file),
+      folder: folder,
     }
   } else{
     return {
@@ -56,12 +57,13 @@ async function getFileInit(
       marked: false,
       sharedWith: [],
       thumbnail: '',
+      folder: folder,
     }
   }
 }
 
-export async function uploadFile(file, userAgent, dispatch, uploadProgress, uploadFileId) {
-  const fileInit = await getFileInit(file);
+export async function uploadFile(file, folder, userAgent, dispatch, uploadProgress, uploadFileId) {
+  const fileInit = await getFileInit(file, folder);
   const [fileId] = await userAgent.createFile(fileInit, localStorage.getItem('userName'));
   dispatch(uploadFileId(fileId.toString()));
 
@@ -86,12 +88,12 @@ export async function uploadFile(file, userAgent, dispatch, uploadProgress, uplo
   }
 }
 
-export async function useUploadFile(file, dispatch, uploadProgress, uploadFileId) {
+export async function useUploadFile(file, folder, dispatch, uploadProgress, uploadFileId) {
   const userAgent = await canisterHttpAgent();
   console.info('Storing File...');
   try {
     console.time('Stored in');
-    await uploadFile(file, userAgent, dispatch, uploadProgress, uploadFileId);
+    await uploadFile(file, folder, userAgent, dispatch, uploadProgress, uploadFileId);
     console.timeEnd('Stored in');
   } catch (error) {
     console.error('Failed to store file.', error);

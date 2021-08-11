@@ -44,6 +44,10 @@ export const switchSearch = (payload) => ({
   type: 'switchSearch',
   payload,
 });
+export const switchFolder = (payload) => ({
+  type: 'switchFolder',
+  payload,
+});
 
 // -------------------------------------Upload Progress-----------------------------------------//
 export const uploadProgress = (payload) => ({
@@ -58,5 +62,11 @@ export const sizeUpdate = (payload) => ({
 // ---------------------------------------Side Bar----------------------------------------------//
 export const SideBarShow = (payload) => ({
   type: 'SideBarShow',
+  payload,
+});
+
+// ---------------------------------------Folder------------------------------------------------//
+export const folderUpdate = (payload) => ({
+  type: 'folderUpdate',
   payload,
 });

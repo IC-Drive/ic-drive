@@ -22,6 +22,7 @@ module {
     thumbnail: Text;
     marked: Bool;
     sharedWith: [UserName];
+    folder: Text;
   };
 
   public type FileInfo = {
@@ -37,6 +38,7 @@ module {
     sharedWith: [UserName];
     madePublic: Bool;
     fileHash: Text;
+    folder: Text;
   };
 
   public type State = {

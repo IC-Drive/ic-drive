@@ -44,7 +44,7 @@ shared (msg) actor class icdrive (){
 
   var fileUrlTrieMap = TrieMap.TrieMap<Text, PublicUrl>(Text.equal, Text.hash);
 
-  public shared(msg) func createProfile(userName: UserName, email: Text) : async ?Principal {
+  public shared(msg) func createProfile(userName: UserName, email: Text) : async ?FileCanister {
     for (e in emailList.vals()) {
       if(e==email){
         return null
