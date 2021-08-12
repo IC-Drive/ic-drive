@@ -12,11 +12,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, removeFilePublic, bytesToSize
 } from '../Methods';
-import { filesUpdate, switchFolder } from '../../../state/actions';
+import { filesUpdate, switchFolder, refreshComponents } from '../../../state/actions';
 
 const GridView = () => {
   const files = useSelector((state) => state.FileHandler.files);
   const folders = useSelector((state) => state.FolderHandle.folders);
+  const refreshData = useSelector((state) => state.FileHandler.refreshComponents);
 
   const dispatch = useDispatch();
 
@@ -29,6 +30,7 @@ const GridView = () => {
   const userName = React.useRef('');
 
   React.useEffect(() => {
+    dispatch(refreshComponents(false));
     const temp = [];
     for (let i = 0; i < files.length; i+=1) {
       if (files[i].folder==='') {
@@ -36,7 +38,7 @@ const GridView = () => {
       }
     }
     setData(temp);
-  }, [files.length!=(data.length+folders.length)]);
+  }, [refreshData]);
 
   const handleDownload = async () => {
     await downloadFile(fileObj.current);

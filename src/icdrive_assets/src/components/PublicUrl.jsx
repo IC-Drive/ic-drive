@@ -70,19 +70,19 @@ const PublicUrl = () => {
           });
 
           const fileURL = URL.createObjectURL(fileBlob);
-          if(isPdf(type)){
-            setType(mimeType);
-            setData(fileURL);
-          } else{
-            let reader = new FileReader();
-            //reader.readAsDataURL(fileBlob);
-            setData(fileURL);
-            //reader.onloadend = function() {
-            //  setData(reader.result);
-            //}
-            setType(mimeType);
-          }
-          //window.open(fileURL, '_self');
+          // if(isPdf(type)){
+          //   setType(mimeType);
+          //   setData(fileURL);
+          // } else{
+          //   let reader = new FileReader();
+          //   //reader.readAsDataURL(fileBlob);
+          //   setData(fileURL);
+          //   //reader.onloadend = function() {
+          //   //  setData(reader.result);
+          //   //}
+          //   setType(mimeType);
+          // }
+          window.open(fileURL, '_self');
         } else {
           setNotFound(true);
         }
@@ -93,7 +93,7 @@ const PublicUrl = () => {
 
   return (
     <Style>
-      <Helmet>
+      {/* <Helmet>
         <meta charSet="utf-8" />
         <title>IC Drive</title>
         <meta property="og:title" content="The Rock" />
@@ -120,7 +120,7 @@ const PublicUrl = () => {
             <div className="show-image">
               <img alt="IC Drive - File on Blockchain" id="the-image" src={data}/>
             </div>
-      }
+      } */}
     </Style>
   );
 };

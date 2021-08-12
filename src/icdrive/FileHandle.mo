@@ -288,7 +288,7 @@ shared (msg) actor class FileHandle (){
         sharedWith = fileInfo.sharedWith;
         madePublic = fileInfo.madePublic;
         fileHash = fileInfo.fileHash;
-        folder = "";
+        folder = fileInfo.folder;
       };
       Debug.print(fileId);
       state.files.put(fileId, fileMetaData);

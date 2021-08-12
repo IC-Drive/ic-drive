@@ -14,6 +14,10 @@ export const refreshFiles = (payload) => ({
   type: 'refreshFiles',
   payload,
 });
+export const refreshComponents = (payload) => ({
+  type: 'refreshComponents',
+  payload,
+});
 export const uploadFileId = (payload) => ({
   type: 'uploadFileId',
   payload,

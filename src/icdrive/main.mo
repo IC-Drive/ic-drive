@@ -9,7 +9,7 @@ import TrieMap "mo:base/TrieMap";
 import Int "mo:base/Int";
 import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";
-import Principal "mo:base/Bool";
+import Principal "mo:base/Principal";
 import ProfileTypes "./backend/profileTypes";
 import Text "mo:base/Text";
 
@@ -37,55 +37,34 @@ shared (msg) actor class icdrive (){
   stable var public_file_url_entries : [(Text, PublicUrl)] = [];
 
   stable var feedback : [Text] = [];
-  stable var emailList : [Text] = [];
-  stable var emailIdList : [Text] = [];
   stable var userCount : Nat = 0;
-  stable var tempNewEmails : [Text] = [];
 
   var fileUrlTrieMap = TrieMap.TrieMap<Text, PublicUrl>(Text.equal, Text.hash);
 
   public shared(msg) func createProfile(userName: UserName, email: Text) : async ?FileCanister {
-    for (e in emailList.vals()) {
-      if(e==email){
-        return null
-      };
-    };
-    var flag = 1;
-    /*for (e in emailIdList.vals()) {
-      if(e==email){
-        flag := 1
-      };
-    };*/
-    if(flag==1){
-      switch(user.findOne(msg.caller)){
-        case null{
-          Cycles.add(600_000_000_000);
-          let fileHandleObj = await FileHandle.FileHandle(); // dynamically install a new Canister
-          
-          let canId = await fileHandleObj.createOwner(msg.caller);
-          user.createOne(msg.caller, userName, canId, email);
-          
-          let settings: CanisterSettings = {
-          controllers = [admin, msg.caller];
-          };
-          let params: UpdateSettingsParams = {
-              canister_id = canId;
-              settings = settings;
-          };
-          await IC.update_settings(params);
-
-          emailList := Array.append<Text>(emailList, [email]);
-          userCount := userCount + 1;
-          
-          return(?canId);
+    switch(user.findOne(msg.caller)){
+      case null{
+        Cycles.add(600_000_000_000);
+        let fileHandleObj = await FileHandle.FileHandle(); // dynamically install a new Canister
+        
+        let canId = await fileHandleObj.createOwner(msg.caller);
+        user.createOne(msg.caller, userName, canId, email);
+        
+        let settings: CanisterSettings = {
+        controllers = [admin, msg.caller];
         };
-        case (?_){
-          return(null);
+        let params: UpdateSettingsParams = {
+            canister_id = canId;
+            settings = settings;
         };
-      }
-    } else{
-      tempNewEmails := Array.append<Text>(tempNewEmails, [email]);
-      return null;
+        await IC.update_settings(params);
+        userCount := userCount + 1;
+        
+        return(?canId);
+      };
+      case (?_){
+        return(null);
+      };
     }
   };
 
@@ -154,14 +133,6 @@ shared (msg) actor class icdrive (){
   public query(msg) func getFeedback(password: Text) : async [Text] {
     if (password == "process.env.password") {
         feedback
-    } else {
-        []
-    }
-  };
-
-  public query(msg) func getTempNewEmails(password: Text) : async [Text] {
-    if (password == "process.env.password") {
-        tempNewEmails
     } else {
         []
     }

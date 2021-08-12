@@ -2,7 +2,7 @@ import React from 'react';
 
 // 3rd party imports
 import { useDispatch, useSelector } from 'react-redux';
-import { filesUpdate, sharedUpdate, refreshFiles, folderUpdate } from '../state/actions';
+import { filesUpdate, sharedUpdate, refreshFiles, folderUpdate, refreshComponents } from '../state/actions';
 
 // custom imports
 import TopBar from './TopBar/TopBar';
@@ -34,17 +34,19 @@ const Dashboard = () => {
           fileList[0][i].createdAt = `${temp.getDate()}-${temp.getMonth() + 1}-${temp.getFullYear()}`;
           if (localStorage.getItem('userName') === fileList[0][i].userName) {
             if(fileList[0][i]['folder']!=''){
-              folders.push(fileList[0][i]['folder']);
+              if(folders.indexOf(fileList[0][i]['folder'])===-1){
+                folders.push(fileList[0][i]['folder']);
+              }
             }
             files.push(fileList[0][i]);
           } else {
             sharedFiles.push(fileList[0][i]);
           }
         }
-        console.log(folders, files, sharedFiles);
         dispatch(folderUpdate(folders));
         dispatch(filesUpdate(files));
         dispatch(sharedUpdate(sharedFiles));
+        dispatch(refreshComponents(true));
       }
     };
     fileJSON();
