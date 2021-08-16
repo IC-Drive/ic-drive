@@ -34,12 +34,9 @@ shared (msg) actor class icdrive (){
 
   stable var user_entries : [(UserId, Profile)] = [];
   stable var user_name_entries : [(UserName, UserId)] = [];
-  stable var public_file_url_entries : [(Text, PublicUrl)] = [];
 
   stable var feedback : [Text] = [];
   stable var userCount : Nat = 0;
-
-  var fileUrlTrieMap = TrieMap.TrieMap<Text, PublicUrl>(Text.equal, Text.hash);
 
   public shared(msg) func createProfile(userName: UserName, email: Text) : async ?FileCanister {
     switch(user.findOne(msg.caller)){
@@ -101,30 +98,6 @@ shared (msg) actor class icdrive (){
     }
   };
 
-  //Public File
-  public shared(msg) func makeFilePublic(hash: Text, data: Text) : async() {
-    fileUrlTrieMap.put(hash, {
-      data = data;
-      id = msg.caller;
-    });
-  };
-
-  public query(msg) func getPublicFileLocation(hash: Text) : async ?Text {
-    do?{
-      let publicUrlData = fileUrlTrieMap.get(hash)!;
-      publicUrlData.data
-    }
-  };
-
-  public shared(msg) func removeFilePublic(hash: Text) : async?() {
-    do?{
-      let publicUrlData = fileUrlTrieMap.get(hash)!;
-      if(msg.caller==publicUrlData.id){
-        fileUrlTrieMap.delete(hash);
-      }
-    }
-  };
-
   //Feedback
   public shared(msg) func addFeedback(feed: Text) : async() {
     feedback := Array.append<Text>(feedback, [feed]);
@@ -174,7 +147,6 @@ shared (msg) actor class icdrive (){
   system func preupgrade() {
     user_entries := user.getAllUsers();
     user_name_entries := user.getAllUsersNames();
-    public_file_url_entries := Iter.toArray(fileUrlTrieMap.entries());
   };
 
   system func postupgrade () {
@@ -194,14 +166,9 @@ shared (msg) actor class icdrive (){
     for ((userName, userId) in user_name_entries.vals()) {
       user.insertUsersNames(userName, userId);
     };
-    //Restore URL Hash and Data
-    for ((hash, data) in public_file_url_entries.vals()) {
-      fileUrlTrieMap.put(hash, data);
-    };
     
     user_entries := [];
     user_name_entries := [];
-    public_file_url_entries := [];
   };
 
   ////////////////////////////////////Testing/////////////////////////////////////////////

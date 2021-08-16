@@ -1,7 +1,6 @@
 import React from 'react';
 
 // custom imports
-import { imageTypes, pdfType } from '../MimeTypes';
 import '../../../../assets/css/GridView.css';
 
 // 3rd party imports
@@ -134,21 +133,19 @@ const GridView = () => {
 
   const isImage = (mimeType) =>{
     let flag = false
-    for(let i=0; i<imageTypes.length;i++){
-      if(mimeType===imageTypes[i]){
-        flag=true
-        break
-      }
+    if(mimeType.indexOf("image")!=-1){
+      flag=true
     }
     return(flag)
   }
   const isPdf = (mimeType) =>{
     let flag = false
-    if(mimeType===pdfType){
-      flag = true
+    if(mimeType.indexOf("pdf")!=-1){
+      flag=true
     }
     return(flag)
   }
+
   const getToolTipText = (value) =>{
     return(value.name+' - '+ bytesToSize(Number(value.fileSize)) + ' - ' + value.createdAt)
   }
@@ -163,7 +160,7 @@ const GridView = () => {
         folders.map((value) => (
           <div className="file-div" onDoubleClick={()=>{ switchToFolder(value) }} onContextMenu={() => {  }}>
             <div className="grid-view-icon-part">
-              <img src="./icons/folder.svg" alt="file icon" style={{ width: '60px' }} />
+              <img id="display-icon" src="./icons/folder.svg" alt="file icon" />
             </div>
             <div className="grid-view-text-part truncate-overflow">
               {value}
@@ -183,16 +180,16 @@ const GridView = () => {
                     <div>
                       {
                         value.thumbnail===''?
-                        <img src="./icons/image-icon.svg" alt="file icon" style={{ width: '60px' }} />
+                        <img id="display-icon" src="./icons/image-icon.svg" alt="file icon" />
                         :
-                        <img src={value.thumbnail} alt="file icon" style={{ width: '60px' }} />
+                        <img id="display-icon" src={value.thumbnail} alt="file icon" />
                       }
                     </div>
                     :
                     isPdf(value.mimeType)?
-                    <img src="./icons/pdf-icon.svg" alt="file icon" style={{ width: '60px' }} />
+                    <img id="display-icon" src="./icons/pdf-icon.svg" alt="file icon" />
                     :
-                    <img src="./icons/file-icon.svg" alt="file icon" style={{ width: '60px' }} />
+                    <img id="display-icon" src="./icons/file-icon.svg" alt="file icon" />
                   }
                 </div>
                 <div className="grid-view-text-part truncate-overflow">
@@ -246,7 +243,7 @@ const GridView = () => {
               <div>
                 <span id="public-url" style={{color:'#4D85BD'}} onClick={() => { navigator.clipboard.writeText(`${window.location.href}icdrive/${fileObj.current.fileHash}`); message.info('copied to clipboard'); }}>
                   {window.location.href}
-                  icdrive/
+                  icdrive/{localStorage.getItem('fileCanister')}/
                   {fileObj.current.fileHash}
                 </span>
                 <br />

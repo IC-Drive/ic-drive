@@ -1,6 +1,5 @@
 import { canisterHttpAgent } from '../../httpAgent';
 import Resizer from "react-image-file-resizer";
-import { imageTypes } from '../CenterPortion/MimeTypes';
 
 const MAX_CHUNK_SIZE = 1024 * 1024 * 1.5; // 1.5MB
 
@@ -10,25 +9,24 @@ const resizeFile = (file) =>
   new Promise((resolve) => {
     Resizer.imageFileResizer(
       file,
-      60,
-      60,
+      70,
+      58,
       "JPEG",
       100,
       0,
       (uri) => {
         resolve(uri);
       },
-      "base64"
+      "base64",
+      70,
+      58
     );
 });
 
 const isImage = (mimeType) =>{
   let flag = false
-  for(let i=0; i<imageTypes.length;i++){
-    if(mimeType===imageTypes[i]){
-      flag=true
-      break
-    }
+  if(mimeType.indexOf("image")!=-1){
+    flag=true
   }
   return(flag)
 }
@@ -78,7 +76,6 @@ export async function uploadFile(file, folder, userAgent, dispatch, uploadProgre
     const fileSliceBuffer = (await fileSlice.arrayBuffer()) || new ArrayBuffer(0);
     const sliceToNat = encodeArrayBuffer(fileSliceBuffer);
     await userAgent.putFileChunk(fileId, chunk, sliceToNat);
-
     dispatch(uploadProgress(100 * (chunk / fileInit.chunkCount).toFixed(2)));
 
     if (chunk >= fileInit.chunkCount) {

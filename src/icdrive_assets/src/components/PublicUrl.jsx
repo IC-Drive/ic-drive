@@ -4,7 +4,6 @@ import { Helmet } from "react-helmet";
 
 // custom imports
 import { idlFactory as FileHandleIdl } from 'dfx-generated/FileHandle';
-import { imageTypes, pdfType } from './CenterPortion/MimeTypes';
 
 // 3rd party imports
 import { Result } from 'antd';
@@ -16,84 +15,58 @@ const PublicUrl = () => {
   const [data, setData] = React.useState('');
   const [type, setType] = React.useState('');
 
-  const isPdf = (mimeType) =>{
-    let flag = false
-    if(mimeType===pdfType){
-      flag = true
-    }
-    return(flag)
-  }
-
   React.useEffect(() => {
     const getFiles = async () => {
-      const icdrive = await httpAgent();
-      const temp = window.location.href.split('/');
-      const hash = temp[temp.length - 1];
-      
-      const file = await icdrive.getPublicFileLocation(hash);
+      let canisterId = window.location.href.split('/')[5]
+      let fileHash = window.location.href.split('/')[6]
 
-      if (file.length === 1) {
-        const metaData = file[0].split('$');
+      const identityAgent = await httpAgentIdentity();
+      const userAgentShare = Actor.createActor(FileHandleIdl, { agent: identityAgent, canisterId: canisterId });
+      let fileInfo = await userAgentShare.getPublicFileMeta(fileHash);
+      fileInfo = fileInfo[0]
 
-        let fileId = '';
-        for (let i = 3; i < metaData.length; i += 1) {
-          fileId += metaData[i];
-        }
-
-        const mimeType = metaData[0];
-
-        let flag = 0;
-        for (let i = 0; i < imageTypes.length; i += 1) {
-          if (mimeType === imageTypes[i]) {
-            flag = 1;
-            break;
-          }
-        }
-        if (mimeType === pdfType) {
-          flag = 1;
-        }
-
-        if (flag) {
-          const chunkCount = parseInt(metaData[1], 10);
-          const fileCanister = metaData[2];
-          const identityAgent = await httpAgentIdentity();
-          const userAgentShare = Actor.createActor(FileHandleIdl, { agent: identityAgent, canisterId: fileCanister });
-          const chunkBuffers = [];
-          for (let j = 0; j < chunkCount; j += 1) {
-            const bytes = await userAgentShare.getPublicFileChunk(fileId, j + 1);
-            const bytesAsBuffer = new Uint8Array(bytes[0]);
-            chunkBuffers.push(bytesAsBuffer);
-          }
-
-          const fileBlob = new Blob([Buffer.concat(chunkBuffers)], {
-            type: mimeType,
-          });
-
-          const fileURL = URL.createObjectURL(fileBlob);
-          // if(isPdf(type)){
-          //   setType(mimeType);
-          //   setData(fileURL);
-          // } else{
-          //   let reader = new FileReader();
-          //   //reader.readAsDataURL(fileBlob);
-          //   setData(fileURL);
-          //   //reader.onloadend = function() {
-          //   //  setData(reader.result);
-          //   //}
-          //   setType(mimeType);
-          // }
-          window.open(fileURL, '_self');
-        } else {
-          setNotFound(true);
-        }
+      const chunkBuffers = [];
+      for (let j = 0; j < fileInfo.chunkCount; j += 1) {
+        const bytes = await userAgentShare.getPublicFileChunk(fileInfo.fileId, j + 1);
+        const bytesAsBuffer = new Uint8Array(bytes[0]);
+        chunkBuffers.push(bytesAsBuffer);
       }
+      const fileBlob = new Blob([Buffer.concat(chunkBuffers)], {
+        type: fileInfo.mimeType,
+      });
+      
+      const fileURL = URL.createObjectURL(fileBlob);
+      
+      // if(isPdf(type)){
+      //   setType(mimeType);
+      //   setData(fileURL);
+      // } else{
+      //   let reader = new FileReader();
+      //   //reader.readAsDataURL(fileBlob);
+      //   setData(fileURL);
+      //   //reader.onloadend = function() {
+      //   //  setData(reader.result);
+      //   //}
+      //   setType(mimeType);
+      // }
+      setType(fileInfo.mimeType);
+      setData(fileURL);
+
     };
     getFiles();
   }, []);
 
+  const isPdf = (mimeType) =>{
+    let flag = false
+    if(mimeType.indexOf("pdf")!=-1){
+      flag=true
+    }
+    return(flag)
+  }
+
   return (
     <Style>
-      {/* <Helmet>
+      <Helmet>
         <meta charSet="utf-8" />
         <title>IC Drive</title>
         <meta property="og:title" content="The Rock" />
@@ -120,7 +93,7 @@ const PublicUrl = () => {
             <div className="show-image">
               <img alt="IC Drive - File on Blockchain" id="the-image" src={data}/>
             </div>
-      } */}
+      }
     </Style>
   );
 };

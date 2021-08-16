@@ -5,7 +5,7 @@
   .file-div{
     margin-top: 30px;
     margin-left: 30px;
-    width: 60px;
+    width: 70px;
     justify-content: center; 
     overflow:hidden;
     align-items: center;
@@ -24,7 +24,10 @@
   .ant-dropdown-menu-item:hover, .ant-dropdown-menu-submenu-title:hover{
     background: #425757 !important;
   }
-  
+  #display-icon{
+    width: 70px;
+    height: 58px;
+  }
   .truncate-overflow{
     -webkit-line-clamp: 3 !important;
     -webkit-box-orient: vertical;

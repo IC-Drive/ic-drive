@@ -2,6 +2,7 @@ import React from 'react';
 
 // custom imports
 import { useDispatch, useSelector } from 'react-redux';
+import DropboxImport from '../ImportFiles/DropboxImport';
 import { useUploadFile } from './File';
 import '../../../assets/css/SideBar.css';
 
@@ -134,7 +135,7 @@ const SideBar = () => {
         visible={importModal}
         onCancel={() => setImportModal(false) }
       >
-        <strong>Will be available soon</strong>
+        <DropboxImport />
       </Modal>
     </div>
   );
