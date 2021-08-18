@@ -2,31 +2,30 @@ import React from 'react';
 import styled from 'styled-components';
 
 // custom imports
-import {bytesToSize} from './CenterPortion/Methods';
+import { useSelector } from 'react-redux';
+import { bytesToSize } from './CenterPortion/Methods';
 import { canisterHttpAgent } from '../httpAgent';
 
 // 3rd party imports
-import { useSelector } from 'react-redux';
 
 const ProfilePage = () => {
-
-  const [cycles, setCycles] = React.useState(0)
-  const [storage, setStorage] = React.useState(0)
+  const [cycles, setCycles] = React.useState(0);
+  const [storage, setStorage] = React.useState(0);
   const files = useSelector((state) => state.FileHandler.files);
 
   React.useEffect(() => {
-    let size = 0
+    let size = 0;
     for (let i = 0; i < files.length; i += 1) {
-      size = size + Number(files[i].fileSize)
+      size += Number(files[i].fileSize);
     }
 
-    setStorage(bytesToSize(size))
-    const getBalance = async()=>{
-      let userAgent = await canisterHttpAgent()
-      let userCycles = await userAgent.getCycles()
-      setCycles(Number(userCycles))
-    }
-    getBalance()
+    setStorage(bytesToSize(size));
+    const getBalance = async () => {
+      const userAgent = await canisterHttpAgent();
+      const userCycles = await userAgent.getCycles();
+      setCycles(Number(userCycles));
+    };
+    getBalance();
   }, []);
 
   return (
@@ -36,16 +35,30 @@ const ProfilePage = () => {
           <div className="details">
             <table>
               <tr>
-                <td>username:&nbsp;&nbsp;&nbsp;{localStorage.getItem("userName")}</td>
+                <td>
+                  username:&nbsp;&nbsp;&nbsp;
+                  {localStorage.getItem('userName')}
+                </td>
               </tr>
               <tr>
-                <td>cycles:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{cycles}</td>
+                <td>
+                  cycles:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  {cycles}
+                </td>
               </tr>
               <tr>
-                <td>storage:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{storage} / 4 GB</td>
+                <td>
+                  storage:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  {storage}
+                  {' '}
+                  / 4 GB
+                </td>
               </tr>
               <tr>
-                <td>Canister ID:&nbsp;&nbsp;&nbsp;&nbsp;{localStorage.getItem("fileCanister")}</td>
+                <td>
+                  Canister ID:&nbsp;&nbsp;&nbsp;&nbsp;
+                  {localStorage.getItem('fileCanister')}
+                </td>
               </tr>
             </table>
           </div>

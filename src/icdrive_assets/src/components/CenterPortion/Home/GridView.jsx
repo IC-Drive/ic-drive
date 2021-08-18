@@ -52,6 +52,7 @@ const GridView = () => {
       }
     }
     dispatch(filesUpdate(temp));
+    dispatch(refreshComponents(true));
     await markFile(fileObj.current);
   };
 
@@ -66,6 +67,7 @@ const GridView = () => {
       }
     }
     dispatch(filesUpdate(newFiles));
+    dispatch(refreshComponents(true));
     deleteFile(fileObj.current);
   };
 

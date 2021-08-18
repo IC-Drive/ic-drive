@@ -1,16 +1,16 @@
 import React from 'react';
 
-// custom imports
-import { useDispatch, useSelector } from 'react-redux';
-import DropboxImport from '../ImportFiles/DropboxImport';
-import { useUploadFile } from './File';
-import '../../../assets/css/SideBar.css';
-
 // 3rd party imports
-import {message, Modal} from 'antd';
+import { message } from 'antd';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   uploadUpdate, refreshFiles, switchHome, switchMarked, switchShared, uploadProgress, sizeUpdate, uploadFileId, SideBarShow,
 } from '../../state/actions';
+
+// custom imports
+import DropboxImport from '../ImportFiles/DropboxImport';
+import { useUploadFile } from './File';
+import '../../../assets/css/SideBar.css';
 
 const SideBar = () => {
   const dispatch = useDispatch();
@@ -22,18 +22,18 @@ const SideBar = () => {
 
   const onFileSelect = async (evt) => {
     dispatch(SideBarShow(!sideBarShow));
-    if(uploadInProgress.file_count > 0){
-      message.info("Wait for previous files to upload!!!")
-    } else{
+    if (uploadInProgress.file_count > 0) {
+      message.info('Wait for previous files to upload!!!');
+    } else {
       setUploadFlag(true);
       const fileList = evt.target.files;
       let folder = '';
-      if(optionSelected==='home' || optionSelected==='marked' || optionSelected==='shared' || optionSelected==='search'){
+      if (optionSelected === 'home' || optionSelected === 'marked' || optionSelected === 'shared' || optionSelected === 'search') {
         folder = '';
-      } else{
+      } else {
         folder = optionSelected;
       }
-      console.log(folder)
+
       for (let i = 0; i < fileList.length; i += 1) {
         const file = fileList[i];
         dispatch(uploadUpdate({ file_uploading: file.name, file_count: fileList.length, completed: i + 1 }));
@@ -118,7 +118,7 @@ const SideBar = () => {
         </div>
 
         <div className="element">
-          <div className="element-section" onClick={()=>{setImportModal(true)}}>
+          <div className="element-section" onClick={() => { setImportModal(!importModal); }}>
             <div className="side-bar-icon-part">
               <img src="./icons/import.svg" alt="home icon" style={{ height: '22px', color: '#fff' }} />
             </div>
@@ -126,17 +126,24 @@ const SideBar = () => {
               <span>Import</span>
             </div>
           </div>
+          {
+            importModal
+              ? (
+                <div style={{ display: 'flex' }}>
+                  <div className="side-bar-import-icon-part-2" onClick={() => { setImportModal(false); }}>
+                    <span><DropboxImport /></span>
+                  </div>
+&nbsp;&nbsp;&nbsp;
+                  <div className="side-bar-import-icon-part-3" onClick={() => { setImportModal(false); }}>
+                    <span><img height="24px" src="./icons/google-drive.png" /></span>
+                  </div>
+                </div>
+              )
+              : null
+          }
         </div>
 
       </div>
-      <Modal
-        footer={null}
-        title={false}
-        visible={importModal}
-        onCancel={() => setImportModal(false) }
-      >
-        <DropboxImport />
-      </Modal>
     </div>
   );
 };

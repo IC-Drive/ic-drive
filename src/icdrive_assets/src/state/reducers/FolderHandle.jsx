@@ -1,5 +1,5 @@
 const initialState = {
-  folders: []
+  folders: [],
 };
 
 const reducer = (state = initialState, action) => {

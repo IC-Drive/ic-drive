@@ -2,16 +2,18 @@ import React from 'react';
 
 // custom imports
 import '../../../assets/css/TopBar.css';
-import { SideBarShow, switchProfile, switchSearch, searchedFile } from '../../state/actions';
-import {sendFeedback} from '../../components/CenterPortion/Methods'
 
 // 3rd party imports
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  AutoComplete, Dropdown, Menu, Modal, Input, Button, message
+  AutoComplete, Dropdown, Menu, Modal, Input, Button, message,
 } from 'antd';
 import { AuthClient } from '@dfinity/auth-client';
 import { QuestionCircleOutlined, MenuOutlined, UserOutlined } from '@ant-design/icons';
+import { sendFeedback } from '../CenterPortion/Methods';
+import {
+  SideBarShow, switchProfile, switchSearch, searchedFile,
+} from '../../state/actions';
 
 const TopBar = () => {
   const dispatch = useDispatch();
@@ -36,27 +38,27 @@ const TopBar = () => {
   const [options, setOptions] = React.useState([]);
 
   const searchFile = (str) => {
-    str = str.toLowerCase();
-    let temp = []
-    for(let i=0; i<files.length; i+=1){
-      if(files[i].name.toLowerCase().indexOf(str)>-1){
-        temp.push({value: files[i].name, id: files[i].id})
+    const query = str.toLowerCase();
+    const temp = [];
+    for (let i = 0; i < files.length; i += 1) {
+      if (files[i].name.toLowerCase().indexOf(query) > -1) {
+        temp.push({ value: files[i].name, id: files[i].id });
       }
-      if(temp.length>5){
-        break
+      if (temp.length > 5) {
+        break;
       }
     }
-    return(temp)
-  }
+    return (temp);
+  };
 
-  const sendFeed = async() =>{
-    setLoadingFlag(true)
-    await sendFeedback(feedback.current.resizableTextArea.props.value)
-    message.info("Thank you for the feedback !")
-    feedback.current.resizableTextArea.props.value = ''
-    setHelpModal(false)
-    setLoadingFlag(false)
-  }
+  const sendFeed = async () => {
+    setLoadingFlag(true);
+    await sendFeedback(feedback.current.resizableTextArea.props.value);
+    message.info('Thank you for the feedback !');
+    feedback.current.resizableTextArea.props.value = '';
+    setHelpModal(false);
+    setLoadingFlag(false);
+  };
 
   const onSearch = (searchText) => {
     setOptions(
@@ -99,12 +101,15 @@ const TopBar = () => {
             className="textArea"
             ref={feedback}
             autoSize={{ minRows: 6, maxRows: 6 }}
-            style={{minWidth: "100%"}}
+            style={{ minWidth: '100%' }}
           />
         </span>
-        <br/><br/>
-        <Button type="primary" style={{ float: 'right', marginRight: '10px' }} loading={loadingFlag} onClick={()=>sendFeed()}>Send</Button>
-        <br/><br/><br/>
+        <br />
+        <br />
+        <Button type="primary" style={{ float: 'right', marginRight: '10px' }} loading={loadingFlag} onClick={() => sendFeed()}>Send</Button>
+        <br />
+        <br />
+        <br />
       </Modal>
     </div>
   );

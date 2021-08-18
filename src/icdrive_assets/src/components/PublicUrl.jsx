@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Helmet } from "react-helmet";
+import { Helmet } from 'react-helmet';
 
 // custom imports
 import { idlFactory as FileHandleIdl } from 'dfx-generated/FileHandle';
@@ -17,13 +17,13 @@ const PublicUrl = () => {
 
   React.useEffect(() => {
     const getFiles = async () => {
-      let canisterId = window.location.href.split('/')[5]
-      let fileHash = window.location.href.split('/')[6]
+      const canisterId = window.location.href.split('/')[5];
+      const fileHash = window.location.href.split('/')[6];
 
       const identityAgent = await httpAgentIdentity();
-      const userAgentShare = Actor.createActor(FileHandleIdl, { agent: identityAgent, canisterId: canisterId });
+      const userAgentShare = Actor.createActor(FileHandleIdl, { agent: identityAgent, canisterId });
       let fileInfo = await userAgentShare.getPublicFileMeta(fileHash);
-      fileInfo = fileInfo[0]
+      fileInfo = fileInfo[0];
 
       const chunkBuffers = [];
       for (let j = 0; j < fileInfo.chunkCount; j += 1) {
@@ -34,9 +34,9 @@ const PublicUrl = () => {
       const fileBlob = new Blob([Buffer.concat(chunkBuffers)], {
         type: fileInfo.mimeType,
       });
-      
+
       const fileURL = URL.createObjectURL(fileBlob);
-      
+
       // if(isPdf(type)){
       //   setType(mimeType);
       //   setData(fileURL);
@@ -51,18 +51,17 @@ const PublicUrl = () => {
       // }
       setType(fileInfo.mimeType);
       setData(fileURL);
-
     };
     getFiles();
   }, []);
 
-  const isPdf = (mimeType) =>{
-    let flag = false
-    if(mimeType.indexOf("pdf")!=-1){
-      flag=true
+  const isPdf = (mimeType) => {
+    let flag = false;
+    if (mimeType.indexOf('pdf') != -1) {
+      flag = true;
     }
-    return(flag)
-  }
+    return (flag);
+  };
 
   return (
     <Style>
@@ -84,15 +83,17 @@ const PublicUrl = () => {
               subTitle="Sorry, the page you visited does not exist."
             />
           )
-          :
-            isPdf(type)?
-            <div className="show-pdf">
-              <embed name="316B4D6EC81C66DEFBBB62C94CA2068C" style={{position:"absolute", left: "0", top: "0"}} width="100%" height="100%" src={data} type="application/pdf" internalid="316B4D6EC81C66DEFBBB62C94CA2068C" />
-            </div>
-            :
-            <div className="show-image">
-              <img alt="IC Drive - File on Blockchain" id="the-image" src={data}/>
-            </div>
+          : isPdf(type)
+            ? (
+              <div className="show-pdf">
+                <embed name="316B4D6EC81C66DEFBBB62C94CA2068C" style={{ position: 'absolute', left: '0', top: '0' }} width="100%" height="100%" src={data} type="application/pdf" internalid="316B4D6EC81C66DEFBBB62C94CA2068C" />
+              </div>
+            )
+            : (
+              <div className="show-image">
+                <img alt="IC Drive - File on Blockchain" id="the-image" src={data} />
+              </div>
+            )
       }
     </Style>
   );

@@ -115,10 +115,10 @@ export const shareFile = async (fileObj, userName) => {
 export const shareFilePublic = async (fileObj) => {
   let flag = 0;
 
-  if (fileInfo.mimeType.indexOf("image")!=-1) {
+  if (fileObj.mimeType.indexOf("image")!=-1) {
     flag = 1;
   }
-  if (fileInfo.mimeType.indexOf("pdf")!=-1) {
+  if (fileObj.mimeType.indexOf("pdf")!=-1) {
     flag = 1;
   }
 
