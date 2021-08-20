@@ -1,6 +1,7 @@
 import React from "react"
 import axios from 'axios';
 import DropboxChooser from './DropBoxChooser';
+import Resizer from 'react-image-file-resizer';
 import { canisterHttpAgent } from '../../httpAgent';
 import { uploadUpdate, refreshFiles, uploadProgress, sizeUpdate } from '../../state/actions';
 import { useDispatch } from 'react-redux';
@@ -12,6 +13,31 @@ const DropboxImport = () =>{
   const CLIENT_ID = 'w84gwocxlux9udk';
   const MAX_CHUNK_SIZE = 1024 * 1024 * 1.5; // 1.5MB
   const encodeArrayBuffer = (file) => Array.from(new Uint8Array(file));
+
+  const resizeFile = (file) => new Promise((resolve) => {
+    Resizer.imageFileResizer(
+      file,
+      70,
+      58,
+      'JPEG',
+      100,
+      0,
+      (uri) => {
+        resolve(uri);
+      },
+      'base64',
+      70,
+      58,
+    );
+  });
+  
+  const isImage = (mimeType) => {
+    let flag = false;
+    if (mimeType.indexOf('image') !== -1) {
+      flag = true;
+    }
+    return (flag);
+  };
 
   const onSuccess = async(file) =>{
     for(let i=0; i<file.length; i+=1){
@@ -27,7 +53,11 @@ const DropboxImport = () =>{
 
       let data = await response.data;
       const chunkCount = Number(Math.ceil(file[i]['bytes'] / MAX_CHUNK_SIZE));
-      
+      let thumbnail = ''
+      if(isImage(data.type)){
+        thumbnail = await resizeFile(data)
+      }
+
       let fileInit = {
         chunkCount: chunkCount,
         fileSize: file[i]['bytes'],
@@ -35,7 +65,7 @@ const DropboxImport = () =>{
         mimeType: data.type,
         marked: false,
         sharedWith: [],
-        thumbnail: '',
+        thumbnail: thumbnail,
         folder: '',
       }
         
