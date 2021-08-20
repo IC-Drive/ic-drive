@@ -1,6 +1,6 @@
 import { canisterHttpAgent } from '../../httpAgent';
 
-const MAX_CHUNK_SIZE = 1024 * 1024 * 2; // 4MB
+const MAX_CHUNK_SIZE = 1024 * 1024 * 1.5; // 1.5MB
 
 const encodeArrayBuffer = (file) => Array.from(new Uint8Array(file));
 

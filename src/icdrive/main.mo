@@ -217,6 +217,7 @@ shared (msg) actor class icdrive (){
     user_entries := [];
     user_name_entries := [];
     file_url_entries := [];
+    emailIdList := [];
   };
 
   ////////////////////////////////////Testing/////////////////////////////////////////////
