@@ -11,7 +11,6 @@ import { Actor } from '@dfinity/agent';
 import { httpAgent, httpAgentIdentity } from '../httpAgent';
 
 const PublicUrl = () => {
-  const [notFound, setNotFound] = React.useState(false);
   const [data, setData] = React.useState('');
   const [type, setType] = React.useState('');
 
@@ -65,35 +64,18 @@ const PublicUrl = () => {
 
   return (
     <Style>
-      <Helmet>
-        <meta charSet="utf-8" />
-        <title>IC Drive</title>
-        <meta property="og:title" content="The Rock" />
-        <meta property="og:type" content={type} />
-        <meta property="og:url" content={window.location.href} />
-        <meta property="og:image" content={data} />
-        <link rel="canonical" href={window.location.href} />
-      </Helmet>
       {
-        notFound
+        isPdf(type)
           ? (
-            <Result
-              status="404"
-              title="404"
-              subTitle="Sorry, the page you visited does not exist."
-            />
+            <div className="show-pdf">
+              <embed name="316B4D6EC81C66DEFBBB62C94CA2068C" style={{ position: 'absolute', left: '0', top: '0' }} width="100%" height="100%" src={data} type="application/pdf" internalid="316B4D6EC81C66DEFBBB62C94CA2068C" />
+            </div>
           )
-          : isPdf(type)
-            ? (
-              <div className="show-pdf">
-                <embed name="316B4D6EC81C66DEFBBB62C94CA2068C" style={{ position: 'absolute', left: '0', top: '0' }} width="100%" height="100%" src={data} type="application/pdf" internalid="316B4D6EC81C66DEFBBB62C94CA2068C" />
-              </div>
-            )
-            : (
-              <div className="show-image">
-                <img alt="IC Drive - File on Blockchain" id="the-image" src={data} />
-              </div>
-            )
+          : (
+            <div className="show-image">
+              <img alt="IC Drive - File on Blockchain" id="the-image" src={data} />
+            </div>
+          )
       }
     </Style>
   );

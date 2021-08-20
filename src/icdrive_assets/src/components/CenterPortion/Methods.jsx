@@ -76,7 +76,6 @@ export function bytesToSize(bytes) {
   return `${Math.round(bytes / Math.pow(1024, i), 2)} ${sizes[i]}`;
 }
 
-// Temporary, relook the logic
 export const shareFile = async (fileObj, userName) => {
   const icdrive = await httpAgent();
   const userAgent = await canisterHttpAgent();
@@ -84,7 +83,7 @@ export const shareFile = async (fileObj, userName) => {
   const canisterIdShared = await icdrive.getUserCanister(userName);
   try {
     if (canisterIdShared.length === 1) {
-      const respShare = await userAgent.shareFile(fileObj.fileId, userName, localStorage.getItem('userName'));
+      const respShare = await userAgent.shareFile(fileObj.fileId, userName);
       if (respShare[0] === 'Success') {
         const identityAgent = await httpAgentIdentity();
         const userAgentShare = Actor.createActor(FileHandleIdl, { agent: identityAgent, canisterId: canisterIdShared[0] });
@@ -96,10 +95,12 @@ export const shareFile = async (fileObj, userName) => {
           chunkCount: fileObj.chunkCount,
           fileSize: fileObj.fileSize,
           mimeType: fileObj.mimeType,
+          thumbnail: fileObj.thumbnail,
           marked: false,
           sharedWith: [],
           madePublic: false,
           fileHash: "",
+          folder: "",
         };
         await userAgentShare.addSharedFile(fileInfo);
         return (true);

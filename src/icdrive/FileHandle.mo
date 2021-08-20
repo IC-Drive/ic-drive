@@ -152,7 +152,7 @@ shared (msg) actor class FileHandle (){
   };
 
   // Share File
-  public shared(msg) func shareFile(fileId : FileId, userNameShared : UserName, userName: UserName) : async ?(Text) {
+  public shared(msg) func shareFile(fileId : FileId, userNameShared : UserName) : async ?(Text) {
     do ? {
       assert(msg.caller==owner);
       let fileInfo = state.files.get(fileId)!;      // Info of File
@@ -164,9 +164,9 @@ shared (msg) actor class FileHandle (){
       //  return(?"Unauthorized");
       //};
       state.files.put(fileId, {
-        userName = userName;
+        userName = fileInfo.userName;
         createdAt = fileInfo.createdAt ;
-        fileId = fileId ;
+        fileId = fileInfo.fileId ;
         name = fileInfo.name ;
         chunkCount = fileInfo.chunkCount ;
         fileSize = fileInfo.fileSize;
@@ -313,7 +313,7 @@ shared (msg) actor class FileHandle (){
         chunkCount = fileInfo.chunkCount;
         fileSize = fileInfo.fileSize;
         mimeType = fileInfo.mimeType;
-        thumbnail = "";
+        thumbnail = fileInfo.thumbnail;
         marked = fileInfo.marked;
         sharedWith = fileInfo.sharedWith;
         madePublic = fileInfo.madePublic;

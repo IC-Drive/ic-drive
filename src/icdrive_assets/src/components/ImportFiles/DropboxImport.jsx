@@ -9,7 +9,7 @@ const DropboxImport = () =>{
 
   const dispatch = useDispatch();
 
-  const CLIENT_ID = 'owuibsvme6i5k4w';
+  const CLIENT_ID = 'w84gwocxlux9udk';
   const MAX_CHUNK_SIZE = 1024 * 1024 * 1.5; // 1.5MB
   const encodeArrayBuffer = (file) => Array.from(new Uint8Array(file));
 
