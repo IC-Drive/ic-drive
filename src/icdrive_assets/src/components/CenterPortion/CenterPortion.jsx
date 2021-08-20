@@ -56,22 +56,22 @@ const CenterPortion = () => {
           {
           optionSelected === 'home' ? (
             <div className="show-section">
-            &nbsp;&nbsp;Home
+            &nbsp;&nbsp;<b>Home</b>
             </div>
           )
             : optionSelected === 'marked' ? (
               <div className="show-section">
-            &nbsp;&nbsp;Marked
+            &nbsp;&nbsp;<b>Marked</b>
               </div>
             )
               : optionSelected === 'shared' ? (
                 <div className="show-section">
-            &nbsp;&nbsp;Shared
+            &nbsp;&nbsp;<b>Shared With Me</b>
                 </div>
               )
                 : optionSelected === 'search' ? (
                   <div className="show-section">
-              &nbsp;&nbsp;Search
+              &nbsp;&nbsp;<b> Search</b>
                   </div>
                 )
                 : <div className="show-section">
