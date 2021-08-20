@@ -1,14 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Helmet } from 'react-helmet';
 
 // custom imports
 import { idlFactory as FileHandleIdl } from 'dfx-generated/FileHandle';
 
 // 3rd party imports
-import { Result } from 'antd';
 import { Actor } from '@dfinity/agent';
-import { httpAgent, httpAgentIdentity } from '../httpAgent';
+import { httpAgentIdentity } from '../httpAgent';
 
 const PublicUrl = () => {
   const [data, setData] = React.useState('');
