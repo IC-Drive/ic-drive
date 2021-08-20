@@ -47,6 +47,7 @@ const Dashboard = () => {
         }
         dispatch(folderUpdate(folders));
         dispatch(filesUpdate(files));
+        console.log(sharedFiles);
         dispatch(sharedUpdate(sharedFiles));
         dispatch(refreshComponents(true));
       }
