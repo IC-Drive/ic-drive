@@ -40,6 +40,7 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-dropbox-chooser": "^0.0.5",
+    "react-google-drive-picker": "^1.1.4",
     "react-helmet": "^6.1.0",
     "react-image-file-resizer": "^0.4.7",
     "react-redux": "^7.2.4",

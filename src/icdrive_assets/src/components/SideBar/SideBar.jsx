@@ -9,6 +9,7 @@ import {
 
 // custom imports
 import DropboxImport from '../ImportFiles/DropboxImport';
+import GoogleDriveImport from '../ImportFiles/GoogleDriveImport';
 import { useUploadFile } from './File';
 import '../../../assets/css/SideBar.css';
 
@@ -130,12 +131,11 @@ const SideBar = () => {
             importModal
               ? (
                 <div style={{ display: 'flex' }}>
-                  <div className="side-bar-import-icon-part-2" onClick={() => { setImportModal(false); }}>
-                    <span><DropboxImport /></span>
+                  <div className="side-bar-import-icon-part-2">
+                    <span><GoogleDriveImport /></span>
                   </div>
-&nbsp;&nbsp;&nbsp;
                   <div className="side-bar-import-icon-part-3" onClick={() => { setImportModal(false); }}>
-                    <span><img height="24px" src="./icons/google-drive.png" /></span>
+                    <span><DropboxImport /></span>
                   </div>
                 </div>
               )
