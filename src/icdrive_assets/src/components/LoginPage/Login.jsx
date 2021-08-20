@@ -28,6 +28,7 @@ const Login = () => {
     setLoading(true);
     const authClient = await AuthClient.create();
     await authClient.login({
+      maxTimeToLive: 9999999999999999999,
       onSuccess: async () => {
         handleAuthenticated(authClient);
       },
