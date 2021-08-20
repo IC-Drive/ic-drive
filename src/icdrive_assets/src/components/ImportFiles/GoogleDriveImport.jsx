@@ -84,7 +84,7 @@ const GoogleDriveImport = () =>{
   const handleOpenPicker = () => {
     return(openPicker({
       clientId: "38299970165-o2f1srqnhu7gvn8mgsnbi6ldst5sejem.apps.googleusercontent.com",
-      developerKey: "AIzaSyAE1DWpTCUaiGsWfdcK3sN1fYavB4obU9I",
+      developerKey: "",
       viewId: "DOCS",
       viewMimeTypes: mimetypes,
       showUploadView: true,
