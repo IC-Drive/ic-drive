@@ -6,7 +6,6 @@ import { idlFactory as FileHandleIdl } from 'dfx-generated/FileHandle';
 // import { WritableStream } from 'web-streams-polyfill/ponyfill'
 import sha256 from 'sha256';
 import { Actor } from '@dfinity/agent';
-import { imageTypes, pdfType } from './MimeTypes';
 import { httpAgent, canisterHttpAgent, httpAgentIdentity } from '../../httpAgent';
 /* Contain Download, File View, Mark File, Delete File and File Share Implementation */
 
@@ -34,13 +33,10 @@ export const downloadFile = async (fileInfo) => {
 export const viewFile = async (fileInfo) => {
   // Currently View only image and pdf files
   let flag = 0;
-  for (let i = 0; i < imageTypes.length; i += 1) {
-    if (fileInfo.mimeType === imageTypes[i]) {
-      flag = 1;
-      break;
-    }
+  if (fileInfo.mimeType.indexOf("image")!=-1) {
+    flag = 1;
   }
-  if (fileInfo.mimeType.toString() === pdfType) {
+  if (fileInfo.mimeType.indexOf("pdf")!=-1) {
     flag = 1;
   }
 
@@ -80,7 +76,6 @@ export function bytesToSize(bytes) {
   return `${Math.round(bytes / Math.pow(1024, i), 2)} ${sizes[i]}`;
 }
 
-// Temporary, relook the logic
 export const shareFile = async (fileObj, userName) => {
   const icdrive = await httpAgent();
   const userAgent = await canisterHttpAgent();
@@ -88,7 +83,7 @@ export const shareFile = async (fileObj, userName) => {
   const canisterIdShared = await icdrive.getUserCanister(userName);
   try {
     if (canisterIdShared.length === 1) {
-      const respShare = await userAgent.shareFile(fileObj.fileId, userName, localStorage.getItem('userName'));
+      const respShare = await userAgent.shareFile(fileObj.fileId, userName);
       if (respShare[0] === 'Success') {
         const identityAgent = await httpAgentIdentity();
         const userAgentShare = Actor.createActor(FileHandleIdl, { agent: identityAgent, canisterId: canisterIdShared[0] });
@@ -100,10 +95,12 @@ export const shareFile = async (fileObj, userName) => {
           chunkCount: fileObj.chunkCount,
           fileSize: fileObj.fileSize,
           mimeType: fileObj.mimeType,
+          thumbnail: fileObj.thumbnail,
           marked: false,
           sharedWith: [],
           madePublic: false,
           fileHash: "",
+          folder: "",
         };
         await userAgentShare.addSharedFile(fileInfo);
         return (true);
@@ -118,21 +115,18 @@ export const shareFile = async (fileObj, userName) => {
 
 export const shareFilePublic = async (fileObj) => {
   let flag = 0;
-  for (let i = 0; i < imageTypes.length; i += 1) {
-    if (fileObj.mimeType === imageTypes[i]) {
-      flag = 1;
-      break;
-    }
-  }
-  if (fileObj.mimeType.toString() === pdfType) {
+
+  if (fileObj.mimeType.indexOf("image")!=-1) {
     flag = 1;
   }
+  if (fileObj.mimeType.indexOf("pdf")!=-1) {
+    flag = 1;
+  }
+
   if (flag) {
-    const icdrive = await httpAgent();
     const userAgent = await canisterHttpAgent();
     const data = `${fileObj.mimeType}$${fileObj.chunkCount.toString()}$${localStorage.getItem('fileCanister')}$${fileObj.fileId}`;
     const fileHash = sha256(data);
-    await icdrive.makeFilePublic(fileHash, data);
     await userAgent.makeFilePublic(fileObj.fileId, fileHash);
     return (fileHash);
   }
@@ -140,9 +134,7 @@ export const shareFilePublic = async (fileObj) => {
 };
 
 export const removeFilePublic = async (fileObj) => {
-  const icdrive = await httpAgent();
   const userAgent = await canisterHttpAgent();
-  await icdrive.removeFilePublic(fileObj.fileHash);
   await userAgent.removeFilePublic(fileObj.fileId);
   return (true);
 };
@@ -175,13 +167,11 @@ export const downloadSharedFile = async (fileInfo, userName) => {
 export const viewSharedFile = async (fileInfo, userName) => {
   // Currently View only image and pdf files
   let flag = 0;
-  for (let i = 0; i < imageTypes.length; i += 1) {
-    if (fileInfo.mimeType === imageTypes[i]) {
-      flag = 1;
-      break;
-    }
+
+  if (fileInfo.mimeType.indexOf("image")!=-1) {
+    flag = 1;
   }
-  if (fileInfo.mimeType.toString() === pdfType) {
+  if (fileInfo.mimeType.indexOf("pdf")!=-1) {
     flag = 1;
   }
 

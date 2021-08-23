@@ -1,16 +1,15 @@
 import React from 'react';
 
 // custom imports
-import { imageTypes, pdfType } from '../MimeTypes';
 import '../../../../assets/css/GridView.css';
 
 // 3rd party imports
 import {
-  message, Menu, Dropdown,
+  message, Menu, Dropdown, Tooltip, Popconfirm
 } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import {
-  downloadSharedFile, viewSharedFile, deleteSharedFile,
+  downloadSharedFile, viewSharedFile, deleteSharedFile, bytesToSize
 } from '../Methods';
 import { refreshFiles } from '../../../state/actions';
 
@@ -50,28 +49,31 @@ const GridViewShared = () => {
       <Menu.Item key="2" onClick={() => { handleView(); }}>
         <span id="context-view" role="button" tabIndex={0}>View</span>
       </Menu.Item>
-      <Menu.Item key="3" onClick={() => { handleDelete(); }}>
-        <span id="context-delete" role="button" tabIndex={0}>Delete</span>
-      </Menu.Item>
+      <Popconfirm className="popconfirm" title="Sure to delete?" onConfirm={() => { handleDelete(); }}>
+        <Menu.Item key="3">
+          <span id="context-delete" role="button" tabIndex={0}>Delete</span>
+        </Menu.Item>
+      </Popconfirm>        
     </Menu>
   );
 
   const isImage = (mimeType) =>{
     let flag = false
-    for(let i=0; i<imageTypes.length;i++){
-      if(mimeType===imageTypes[i]){
-        flag=true
-        break
-      }
+    if(mimeType.indexOf("image")!=-1){
+      flag=true
     }
     return(flag)
   }
   const isPdf = (mimeType) =>{
     let flag = false
-    if(mimeType===pdfType){
-      flag = true
+    if(mimeType.indexOf("pdf")!=-1){
+      flag=true
     }
     return(flag)
+  }
+
+  const getToolTipText = (value) =>{
+    return(value.name+' - '+ bytesToSize(Number(value.fileSize)) + ' - ' + value.createdAt)
   }
 
   return (
@@ -79,22 +81,31 @@ const GridViewShared = () => {
       {
           shared.map((value) => (
             <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
+              <Tooltip placement="right" title={()=>getToolTipText(value)}>
               <div className="file-div" onDoubleClick={()=>{fileObj.current = value; handleView() }} onContextMenu={() => { fileObj.current = value; }}>
                 <div className="grid-view-icon-part">
                   {
                     isImage(value.mimeType)?
-                    <img src="./icons/image-icon.svg" alt="file icon" style={{ width: '60px' }} />
+                    <div>
+                      {
+                        value.thumbnail===''?
+                        <img id="display-icon" src="./icons/image-icon.svg" alt="file icon" />
+                        :
+                        <img id="display-icon" src={value.thumbnail} alt="file icon" />
+                      }
+                    </div>
                     :
                     isPdf(value.mimeType)?
-                    <img src="./icons/pdf-icon.svg" alt="file icon" style={{ width: '60px' }} />
+                    <img id="display-icon" src="./icons/pdf-icon.svg" alt="file icon" />
                     :
-                    <img src="./icons/file-icon.svg" alt="file icon" style={{ width: '60px' }} />
+                    <img id="display-icon" src="./icons/file-icon.svg" alt="file icon" />
                   }
                 </div>
                 <div className="grid-view-text-part truncate-overflow">
                   {value.name}
                 </div>
               </div>
+              </Tooltip>
             </Dropdown>
           ))
       }

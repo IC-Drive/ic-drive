@@ -11,17 +11,19 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, removeFilePublic, bytesToSize
 } from '../Methods';
-import { filesUpdate, refreshFiles } from '../../../state/actions';
+import { filesUpdate } from '../../../state/actions';
 
-const GridViewSearch = () => {
+const GridViewMarked = () => {
+
+  const optionSelected = useSelector((state) => state.OptionSelected.option);
   const files = useSelector((state) => state.FileHandler.files);
-  const searched = useSelector((state) => state.FileHandler.searched);
-
+  const [previousFileObjectLength, setPreviousFileObjectLength] = React.useState(0);
   const [data, setData] = React.useState([]);
   const dispatch = useDispatch();
 
   const fileObj = React.useRef({});
   const [shareModal, setShareModal] = React.useState(false);
+  const [refreshData, setRefreshData] = React.useState(true);
   const [ShareLoadingFlag, setShareLoadingFlag] = React.useState(false);
   const [removeFlag, setRemoveLoadingFlag] = React.useState(false);
   const [PublicLoadingFlag, setPublicLoadingFlag] = React.useState(false);
@@ -29,15 +31,15 @@ const GridViewSearch = () => {
 
   // Functions
   React.useEffect(() => {
+    setPreviousFileObjectLength(files.length)
     const temp = [];
-    for (let i = 0; i < files.length; i += 1) {
-      if (files[i].name===searched) {
+    for (let i = 0; i < files.length; i+=1) {
+      if (files[i].folder===optionSelected) {
         temp.push(files[i]);
-        break
       }
     }
     setData(temp);
-  }, []);
+  }, [previousFileObjectLength!=files.length]);
 
   const handleDownload = async () => {
     await downloadFile(fileObj.current);
@@ -52,12 +54,23 @@ const GridViewSearch = () => {
       }
     }
     dispatch(filesUpdate(temp));
-    await markFile(fileObj.current);
+    markFile(fileObj.current);
+    setRefreshData(true);
   };
 
   const handleDelete = async () => {
-    await deleteFile(fileObj.current);
-    dispatch(refreshFiles(true));
+    const temp = [...files];
+    const newFiles = []
+    for (let i = 0; i < temp.length; i += 1) {
+      if (temp[i].fileId === fileObj.current.fileId) {
+        continue;
+      } else{
+        newFiles.push(temp[i]);
+      }
+    }
+    dispatch(filesUpdate(newFiles));
+    deleteFile(fileObj.current);
+    setRefreshData(true);
   };
 
   const handleView = async () => {
@@ -144,7 +157,7 @@ const GridViewSearch = () => {
   return (
     <div className="grid-container">
       {
-        data.map((value) => (
+          data.map((value) => (
             <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
               <Tooltip placement="right" title={()=>getToolTipText(value)}>
               <div className="file-div" onDoubleClick={()=>{fileObj.current = value; handleView() }} onContextMenu={() => { fileObj.current = value; }}>
@@ -234,4 +247,4 @@ const GridViewSearch = () => {
   );
 };
 
-export default GridViewSearch;
+export default GridViewMarked;

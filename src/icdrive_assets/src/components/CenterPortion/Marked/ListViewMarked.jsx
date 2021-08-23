@@ -14,7 +14,7 @@ import {
 import {
   downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, removeFilePublic, bytesToSize,
 } from '../Methods';
-import { filesUpdate, refreshFiles } from '../../../state/actions';
+import { filesUpdate } from '../../../state/actions';
 
 const ListViewMarked = () => {
   const files = useSelector((state) => state.FileHandler.files);
@@ -23,14 +23,15 @@ const ListViewMarked = () => {
 
   const fileObj = React.useRef({});
   const [shareModal, setShareModal] = React.useState(false);
+  const [refreshData, setRefreshData] = React.useState(true);
   const [ShareLoadingFlag, setShareLoadingFlag] = React.useState(false);
   const [removeFlag, setRemoveLoadingFlag] = React.useState(false);
   const [PublicLoadingFlag, setPublicLoadingFlag] = React.useState(false);
-  const [deletingFlag, setDeletingFlag] = React.useState(false);
   const userName = React.useRef('');
 
   // Functions
   React.useEffect(async () => {
+    setRefreshData(false)
     const temp = [];
     for (let i = 0; i < files.length; i += 1) {
       if (files[i].marked) {
@@ -38,7 +39,7 @@ const ListViewMarked = () => {
       }
     }
     setData(temp);
-  }, []);
+  }, [refreshData]);
 
   const handleDownload = async (record) => {
     await downloadFile(record);
@@ -49,22 +50,27 @@ const ListViewMarked = () => {
     for (let i = 0; i < temp.length; i += 1) {
       if (temp[i].fileId === record.fileId) {
         temp[i].marked = false;
-        break;
+        break
       }
     }
     dispatch(filesUpdate(temp));
     markFile(record);
+    setRefreshData(true);
   };
 
   const handleDelete = async (record) => {
-    if(!deletingFlag){
-      setDeletingFlag(true);
-      await deleteFile(record);
-      dispatch(refreshFiles(true));
-      setDeletingFlag(false);
-    } else{
-      message.info('Please wait for previous file to delete!!!');
+    const temp = [...files];
+    const newFiles = []
+    for (let i = 0; i < temp.length; i += 1) {
+      if (temp[i].fileId === record.fileId) {
+        continue;
+      } else{
+        newFiles.push(temp[i]);
+      }
     }
+    dispatch(filesUpdate(newFiles));
+    deleteFile(record);
+    setRefreshData(true);
   };
 
   const handleView = async (record) => {
@@ -167,7 +173,7 @@ const ListViewMarked = () => {
         footer={null}
         title={false}
         visible={shareModal}
-        onCancel={() => { setShareModal(false); fileObj.current = {}; }}
+        onCancel={() => { setShareModal(false); fileObj.current = {}; setRemoveLoadingFlag(false); }}
       >
         <div>
           {
@@ -204,13 +210,13 @@ const ListViewMarked = () => {
             )
             : (
               <div>
-                <span id="public-url" style={{color:'#4D85BD'}} onClick={() => { navigator.clipboard.writeText(`${window.location.href}icdrive/${fileObj.current.fileHash}`); message.info('copied to clipboard'); }}>
+                <span id="public-url" style={{color:'#4D85BD'}} onClick={() => { navigator.clipboard.writeText(`${window.location.href}icdrive/${localStorage.getItem('fileCanister')}/${fileObj.current.fileHash}`); message.info('copied to clipboard'); }}>
                   {window.location.href}
-                  icdrive/
+                  icdrive/{localStorage.getItem('fileCanister')}/
                   {fileObj.current.fileHash}
                 </span>
                 <br />
-                {/* <Button type="primary" style={{ float: 'right', marginRight: '10px' }} loading={removeFlag} onClick={()=>removeSharePublic()}>Remove</Button> */}
+                <Button type="primary" style={{ float: 'right', marginRight: '10px' }} loading={removeFlag} onClick={()=>removeSharePublic()}>Remove</Button>
                 <br />
                 <br />
               </div>

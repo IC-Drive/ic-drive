@@ -1,35 +1,45 @@
 import React from 'react';
 
-// custom imports
-import { useDispatch, useSelector } from 'react-redux';
-import { useUploadFile } from './File';
-import '../../../assets/css/SideBar.css';
-
 // 3rd party imports
-import {message, Modal} from 'antd';
+import { message } from 'antd';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   uploadUpdate, refreshFiles, switchHome, switchMarked, switchShared, uploadProgress, sizeUpdate, uploadFileId, SideBarShow,
 } from '../../state/actions';
+
+// custom imports
+import DropboxImport from '../ImportFiles/DropboxImport';
+import GoogleDriveImport from '../ImportFiles/GoogleDriveImport';
+import { useUploadFile } from './File';
+import '../../../assets/css/SideBar.css';
 
 const SideBar = () => {
   const dispatch = useDispatch();
   const [uploadFlag, setUploadFlag] = React.useState(false);
   const [importModal, setImportModal] = React.useState(false);
+  const optionSelected = useSelector((state) => state.OptionSelected.option);
   const uploadInProgress = useSelector((state) => state.FileHandler.upload);
   const sideBarShow = useSelector((state) => state.SideBarShow.sideBar);
 
   const onFileSelect = async (evt) => {
     dispatch(SideBarShow(!sideBarShow));
-    if(uploadInProgress.file_count > 0){
-      message.info("Wait for previous files to upload!!!")
-    } else{
+    if (uploadInProgress.file_count > 0) {
+      message.info('Wait for previous files to upload!!!');
+    } else {
       setUploadFlag(true);
       const fileList = evt.target.files;
+      let folder = '';
+      if (optionSelected === 'home' || optionSelected === 'marked' || optionSelected === 'shared' || optionSelected === 'search') {
+        folder = '';
+      } else {
+        folder = optionSelected;
+      }
+
       for (let i = 0; i < fileList.length; i += 1) {
         const file = fileList[i];
         dispatch(uploadUpdate({ file_uploading: file.name, file_count: fileList.length, completed: i + 1 }));
         dispatch(sizeUpdate(file.size));
-        await useUploadFile(file, dispatch, uploadProgress, uploadFileId);
+        await useUploadFile(file, folder, dispatch, uploadProgress, uploadFileId);
       }
       dispatch(uploadUpdate({ file_uploading: '', file_count: 0, completed: 0 }));
       dispatch(refreshFiles(true));
@@ -109,7 +119,7 @@ const SideBar = () => {
         </div>
 
         <div className="element">
-          <div className="element-section" onClick={()=>{setImportModal(true)}}>
+          <div className="element-section" onClick={() => { setImportModal(!importModal); }}>
             <div className="side-bar-icon-part">
               <img src="./icons/import.svg" alt="home icon" style={{ height: '22px', color: '#fff' }} />
             </div>
@@ -117,17 +127,23 @@ const SideBar = () => {
               <span>Import</span>
             </div>
           </div>
+          {
+            importModal
+              ? (
+                <div style={{ display: 'flex' }}>
+                  <div className="side-bar-import-icon-part-2">
+                    <span><GoogleDriveImport /></span>
+                  </div>
+                  <div className="side-bar-import-icon-part-3" onClick={() => { setImportModal(false); }}>
+                    <span><DropboxImport /></span>
+                  </div>
+                </div>
+              )
+              : null
+          }
         </div>
 
       </div>
-      <Modal
-        footer={null}
-        title={false}
-        visible={importModal}
-        onCancel={() => setImportModal(false) }
-      >
-        <strong>Will be available soon</strong>
-      </Modal>
     </div>
   );
 };

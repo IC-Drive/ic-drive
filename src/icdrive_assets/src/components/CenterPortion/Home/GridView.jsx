@@ -1,30 +1,43 @@
 import React from 'react';
 
 // custom imports
-import { imageTypes, pdfType } from '../MimeTypes';
 import '../../../../assets/css/GridView.css';
 
 // 3rd party imports
 import {
-  Modal, message, Button, Input, Menu, Dropdown, Tag
+  Modal, message, Button, Input, Menu, Dropdown, Tag, Tooltip, Popconfirm
 } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import {
-  downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, removeFilePublic,
+  downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, removeFilePublic, bytesToSize
 } from '../Methods';
-import { filesUpdate, refreshFiles } from '../../../state/actions';
+import { filesUpdate, switchFolder, refreshComponents } from '../../../state/actions';
 
 const GridView = () => {
   const files = useSelector((state) => state.FileHandler.files);
+  const folders = useSelector((state) => state.FolderHandle.folders);
+  const refreshData = useSelector((state) => state.FileHandler.refreshComponents);
+
   const dispatch = useDispatch();
 
   const fileObj = React.useRef({});
+  const [data, setData] = React.useState([]);
   const [shareModal, setShareModal] = React.useState(false);
   const [ShareLoadingFlag, setShareLoadingFlag] = React.useState(false);
   const [removeFlag, setRemoveLoadingFlag] = React.useState(false);
   const [PublicLoadingFlag, setPublicLoadingFlag] = React.useState(false);
-  const [deletingFlag, setDeletingFlag] = React.useState(false);
   const userName = React.useRef('');
+
+  React.useEffect(() => {
+    dispatch(refreshComponents(false));
+    const temp = [];
+    for (let i = 0; i < files.length; i+=1) {
+      if (files[i].folder==='') {
+        temp.push(files[i]);
+      }
+    }
+    setData(temp);
+  }, [refreshData]);
 
   const handleDownload = async () => {
     await downloadFile(fileObj.current);
@@ -39,18 +52,23 @@ const GridView = () => {
       }
     }
     dispatch(filesUpdate(temp));
+    dispatch(refreshComponents(true));
     await markFile(fileObj.current);
   };
 
   const handleDelete = async () => {
-    if(!deletingFlag){
-      setDeletingFlag(true);
-      await deleteFile(fileObj.current);
-      dispatch(refreshFiles(true));
-      setDeletingFlag(false);
-    } else{
-      message.info('Please wait for previous file to delete!!!');
+    const temp = [...files];
+    const newFiles = []
+    for (let i = 0; i < temp.length; i += 1) {
+      if (temp[i].fileId === fileObj.current.fileId) {
+        continue;
+      } else{
+        newFiles.push(temp[i]);
+      }
     }
+    dispatch(filesUpdate(newFiles));
+    dispatch(refreshComponents(true));
+    deleteFile(fileObj.current);
   };
 
   const handleView = async () => {
@@ -107,51 +125,80 @@ const GridView = () => {
       <Menu.Item key="4" onClick={() => { handleMarked(); }}>
         <span id="context-mark" role="button" tabIndex={0}>Mark</span>
       </Menu.Item>
-      <Menu.Item key="5" onClick={() => { handleDelete(); }}>
-        <span id="context-delete" role="button" tabIndex={0}>Delete</span>
-      </Menu.Item>
+      <Popconfirm className="popconfirm" title="Sure to delete?" onConfirm={() => { handleDelete(); }}>
+        <Menu.Item key="5">
+          <span id="context-delete" role="button" tabIndex={0}>Delete</span>
+        </Menu.Item>
+      </Popconfirm>
     </Menu>
   );
 
   const isImage = (mimeType) =>{
     let flag = false
-    for(let i=0; i<imageTypes.length;i++){
-      if(mimeType===imageTypes[i]){
-        flag=true
-        break
-      }
+    if(mimeType.indexOf("image")!=-1){
+      flag=true
     }
     return(flag)
   }
   const isPdf = (mimeType) =>{
     let flag = false
-    if(mimeType===pdfType){
-      flag = true
+    if(mimeType.indexOf("pdf")!=-1){
+      flag=true
     }
     return(flag)
+  }
+
+  const getToolTipText = (value) =>{
+    return(value.name+' - '+ bytesToSize(Number(value.fileSize)) + ' - ' + value.createdAt)
+  }
+
+  const switchToFolder = (value) =>{
+    dispatch(switchFolder(value))
   }
 
   return (
     <div className="grid-container">
       {
-          files.map((value) => (
+        folders.map((value) => (
+          <div className="file-div" onDoubleClick={()=>{ switchToFolder(value) }} onContextMenu={() => {  }}>
+            <div className="grid-view-icon-part">
+              <img id="display-icon" src="./icons/folder.svg" alt="file icon" />
+            </div>
+            <div className="grid-view-text-part truncate-overflow">
+              {value}
+            </div>
+          </div>
+        ))
+      }
+      <br/><br/>
+      {
+          data.map((value) => (
             <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
+              <Tooltip placement="right" title={()=>getToolTipText(value)}>
               <div className="file-div" onDoubleClick={()=>{fileObj.current = value; handleView() }} onContextMenu={() => { fileObj.current = value; }}>
                 <div className="grid-view-icon-part">
                   {
                     isImage(value.mimeType)?
-                    <img src="./icons/image-icon.svg" alt="file icon" style={{ width: '60px' }} />
+                    <div>
+                      {
+                        value.thumbnail===''?
+                        <img id="display-icon" src="./icons/image-icon.svg" alt="file icon" />
+                        :
+                        <img id="display-icon" src={value.thumbnail} alt="file icon" />
+                      }
+                    </div>
                     :
                     isPdf(value.mimeType)?
-                    <img src="./icons/pdf-icon.svg" alt="file icon" style={{ width: '60px' }} />
+                    <img id="display-icon" src="./icons/pdf-icon.svg" alt="file icon" />
                     :
-                    <img src="./icons/file-icon.svg" alt="file icon" style={{ width: '60px' }} />
+                    <img id="display-icon" src="./icons/file-icon.svg" alt="file icon" />
                   }
                 </div>
                 <div className="grid-view-text-part truncate-overflow">
                   {value.name}
                 </div>
               </div>
+              </Tooltip>
             </Dropdown>
           ))
       }
@@ -159,7 +206,7 @@ const GridView = () => {
         footer={null}
         title={false}
         visible={shareModal}
-        onCancel={() => { setShareModal(false); fileObj.current = {}; }}
+        onCancel={() => { setShareModal(false); fileObj.current = {}; setRemoveLoadingFlag(false); }}
       >
         <div>
           {
@@ -196,13 +243,13 @@ const GridView = () => {
             )
             : (
               <div>
-                <span id="public-url" style={{color:'#4D85BD'}} onClick={() => { navigator.clipboard.writeText(`${window.location.href}icdrive/${fileObj.current.fileHash}`); message.info('copied to clipboard'); }}>
+                <span id="public-url" style={{color:'#4D85BD'}} onClick={() => { navigator.clipboard.writeText(`${window.location.href}icdrive/${localStorage.getItem('fileCanister')}/${fileObj.current.fileHash}`); message.info('copied to clipboard'); }}>
                   {window.location.href}
-                  icdrive/
+                  icdrive/{localStorage.getItem('fileCanister')}/
                   {fileObj.current.fileHash}
                 </span>
                 <br />
-                {/* <Button type="primary" style={{ float: 'right', marginRight: '10px' }} loading={removeFlag} onClick={()=>removeSharePublic()}>Remove</Button> */}
+                <Button type="primary" style={{ float: 'right', marginRight: '10px' }} loading={removeFlag} onClick={()=>removeSharePublic()}>Remove</Button>
                 <br />
                 <br />
               </div>

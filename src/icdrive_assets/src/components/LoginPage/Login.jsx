@@ -32,7 +32,7 @@ const Login = () => {
       onSuccess: async () => {
         handleAuthenticated(authClient);
       },
-      identityProvider: 'https://identity.ic0.app/',
+      identityProvider: 'http://localhost:8000/?canisterId=rwlgt-iiaaa-aaaaa-aaaaa-cai',
     });
   };
 
