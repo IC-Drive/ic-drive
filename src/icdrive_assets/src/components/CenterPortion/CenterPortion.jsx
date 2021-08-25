@@ -66,12 +66,12 @@ const CenterPortion = () => {
             )
               : optionSelected === 'shared' ? (
                 <div className="show-section">
-            &nbsp;&nbsp;<b>Shared With Me</b>
+            &nbsp;&nbsp;<b>Files shared with me</b>
                 </div>
               )
                 : optionSelected === 'search' ? (
                   <div className="show-section">
-              &nbsp;&nbsp;<b> Search</b>
+              &nbsp;&nbsp;<b>Search</b>
                   </div>
                 )
                 : <div className="show-section">
