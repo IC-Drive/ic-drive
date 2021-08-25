@@ -15,8 +15,6 @@ const Profile = () => {
   const [userNameFlag, setUserNameFlag] = React.useState(false);
   const [loadingFlag, setLoadingFlag] = React.useState(false);
   const userName = React.useRef('');
-  const hisName = React.useRef('');
-  const userEmail = React.useRef('');
 
   const createCanister = async () => {
     setLoadingFlag(true);
@@ -27,7 +25,7 @@ const Profile = () => {
       const icdrive = await httpAgent();
       const checkName = await icdrive.checkUserName(userName.current.state.value);
       if (!checkName) {
-        const create = await icdrive.createProfile(userName.current.state.value, userEmail.current.state.value, hisName.current.state.value);
+        const create = await icdrive.createProfile(userName.current.state.value, '', '');
         if (create.length === 1) {
           localStorage.setItem('userName', userName.current.state.value);
           localStorage.setItem('fileCanister', create[0].toText());
@@ -86,29 +84,17 @@ const Profile = () => {
                     <div className="waiting">
                       <div style={{ paddingTop: '20%' }}>
                         <span id="username">
-                          Name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                          <Input style={{ width: '50% !important' }} ref={hisName} />
-                        </span>
-                        <br/>
-                        <span id="username">
-                          Email:&nbsp;&nbsp;&nbsp;&nbsp;
-                          <Input style={{ width: '50% !important' }} ref={userEmail} />
-                        </span>
-                        <br/>
-                        <span id="username">
                           Username:&nbsp;
-                          <Input style={{ width: '50% !important' }} ref={userName} />
+                          <Input style={{ width: '80% !important' }} ref={userName} />
                         </span>
-                        <br />
-                        <br />
-                        <Button type="primary" loading={loadingFlag} onClick={createCanister}>Continue</Button>
+                        <Button type="primary" loading={loadingFlag} onClick={createCanister}>Create Account</Button>
                       </div>
                     </div>
                   </div>
                 )
                 : (
                   <div className="innercontainer">
-                    <div className="waiting-update">
+                    <div className="waiting">
                       <p id="text" style={{ paddingTop: '20%' }}>Updating...</p>
                     </div>
                   </div>

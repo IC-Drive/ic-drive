@@ -5,6 +5,7 @@ import { idlFactory as FileHandleIdl } from 'dfx-generated/FileHandle';
 // import * as streamSaver from 'streamsaver';
 // import { WritableStream } from 'web-streams-polyfill/ponyfill'
 import sha256 from 'sha256';
+import AES from 'crypto-js/aes';
 import { Actor } from '@dfinity/agent';
 import { httpAgent, canisterHttpAgent, httpAgentIdentity } from '../../httpAgent';
 /* Contain Download, File View, Mark File, Delete File and File Share Implementation */
@@ -126,9 +127,9 @@ export const shareFilePublic = async (fileObj) => {
   if (flag) {
     const userAgent = await canisterHttpAgent();
     const data = `${fileObj.mimeType}$${fileObj.chunkCount.toString()}$${localStorage.getItem('fileCanister')}$${fileObj.fileId}`;
-    const fileHash = sha256(data);
-    await userAgent.makeFilePublic(fileObj.fileId, fileHash);
-    return (fileHash);
+    const encrypt = AES.encrypt(data, 'secret key 123').toString();
+    await userAgent.makeFilePublic(fileObj.fileId, encrypt);
+    return (encrypt);
   }
   return (false);
 };

@@ -5,6 +5,8 @@ import styled from 'styled-components';
 import { idlFactory as FileHandleIdl } from 'dfx-generated/FileHandle';
 
 // 3rd party imports
+import AES from 'crypto-js/aes';
+import CryptoJS from 'crypto-js';
 import { Actor } from '@dfinity/agent';
 import { httpAgentIdentity } from '../httpAgent';
 
@@ -14,39 +16,44 @@ const PublicUrl = () => {
 
   React.useEffect(() => {
     const getFiles = async () => {
-      const canisterId = window.location.href.split('/')[5];
-      const fileHash = window.location.href.split('/')[6];
-
+      const fileHash = window.location.href.split('/*')[1];
+      console.log(fileHash)
+      let bytes  = AES.decrypt(fileHash, 'secret key 123');
+      let originalText = bytes.toString(CryptoJS.enc.Utf8);
+      console.log(originalText)
+      const fileId = originalText.split('$')[3]
+      const chunkCount = parseInt(originalText.split('$')[1], 10)
+      const mimeType = originalText.split('$')[0]
+      const canisterId = originalText.split('$')[2]
+      
       const identityAgent = await httpAgentIdentity();
       const userAgentShare = Actor.createActor(FileHandleIdl, { agent: identityAgent, canisterId });
-      let fileInfo = await userAgentShare.getPublicFileMeta(fileHash);
-      fileInfo = fileInfo[0];
 
       const chunkBuffers = [];
-      for (let j = 0; j < fileInfo.chunkCount; j += 1) {
-        const bytes = await userAgentShare.getPublicFileChunk(fileInfo.fileId, j + 1);
+      for (let j = 0; j < chunkCount; j += 1) {
+        const bytes = await userAgentShare.getPublicFileChunk(fileId, j + 1);
         const bytesAsBuffer = new Uint8Array(bytes[0]);
         chunkBuffers.push(bytesAsBuffer);
       }
       const fileBlob = new Blob([Buffer.concat(chunkBuffers)], {
-        type: fileInfo.mimeType,
+        type: mimeType,
       });
 
       const fileURL = URL.createObjectURL(fileBlob);
 
-      // if(isPdf(type)){
-      //   setType(mimeType);
-      //   setData(fileURL);
-      // } else{
-      //   let reader = new FileReader();
-      //   //reader.readAsDataURL(fileBlob);
-      //   setData(fileURL);
-      //   //reader.onloadend = function() {
-      //   //  setData(reader.result);
-      //   //}
-      //   setType(mimeType);
-      // }
-      setType(fileInfo.mimeType);
+      // // if(isPdf(type)){
+      // //   setType(mimeType);
+      // //   setData(fileURL);
+      // // } else{
+      // //   let reader = new FileReader();
+      // //   //reader.readAsDataURL(fileBlob);
+      // //   setData(fileURL);
+      // //   //reader.onloadend = function() {
+      // //   //  setData(reader.result);
+      // //   //}
+      // //   setType(mimeType);
+      // // }
+      setType(mimeType);
       setData(fileURL);
     };
     getFiles();
