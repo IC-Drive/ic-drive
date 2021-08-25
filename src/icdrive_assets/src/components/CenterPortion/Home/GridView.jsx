@@ -9,7 +9,7 @@ import {
 } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import {
-  downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, removeFilePublic, bytesToSize
+  downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, removeFilePublic, bytesToSize, changeFileDirectory
 } from '../Methods';
 import { filesUpdate, switchFolder, refreshComponents } from '../../../state/actions';
 
@@ -155,12 +155,35 @@ const GridView = () => {
   const switchToFolder = (value) =>{
     dispatch(switchFolder(value))
   }
+  // Drag and Drop method begins
+  const onDragStart = (e) =>{
+    e.dataTransfer.setData("fileTransfer", [fileObj.current])
+  }
+  const onDragOver = (e) =>{
+    e.preventDefault()
+  }
+  const onDrop = (e, value) =>{
+    const temp = [];
+    for (let i = 0; i < files.length; i+=1) {
+      if (files[i].id===fileObj.current.id) {
+        let current = Object.assign(fileObj.current);
+        current['folder'] = value;
+        temp.push(current);
+        continue;
+      }
+      temp.push(files[i]);
+    }
+    dispatch(filesUpdate(temp));
+    dispatch(refreshComponents(true));
+    changeFileDirectory(temp);
+  }
+  // Drag and Drop method ends
 
   return (
     <div className="grid-container">
       {
         folders.map((value) => (
-          <div className="file-div" onDoubleClick={()=>{ switchToFolder(value) }} onContextMenu={() => {  }}>
+          <div className="file-div" onDoubleClick={()=>{ switchToFolder(value) }} onContextMenu={() => {  }} onDragOver={e=>onDragOver(e)} onDrop={e=>onDrop(e, value)}>
             <div className="grid-view-icon-part">
               <img id="display-icon" src="./icons/folder.svg" alt="file icon" />
             </div>
@@ -175,7 +198,7 @@ const GridView = () => {
           data.map((value) => (
             <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
               <Tooltip placement="right" title={()=>getToolTipText(value)}>
-              <div className="file-div" onDoubleClick={()=>{fileObj.current = value; handleView() }} onContextMenu={() => { fileObj.current = value; }}>
+              <div className="file-div" onDoubleClick={()=>{fileObj.current = value; handleView() }} onContextMenu={() => { fileObj.current = value; }} onDragStart={e=>{fileObj.current = value;onDragStart(e)}} draggable>
                 <div className="grid-view-icon-part">
                   {
                     isImage(value.mimeType)?
