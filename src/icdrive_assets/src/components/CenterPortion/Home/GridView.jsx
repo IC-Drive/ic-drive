@@ -156,26 +156,25 @@ const GridView = () => {
     dispatch(switchFolder(value))
   }
   // Drag and Drop method begins
-  const onDragStart = (e) =>{
-    e.dataTransfer.setData("fileTransfer", [fileObj.current])
+  const onDragStart = (e, value) =>{
+    fileObj.current = value; 
+    e.dataTransfer.setData("fileTransfer", [value])
   }
   const onDragOver = (e) =>{
     e.preventDefault()
   }
   const onDrop = (e, value) =>{
-    const temp = [];
-    for (let i = 0; i < files.length; i+=1) {
-      if (files[i].id===fileObj.current.id) {
-        let current = Object.assign(fileObj.current);
-        current['folder'] = value;
-        temp.push(current);
-        continue;
+    let temp = [...files]
+
+    for (let i = 0; i < temp.length; i+=1) {
+      if (temp[i]['fileId']===fileObj.current.fileId) {
+        temp[i]['folder'] = value;
       }
-      temp.push(files[i]);
     }
+    console.log(temp)
     dispatch(filesUpdate(temp));
     dispatch(refreshComponents(true));
-    changeFileDirectory(temp);
+    changeFileDirectory(fileObj.current.fileId, value);
   }
   // Drag and Drop method ends
 
@@ -198,7 +197,7 @@ const GridView = () => {
           data.map((value) => (
             <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
               <Tooltip placement="right" title={()=>getToolTipText(value)}>
-              <div className="file-div" onDoubleClick={()=>{fileObj.current = value; handleView() }} onContextMenu={() => { fileObj.current = value; }} onDragStart={e=>{fileObj.current = value;onDragStart(e)}} draggable>
+              <div className="file-div" onDoubleClick={()=>{fileObj.current = value; handleView() }} onContextMenu={() => { fileObj.current = value; }} onDragStart={e=>{onDragStart(e, value)}} draggable>
                 <div className="grid-view-icon-part">
                   {
                     isImage(value.mimeType)?

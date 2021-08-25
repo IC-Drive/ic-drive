@@ -38,14 +38,14 @@ shared (msg) actor class icdrive (){
   stable var feedback : [Text] = [];
   stable var userCount : Nat = 0;
 
-  public shared(msg) func createProfile(userName: UserName, email: Text) : async ?FileCanister {
+  public shared(msg) func createProfile(userName: UserName, email: Text, name: Text) : async ?FileCanister {
     switch(user.findOne(msg.caller)){
       case null{
         Cycles.add(600_000_000_000);
         let fileHandleObj = await FileHandle.FileHandle(); // dynamically install a new Canister
         
         let canId = await fileHandleObj.createOwner(msg.caller);
-        user.createOne(msg.caller, userName, canId, email);
+        user.createOne(msg.caller, userName, canId, email, name);
         
         let settings: CanisterSettings = {
         controllers = [admin, msg.caller];

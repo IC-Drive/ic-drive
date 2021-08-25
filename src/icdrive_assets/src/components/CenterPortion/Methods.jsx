@@ -209,9 +209,9 @@ export const sendFeedback = async (feed) => {
   await icdrive.addFeedback(feed);
 };
 
-export const changeFileDirectory = async (fileInfo) => {
+export const changeFileDirectory = async (fileId, folder) => {
   const userAgent = await canisterHttpAgent();
-  await userAgent.changeFileDirectory(fileInfo[0].fileId, fileInfo[0].folder);
+  await userAgent.changeFileDirectory(fileId, folder);
 };
 
 /* ----------------------------------------------Testing--------------------------------------*/

@@ -13,10 +13,9 @@ import { idlFactory as FileHandleIdl } from 'dfx-generated/FileHandle';
 const Profile = () => {
   const [dashboardFlag, setDashboardFlag] = React.useState(false);
   const [userNameFlag, setUserNameFlag] = React.useState(false);
-  const [emailFlag, setEmailFlag] = React.useState(false);
-  const [emailId, setEmailId] = React.useState('');
   const [loadingFlag, setLoadingFlag] = React.useState(false);
   const userName = React.useRef('');
+  const hisName = React.useRef('');
   const userEmail = React.useRef('');
 
   const createCanister = async () => {
@@ -28,7 +27,7 @@ const Profile = () => {
       const icdrive = await httpAgent();
       const checkName = await icdrive.checkUserName(userName.current.state.value);
       if (!checkName) {
-        const create = await icdrive.createProfile(userName.current.state.value, emailId);
+        const create = await icdrive.createProfile(userName.current.state.value, userEmail.current.state.value, hisName.current.state.value);
         if (create.length === 1) {
           localStorage.setItem('userName', userName.current.state.value);
           localStorage.setItem('fileCanister', create[0].toText());
@@ -36,7 +35,7 @@ const Profile = () => {
           setLoadingFlag(false);
           setDashboardFlag(true);
         } else {
-          message.error('Cant access using this Email!');
+          message.error('Something Went Wrong!');
           setLoadingFlag(false);
         }
       } else {
@@ -46,13 +45,6 @@ const Profile = () => {
     }
   };
 
-  const checkEmail = () =>{
-    setEmailId(userEmail.current.state.value)
-    setEmailFlag(false);
-    userEmail.current.state.value = '';
-    setUserNameFlag(true);
-  }
-
   React.useEffect(() => {
     const createGetProfile = async () => {
       const icdrive = await httpAgent();
@@ -60,12 +52,9 @@ const Profile = () => {
       //console.log(profile)
       // Check if user already exist else create his canister
       if (profile.length === 0) {
-        setEmailFlag(true);
-        //setUserNameFlag(true);
+        setUserNameFlag(true);
       } else {
         if(profile[0].updateCanister){
-          //Update canister
-          //console.log(profile[0].fileCanister.toText());
           const agent = await httpAgentIdentity();
           const wasm_file = await fetch("./FileHandle.wasm");
           const buffer = await wasm_file.arrayBuffer();
@@ -91,29 +80,24 @@ const Profile = () => {
       {
         dashboardFlag
           ? <Dashboard />
-          : emailFlag
-            ? (
-              <div className="innercontainer">
-                <div className="waiting">
-                  <div style={{ paddingTop: '20%' }}>
-                    <span id="username">
-                      Your Email:&nbsp;
-                      <Input style={{ width: '80% !important' }} ref={userEmail} />
-                    </span>
-                    <br />
-                    <br />
-                    <Button type="primary" onClick={checkEmail}>Check Access</Button>
-                  </div>
-                </div>
-              </div>
-            ) : userNameFlag
+          : userNameFlag
                 ? (
                   <div className="innercontainer">
                     <div className="waiting">
                       <div style={{ paddingTop: '20%' }}>
                         <span id="username">
-                          Create Username:&nbsp;
-                          <Input style={{ width: '80% !important' }} ref={userName} />
+                          Name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                          <Input style={{ width: '50% !important' }} ref={hisName} />
+                        </span>
+                        <br/>
+                        <span id="username">
+                          Email:&nbsp;&nbsp;&nbsp;&nbsp;
+                          <Input style={{ width: '50% !important' }} ref={userEmail} />
+                        </span>
+                        <br/>
+                        <span id="username">
+                          Username:&nbsp;
+                          <Input style={{ width: '50% !important' }} ref={userName} />
                         </span>
                         <br />
                         <br />
@@ -124,7 +108,7 @@ const Profile = () => {
                 )
                 : (
                   <div className="innercontainer">
-                    <div className="waiting">
+                    <div className="waiting-update">
                       <p id="text" style={{ paddingTop: '20%' }}>Updating...</p>
                     </div>
                   </div>

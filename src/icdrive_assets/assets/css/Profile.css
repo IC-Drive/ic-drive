@@ -3,10 +3,18 @@
     width: 100vw;
   }
   .innercontainer{
-    padding-top: calc(50vh - 100px);
-    padding-left: calc(50vw - 125px);
+    padding-top: calc(50vh - 125px);
+    padding-left: calc(50vw - 150px);
   }
   .waiting{
+    height: 250px;
+    width: 300px;
+    border-radius: 10px;
+    background: #324851;
+    text-align: center;
+    color: #fff;
+  }
+  .waiting-update{
     height: 200px;
     width: 250px;
     border-radius: 10px;
@@ -23,5 +31,5 @@
     font-weight: 500;
   }
   .ant-input{
-    width: 80% !important;
+    width: 50% !important;
   }
