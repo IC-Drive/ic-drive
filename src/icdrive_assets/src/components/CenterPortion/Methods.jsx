@@ -209,6 +209,11 @@ export const sendFeedback = async (feed) => {
   await icdrive.addFeedback(feed);
 };
 
+export const changeFileDirectory = async (fileInfo) => {
+  const userAgent = await canisterHttpAgent();
+  await userAgent.changeFileDirectory(fileInfo[0].fileId, fileInfo[0].folder);
+};
+
 /* ----------------------------------------------Testing--------------------------------------*/
 // For large files not working on firefox to be fixed
 /* const download = async (fileId, chunk_count, fileName) => {

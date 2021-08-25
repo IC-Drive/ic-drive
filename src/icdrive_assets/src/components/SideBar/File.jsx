@@ -70,7 +70,7 @@ export async function uploadFile(file, folder, userAgent, dispatch, uploadProgre
     byteStart < file.size;
     byteStart += MAX_CHUNK_SIZE, chunk += 1
   ) {
-    const fileSlice = file.slice(byteStart, Math.min(file.size, byteStart + MAX_CHUNK_SIZE));
+    const fileSlice = file.slice(byteStart, Math.min(file.size, byteStart + MAX_CHUNK_SIZE), file.type);
     const fileSliceBuffer = (await fileSlice.arrayBuffer()) || new ArrayBuffer(0);
     const sliceToNat = encodeArrayBuffer(fileSliceBuffer);
     await userAgent.putFileChunk(fileId, chunk, sliceToNat);

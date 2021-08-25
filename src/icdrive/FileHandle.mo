@@ -210,11 +210,11 @@ shared (msg) actor class FileHandle (){
   };
 
   //Public Files
-  public shared(msg) func makeFilePublic(fileId : FileId, file_hash: Text) : async ?() {
+  public shared(msg) func makeFilePublic(fileId : FileId, fileHash: Text) : async ?() {
     do ? {
       assert(msg.caller==owner);
       let fileInfo = state.files.get(fileId)!;
-      fileUrlTrieMap.put(file_hash, fileId);
+      fileUrlTrieMap.put(fileHash, fileId);
       state.files.put(fileId, {
         userName = fileInfo.userName;
         createdAt = fileInfo.createdAt ;
@@ -227,7 +227,7 @@ shared (msg) actor class FileHandle (){
         marked = fileInfo.marked ;
         sharedWith = [] ;
         madePublic = true;
-        fileHash = file_hash;
+        fileHash = fileHash;
         folder = fileInfo.folder;
       });
     }
@@ -249,6 +249,28 @@ shared (msg) actor class FileHandle (){
         Blob.fromArray([]);
       }
     };
+  };
+
+  public shared(msg) func changeFileDirectory(fileInfoTemp : FileId, folder: Text) : async ?() {
+    do ? {
+      assert(msg.caller==owner);
+      let fileInfo = state.files.get(fileInfoTemp)!;
+      state.files.put(fileInfo.fileId, {
+        userName = fileInfo.userName;
+        createdAt = fileInfo.createdAt;
+        fileId = fileInfo.fileId;
+        name = fileInfo.name;
+        chunkCount = fileInfo.chunkCount;
+        fileSize = fileInfo.fileSize;
+        mimeType = fileInfo.mimeType;
+        thumbnail = fileInfo.thumbnail;
+        marked = fileInfo.marked;
+        sharedWith = fileInfo.sharedWith;
+        madePublic = fileInfo.madePublic;
+        fileHash = fileInfo.fileHash;
+        folder = folder;
+      });
+    }
   };
 
   // public query(msg) func getPublicFileEntire(file_hash: Text) : async ?ChunkData {
@@ -313,12 +335,12 @@ shared (msg) actor class FileHandle (){
         chunkCount = fileInfo.chunkCount;
         fileSize = fileInfo.fileSize;
         mimeType = fileInfo.mimeType;
-        thumbnail = fileInfo.thumbnail;
+        thumbnail = "";
         marked = fileInfo.marked;
         sharedWith = fileInfo.sharedWith;
         madePublic = fileInfo.madePublic;
         fileHash = fileInfo.fileHash;
-        folder = fileInfo.folder;
+        folder = "";
       };
       Debug.print(fileId);
       state.files.put(fileId, fileMetaData);
