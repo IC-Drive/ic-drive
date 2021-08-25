@@ -9,6 +9,7 @@ import AES from 'crypto-js/aes';
 import CryptoJS from 'crypto-js';
 import { Actor } from '@dfinity/agent';
 import { httpAgentIdentity } from '../httpAgent';
+import {Spin} from 'antd';
 
 const PublicUrl = () => {
   const [data, setData] = React.useState('');
@@ -17,10 +18,9 @@ const PublicUrl = () => {
   React.useEffect(() => {
     const getFiles = async () => {
       const fileHash = window.location.href.split('/*')[1];
-      console.log(fileHash)
       let bytes  = AES.decrypt(fileHash, 'secret key 123');
       let originalText = bytes.toString(CryptoJS.enc.Utf8);
-      console.log(originalText)
+      
       const fileId = originalText.split('$')[3]
       const chunkCount = parseInt(originalText.split('$')[1], 10)
       const mimeType = originalText.split('$')[0]
@@ -78,7 +78,13 @@ const PublicUrl = () => {
           )
           : (
             <div className="show-image">
-              <img alt="IC Drive - File on Blockchain" id="the-image" src={data} />
+              {
+                data===''?
+                <div style={{marginTop: "calc(50vh - 13px)", marginLeft: "calc(50vw - 13px)"}}><Spin /></div>
+                :
+                // <img alt="IC Drive - File on Blockchain" id="the-image" src={data} />
+                <div style={{marginTop: "calc(100vh - 50px)", marginLeft: "calc(100vw - 50px)"}}><Spin /></div>
+              }
             </div>
           )
       }

@@ -15,7 +15,7 @@ import ListViewSearch from './SearchFile/ListViewSearch';
 import GridViewSearch from './SearchFile/GridViewSearch';
 
 // 3rd party imports
-import { Progress, Menu, Dropdown, Input, Button, Modal } from 'antd';
+import { Progress, Menu, Dropdown, Input, Button, Modal, Spin } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   MenuOutlined, AppstoreOutlined, CaretDownOutlined, CaretUpOutlined,
@@ -180,7 +180,7 @@ const CenterPortion = () => {
                   <div id="cp-right-section">
                     {
                   uploadSize / (1024 * 1024) < 2
-                    ? null
+                    ? <Spin size="small" />
                     : <Progress steps={4} percent={uploadProgress} />
                 }
                   </div>
