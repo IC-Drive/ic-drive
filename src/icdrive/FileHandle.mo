@@ -24,6 +24,23 @@ shared (msg) actor class FileHandle (){
   public type FileInfo = FileTypes.FileInfo;
   public type FileInit = FileTypes.FileInit;
 
+public type FileInfo2 = {
+    fileId : FileId;
+    userName: UserName;
+    createdAt : Int;
+    name: Text;
+    chunkCount: Nat;
+    fileSize: Nat;
+    mimeType: Text;
+    thumbnail: Text;
+    marked: Bool;
+    sharedWith: [UserName];
+    madePublic: Bool;
+    fileHash: Text;
+    folder: Text;
+    yo: Text;
+  };
+
   stable var fileEntries : [(FileId, FileInfo)] = [];
   stable var chunkEntries : [(ChunkId, ChunkData)] = [];
   stable var public_file_url_entries : [(Text, FileId)] = [];
@@ -50,10 +67,10 @@ shared (msg) actor class FileHandle (){
     let now = Time.now();
     let fileId = userName # "-" # fileData.name # "-" # (Int.toText(now));
 
-    switch (state.files.get(fileId)) {
+    switch (state.files2.get(fileId)) {
     case (?_) { /* error -- ID already taken. */ null };
     case null { /* ok, not taken yet. */
-            state.files.put(fileId, {
+            state.files2.put(fileId, {
               fileId = fileId;
               userName = userName;
               name = fileData.name;
@@ -67,6 +84,7 @@ shared (msg) actor class FileHandle (){
               madePublic = false;
               fileHash = "";
               folder = fileData.folder;
+              yo = "";
             });
 
           ?fileId
@@ -87,7 +105,7 @@ shared (msg) actor class FileHandle (){
     do?{
       assert(msg.caller==owner);
       let b = Buffer.Buffer<FileInfo>(0);
-      for ((k,v) in state.files.entries()) {
+      for ((k,v) in state.files2.entries()) {
           b.add(v);
       };
       b.toArray()
@@ -98,8 +116,8 @@ shared (msg) actor class FileHandle (){
   public shared(msg) func markFile(fileId : FileId) : async ?() {
     do ? {
       assert(msg.caller==owner);
-      var fileInfo = state.files.get(fileId)!;
-      state.files.put(fileId, {
+      var fileInfo = state.files2.get(fileId)!;
+      state.files2.put(fileId, {
         userName = fileInfo.userName;
         createdAt = fileInfo.createdAt ;
         fileId = fileId ;
@@ -113,6 +131,7 @@ shared (msg) actor class FileHandle (){
         madePublic = fileInfo.madePublic;
         fileHash = fileInfo.fileHash;
         folder = fileInfo.folder;
+        yo = "";
       });
     }
   };
@@ -140,13 +159,13 @@ shared (msg) actor class FileHandle (){
     for (j in Iter.range(1, fileInfo.chunkCount)) {
       state.chunks.delete(chunkId(fileInfo.fileId, j));
     };
-    state.files.delete(fileInfo.fileId);
+    state.files2.delete(fileInfo.fileId);
   };
 
   public shared(msg) func deleteFile(fileId : FileId) : async ?() {
     do ? {
       assert(msg.caller==owner);
-      let fileInfo = state.files.get(fileId)!;
+      let fileInfo = state.files2.get(fileId)!;
       deleteFile_(fileInfo);
     }
   };
@@ -155,7 +174,7 @@ shared (msg) actor class FileHandle (){
   public shared(msg) func shareFile(fileId : FileId, userNameShared : UserName) : async ?(Text) {
     do ? {
       assert(msg.caller==owner);
-      let fileInfo = state.files.get(fileId)!;      // Info of File
+      let fileInfo = state.files2.get(fileId)!;      // Info of File
 
       //if(msg.caller!=fileInfo.userId){  // User cant reshare other users file
       //  return(?"Unauthorized");
@@ -163,7 +182,7 @@ shared (msg) actor class FileHandle (){
       //if(msg.caller==shareId){  // User cant share file to himself
       //  return(?"Unauthorized");
       //};
-      state.files.put(fileId, {
+      state.files2.put(fileId, {
         userName = fileInfo.userName;
         createdAt = fileInfo.createdAt ;
         fileId = fileInfo.fileId ;
@@ -177,19 +196,20 @@ shared (msg) actor class FileHandle (){
         madePublic = fileInfo.madePublic;
         fileHash = fileInfo.fileHash;
         folder = fileInfo.folder;
+        yo = "";
       });
       return(?"Success")
     }
   };
   
   //Authorization for sharing to be added
-  public shared(msg) func addSharedFile(fileInfo : FileInfo) : async () {
-    state.files.put(fileInfo.fileId, fileInfo)
+  public shared(msg) func addSharedFile(fileInfo : FileInfo2) : async () {
+    state.files2.put(fileInfo.fileId, fileInfo)
   };
 
   public query(msg) func getSharedFileChunk(fileId : FileId, chunkNum : Nat, userName: UserName) : async ?ChunkData {
     do?{
-      let fileInfo = state.files.get(fileId)!;
+      let fileInfo = state.files2.get(fileId)!;
       var flag = 0;
       for (j in fileInfo.sharedWith.vals()) {
         if(userName==j){
@@ -204,8 +224,8 @@ shared (msg) actor class FileHandle (){
   public shared(msg) func deleteSharedFile(fileId : FileId) : async ?() {
     do ? {
       assert(msg.caller==owner);
-      let fileInfo = state.files.get(fileId)!;
-      state.files.delete(fileInfo.fileId);
+      let fileInfo = state.files2.get(fileId)!;
+      state.files2.delete(fileInfo.fileId);
     }
   };
 
@@ -213,9 +233,9 @@ shared (msg) actor class FileHandle (){
   public shared(msg) func makeFilePublic(fileId : FileId, fileHash: Text) : async ?() {
     do ? {
       assert(msg.caller==owner);
-      let fileInfo = state.files.get(fileId)!;
+      let fileInfo = state.files2.get(fileId)!;
       fileUrlTrieMap.put(fileHash, fileId);
-      state.files.put(fileId, {
+      state.files2.put(fileId, {
         userName = fileInfo.userName;
         createdAt = fileInfo.createdAt ;
         fileId = fileId ;
@@ -229,6 +249,7 @@ shared (msg) actor class FileHandle (){
         madePublic = true;
         fileHash = fileHash;
         folder = fileInfo.folder;
+        yo = "";
       });
     }
   };
@@ -236,13 +257,13 @@ shared (msg) actor class FileHandle (){
   public query(msg) func getPublicFileMeta(fileHash : Text) : async ?FileInfo {
     do?{
       let fileId = fileUrlTrieMap.get(fileHash)!;
-      let fileInfo = state.files.get(fileId)!;
+      let fileInfo = state.files2.get(fileId)!;
     };
   };
 
   public query(msg) func getPublicFileChunk(fileId : FileId, chunkNum : Nat) : async ?ChunkData {
     do?{
-      let fileInfo = state.files.get(fileId)!;
+      let fileInfo = state.files2.get(fileId)!;
       if(fileInfo.madePublic==true){
         state.chunks.get(chunkId(fileId, chunkNum))!;
       } else{
@@ -254,8 +275,8 @@ shared (msg) actor class FileHandle (){
   public shared(msg) func changeFileDirectory(fileInfoTemp : FileId, folder: Text) : async ?() {
     do ? {
       assert(msg.caller==owner);
-      let fileInfo = state.files.get(fileInfoTemp)!;
-      state.files.put(fileInfo.fileId, {
+      let fileInfo = state.files2.get(fileInfoTemp)!;
+      state.files2.put(fileInfo.fileId, {
         userName = fileInfo.userName;
         createdAt = fileInfo.createdAt;
         fileId = fileInfo.fileId;
@@ -269,6 +290,7 @@ shared (msg) actor class FileHandle (){
         madePublic = fileInfo.madePublic;
         fileHash = fileInfo.fileHash;
         folder = folder;
+        yo = "";
       });
     }
   };
@@ -276,7 +298,7 @@ shared (msg) actor class FileHandle (){
   // public query(msg) func getPublicFileEntire(file_hash: Text) : async ?ChunkData {
   //   do?{
   //     let fileId = fileUrlTrieMap.get(file_hash)!;
-  //     let file_info = state.files.get(fileId)!;
+  //     let file_info = state.files2.get(fileId)!;
   //     if(file_info.madePublic==true){
   //       var temp : [Nat8] = [];
   //       let chunkCount = file_info.chunkCount;
@@ -294,8 +316,8 @@ shared (msg) actor class FileHandle (){
   public shared(msg) func removeFilePublic(fileId : FileId) : async ?() {
     do ? {
       assert(msg.caller==owner);
-      let fileInfo = state.files.get(fileId)!;
-      state.files.put(fileId, {
+      let fileInfo = state.files2.get(fileId)!;
+      state.files2.put(fileId, {
         userName = fileInfo.userName;
         createdAt = fileInfo.createdAt ;
         fileId = fileId ;
@@ -309,6 +331,7 @@ shared (msg) actor class FileHandle (){
         madePublic = false;
         fileHash = "";
         folder = fileInfo.folder;
+        yo = "";
       });
     }
   };
@@ -341,9 +364,10 @@ shared (msg) actor class FileHandle (){
         madePublic = fileInfo.madePublic;
         fileHash = fileInfo.fileHash;
         folder = "";
+        yo = "";
       };
       Debug.print(fileId);
-      state.files.put(fileId, fileMetaData);
+      state.files2.put(fileId, fileMetaData);
     };
 
     for ((chunkId, chunkData) in chunkEntries.vals()) {
