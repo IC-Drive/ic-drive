@@ -1,6 +1,6 @@
 import React from "react"
 import axios from 'axios';
-import mimetypes from './mimetypes';
+import {mimetypes} from './mimetypes';
 import useDrivePicker from 'react-google-drive-picker'
 import { canisterHttpAgent } from '../../httpAgent';
 import { uploadUpdate, refreshFiles, uploadProgress, sizeUpdate } from '../../state/actions';

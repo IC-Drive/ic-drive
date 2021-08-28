@@ -34,12 +34,10 @@ module {
     chunkCount: Nat;
     fileSize: Nat;
     mimeType: Text;
-    thumbnail: Text;
     marked: Bool;
     sharedWith: [UserName];
     madePublic: Bool;
     fileHash: Text;
-    folder: Text;
   };
 
   public type FileInfo2 = {
@@ -56,7 +54,6 @@ module {
     madePublic: Bool;
     fileHash: Text;
     folder: Text;
-    yo: Text;
   };
 
   public type State = {

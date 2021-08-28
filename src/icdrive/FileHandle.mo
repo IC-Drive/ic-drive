@@ -22,24 +22,8 @@ shared (msg) actor class FileHandle (){
   public type ChunkId = FileTypes.ChunkId;
   public type ChunkData = FileTypes.ChunkData;
   public type FileInfo = FileTypes.FileInfo;
+  public type FileInfo2 = FileTypes.FileInfo2;
   public type FileInit = FileTypes.FileInit;
-
-public type FileInfo2 = {
-    fileId : FileId;
-    userName: UserName;
-    createdAt : Int;
-    name: Text;
-    chunkCount: Nat;
-    fileSize: Nat;
-    mimeType: Text;
-    thumbnail: Text;
-    marked: Bool;
-    sharedWith: [UserName];
-    madePublic: Bool;
-    fileHash: Text;
-    folder: Text;
-    yo: Text;
-  };
 
   stable var fileEntries : [(FileId, FileInfo)] = [];
   stable var chunkEntries : [(ChunkId, ChunkData)] = [];
@@ -84,7 +68,6 @@ public type FileInfo2 = {
               madePublic = false;
               fileHash = "";
               folder = fileData.folder;
-              yo = "";
             });
 
           ?fileId
@@ -101,10 +84,10 @@ public type FileInfo2 = {
   };
 
   // Get all files
-  public query(msg) func getFiles() : async ?[FileInfo] {
+  public query(msg) func getFiles() : async ?[FileInfo2] {
     do?{
       assert(msg.caller==owner);
-      let b = Buffer.Buffer<FileInfo>(0);
+      let b = Buffer.Buffer<FileInfo2>(0);
       for ((k,v) in state.files2.entries()) {
           b.add(v);
       };
@@ -131,7 +114,6 @@ public type FileInfo2 = {
         madePublic = fileInfo.madePublic;
         fileHash = fileInfo.fileHash;
         folder = fileInfo.folder;
-        yo = "";
       });
     }
   };
@@ -155,7 +137,7 @@ public type FileInfo2 = {
   };
 
   // Delete File
-  func deleteFile_(fileInfo : FileInfo) : () {
+  func deleteFile_(fileInfo : FileInfo2) : () {
     for (j in Iter.range(1, fileInfo.chunkCount)) {
       state.chunks.delete(chunkId(fileInfo.fileId, j));
     };
@@ -196,7 +178,6 @@ public type FileInfo2 = {
         madePublic = fileInfo.madePublic;
         fileHash = fileInfo.fileHash;
         folder = fileInfo.folder;
-        yo = "";
       });
       return(?"Success")
     }
@@ -249,12 +230,11 @@ public type FileInfo2 = {
         madePublic = true;
         fileHash = fileHash;
         folder = fileInfo.folder;
-        yo = "";
       });
     }
   };
 
-  public query(msg) func getPublicFileMeta(fileHash : Text) : async ?FileInfo {
+  public query(msg) func getPublicFileMeta(fileHash : Text) : async ?FileInfo2 {
     do?{
       let fileId = fileUrlTrieMap.get(fileHash)!;
       let fileInfo = state.files2.get(fileId)!;
@@ -290,7 +270,6 @@ public type FileInfo2 = {
         madePublic = fileInfo.madePublic;
         fileHash = fileInfo.fileHash;
         folder = folder;
-        yo = "";
       });
     }
   };
@@ -331,7 +310,6 @@ public type FileInfo2 = {
         madePublic = false;
         fileHash = "";
         folder = fileInfo.folder;
-        yo = "";
       });
     }
   };
@@ -364,7 +342,6 @@ public type FileInfo2 = {
         madePublic = fileInfo.madePublic;
         fileHash = fileInfo.fileHash;
         folder = "";
-        yo = "";
       };
       Debug.print(fileId);
       state.files2.put(fileId, fileMetaData);

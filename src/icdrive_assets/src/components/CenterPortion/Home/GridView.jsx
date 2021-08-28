@@ -188,7 +188,7 @@ const GridView = () => {
               <img id="display-icon" src="./icons/folder.svg" alt="file icon" />
             </div>
             <div className="grid-view-text-part truncate-overflow">
-              {value}
+              <p align="center">{value}</p>
             </div>
           </div>
         ))
@@ -218,7 +218,7 @@ const GridView = () => {
                   }
                 </div>
                 <div className="grid-view-text-part truncate-overflow">
-                  {value.name}
+                  <p align="center">{value.name}</p>
                 </div>
               </div>
               </Tooltip>

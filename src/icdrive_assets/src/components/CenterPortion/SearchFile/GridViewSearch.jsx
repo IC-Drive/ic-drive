@@ -167,7 +167,7 @@ const GridViewSearch = () => {
                   }
                 </div>
                 <div className="grid-view-text-part truncate-overflow">
-                  {value.name}
+                  <p align="center">{value.name}</p>
                 </div>
               </div>
               </Tooltip>
