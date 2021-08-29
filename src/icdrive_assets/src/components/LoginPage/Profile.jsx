@@ -25,7 +25,7 @@ const Profile = () => {
       const icdrive = await httpAgent();
       const checkName = await icdrive.checkUserName(userName.current.state.value);
       if (!checkName) {
-        const create = await icdrive.createProfile(userName.current.state.value, '', '');
+        const create = await icdrive.createProfile(userName.current.state.value, '');
         if (create.length === 1) {
           localStorage.setItem('userName', userName.current.state.value);
           localStorage.setItem('fileCanister', create[0].toText());

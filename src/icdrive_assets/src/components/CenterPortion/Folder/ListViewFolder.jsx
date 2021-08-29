@@ -5,8 +5,11 @@ import '../../../../assets/css/GridView.css';
 
 // 3rd party imports
 import {
-  Modal, message, Button, Input, Tag, Popconfirm
+  Modal, message, Button, Input, Tag, Popconfirm, Table, Space
 } from 'antd';
+import {
+  DownloadOutlined, DeleteOutlined, ShareAltOutlined,
+} from '@ant-design/icons';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, removeFilePublic, bytesToSize
@@ -38,7 +41,7 @@ const ListViewFolder = () => {
       }
     }
     setData(temp);
-  }, [previousFileObjectLength!=files.length]);
+  }, [previousFileObjectLength!=files.length, refreshData]);
 
   const handleDownload = async () => {
     await downloadFile(fileObj.current);
@@ -48,7 +51,7 @@ const ListViewFolder = () => {
     const temp = [...files];
     for (let i = 0; i < temp.length; i += 1) {
       if (temp[i].fileId === fileObj.current.fileId) {
-        temp[i].marked = false;
+        temp[i].marked = !temp[i].marked;
         break
       }
     }
@@ -136,7 +139,7 @@ const ListViewFolder = () => {
       title: 'Mark',
       dataIndex: 'marked',
       key: 'marked',
-      render: (_, record) => <div>{record.marked ? <img src="./icons/mark-blue.svg" alt="mark icon" style={{ height: '14px' }} onClick={() => handleMarked(record)} /> : <img src="./icons/mark-gray.svg" alt="mark icon" style={{ height: '14px' }} onClick={() => handleMarked(record)} />}</div>,
+      render: (_, record) => <div>{record.marked ? <img src="./icons/mark-blue.svg" alt="mark icon" style={{ height: '14px' }} onClick={() => {fileObj.current = record;handleMarked()}} /> : <img src="./icons/mark-gray.svg" alt="mark icon" style={{ height: '14px' }} onClick={() => {fileObj.current = record;handleMarked(record)}} />}</div>,
     },
     {
       title: '',

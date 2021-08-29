@@ -39,7 +39,7 @@ const GridViewMarked = () => {
       }
     }
     setData(temp);
-  }, [previousFileObjectLength!=files.length]);
+  }, [previousFileObjectLength!=files.length, refreshData]);
 
   const handleDownload = async () => {
     await downloadFile(fileObj.current);
@@ -49,7 +49,7 @@ const GridViewMarked = () => {
     const temp = [...files];
     for (let i = 0; i < temp.length; i += 1) {
       if (temp[i].fileId === fileObj.current.fileId) {
-        temp[i].marked = false;
+        temp[i].marked = !temp[i].marked;
         break
       }
     }
