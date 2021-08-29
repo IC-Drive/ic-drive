@@ -25,7 +25,7 @@ const Dashboard = () => {
     const fileJSON = async () => {
       const userAgent = await canisterHttpAgent();
       const fileList = await userAgent.getFiles();
-      console.log(fileList)
+
       const files = [];
       const folders = [];
       const sharedFiles = [];

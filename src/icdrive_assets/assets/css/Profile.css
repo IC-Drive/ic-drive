@@ -3,8 +3,8 @@
     width: 100vw;
   }
   .innercontainer{
-    padding-top: calc(50vh - 100px);
-    padding-left: calc(50vw - 125px);
+    padding-top: calc(50vh - 125px);
+    padding-left: calc(50vw - 150px);
   }
   .waiting{
     height: 200px;
