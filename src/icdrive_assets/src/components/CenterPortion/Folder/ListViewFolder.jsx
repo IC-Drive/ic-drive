@@ -1,18 +1,17 @@
 import React from 'react';
 
 // custom imports
-import '../../../../assets/css/ListViewShared.css'
+import '../../../../assets/css/GridView.css';
 
 // 3rd party imports
+import {
+  Modal, message, Button, Input, Tag, Popconfirm
+} from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import {
-  Table, Popconfirm, Space, message,
-} from 'antd';
-import { DownloadOutlined, DeleteOutlined } from '@ant-design/icons';
-import {
-  downloadSharedFile, viewSharedFile, deleteSharedFile, bytesToSize,
+  downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, removeFilePublic, bytesToSize
 } from '../Methods';
-import { refreshFiles } from '../../../state/actions';
+import { filesUpdate } from '../../../state/actions';
 
 const ListViewFolder = () => {
   const optionSelected = useSelector((state) => state.OptionSelected.option);

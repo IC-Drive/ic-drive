@@ -112,6 +112,9 @@ const GridViewMarked = () => {
 
   const menu = (
     <Menu>
+      <Menu.Item key="0" onClick={() => {  }}>
+        <span id="context-download" role="button" tabIndex={0}></span>
+      </Menu.Item>
       <Menu.Item key="1" onClick={() => { handleDownload(); }}>
         <span id="context-download" role="button" tabIndex={0}>Download</span>
       </Menu.Item>
