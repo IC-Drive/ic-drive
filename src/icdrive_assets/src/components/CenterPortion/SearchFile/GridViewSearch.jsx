@@ -9,12 +9,14 @@ import {
 } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import {
-  downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, removeFilePublic, bytesToSize
+  downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, removeFilePublic, bytesToSize,
+  downloadSharedFile, deleteSharedFile, viewSharedFile
 } from '../Methods';
 import { filesUpdate, refreshFiles } from '../../../state/actions';
 
 const GridViewSearch = () => {
   const files = useSelector((state) => state.FileHandler.files);
+  const sharedFiles = useSelector((state) => state.FileHandler.shared);
   const searched = useSelector((state) => state.FileHandler.searched);
 
   const [data, setData] = React.useState([]);
@@ -36,92 +38,61 @@ const GridViewSearch = () => {
         break
       }
     }
+    for (let i = 0; i < sharedFiles.length; i += 1) {
+      if (sharedFiles[i].name===searched) {
+        temp.push(sharedFiles[i]);
+        break
+      }
+    }
     setData(temp);
   }, []);
 
   const handleDownload = async () => {
-    await downloadFile(fileObj.current);
-  };
-
-  const handleMarked = async () => {
-    const temp = [...files];
-    for (let i = 0; i < temp.length; i += 1) {
-      if (temp[i].fileId === fileObj.current.fileId) {
-        temp[i].marked = false;
-        break
-      }
+    if(fileObj.current.userName===localStorage.getItem('userName')){
+      await downloadFile(fileObj.current);
+    } else{
+      await downloadSharedFile(fileObj.current, localStorage.getItem('userName'));
     }
-    dispatch(filesUpdate(temp));
-    await markFile(fileObj.current);
   };
 
   const handleDelete = async () => {
-    await deleteFile(fileObj.current);
-    dispatch(refreshFiles(true));
+    if(fileObj.current.userName===localStorage.getItem('userName')){
+      await deleteFile(fileObj.current);
+      dispatch(refreshFiles(true));
+    } else{
+      await deleteSharedFile(fileObj.current);
+      dispatch(refreshFiles(true));
+    }
   };
 
   const handleView = async () => {
-    const response = await viewFile(fileObj.current);
-    if (!response) {
-      message.info('Only PDF and Images can be viewed');
+    if(fileObj.current.userName===localStorage.getItem('userName')){
+      const response = await viewFile(fileObj.current);
+      if (!response) {
+        message.info('Only PDF and Images can be viewed');
+      }
+    } else{
+      const response = await viewSharedFile(fileObj.current, localStorage.getItem('userName'));
+      if (!response) {
+        message.info('Only PDF and Images can be viewed');
+      }
     }
-  };
-
-  const handleShare = async () => {
-    setShareLoadingFlag(true);
-    const response = await shareFile(fileObj.current, userName.current.state.value);
-    if (response) {
-      message.success('File Shared');
-    } else {
-      message.error('Something Went Wrong! Check User Name');
-    }
-    setShareLoadingFlag(false);
-  };
-
-  const handleSharePublic = async () => {
-    setPublicLoadingFlag(true);
-    const response = await shareFilePublic(fileObj.current);
-    if (response) {
-      fileObj.current.fileHash = response;
-    } else {
-      message.info('Only Images and PDF can be made public!!!');
-    }
-    setPublicLoadingFlag(false);
-  };
-
-  const removeSharePublic = async () => {
-    setRemoveLoadingFlag(true);
-    const response = await removeFilePublic(fileObj.current);
-    if (response) {
-      fileObj.current.fileHash = '';
-    } else {
-      message.info('Something Went Wrong, Try again!!!');
-    }
-    setRemoveLoadingFlag(false);
   };
 
   const menu = (
     <Menu>
       <Menu.Item key="0" onClick={() => {  }}>
+        <span id="context-download" role="button" tabIndex={0}>{'    '}</span>
+      </Menu.Item>
+      <Menu.Item key="1" onClick={() => {  }}>
         <span id="context-download" role="button" tabIndex={0}></span>
       </Menu.Item>
-      <Menu.Item key="1" onClick={() => { handleDownload(); }}>
+      <Menu.Item key="2" onClick={() => { handleDownload(); }}>
         <span id="context-download" role="button" tabIndex={0}>Download</span>
       </Menu.Item>
-      <Menu.Item key="2" onClick={() => { handleView(); }}>
+      <Menu.Item key="3" onClick={() => { handleView(); }}>
         <span id="context-view" role="button" tabIndex={0}>View</span>
       </Menu.Item>
-      <Menu.Item key="3" onClick={() => { setShareModal(true); }}>
-        <span id="context-share" role="button" tabIndex={0}>Share</span>
-      </Menu.Item>
-      <Menu.Item key="4" onClick={() => { handleMarked(); }}>
-        <span id="context-mark" role="button" tabIndex={0}>Mark</span>
-      </Menu.Item>
-      <Popconfirm className="popconfirm" title="Sure to delete?" onConfirm={() => { handleDelete(); }}>
-        <Menu.Item key="5">
-          <span id="context-delete" role="button" tabIndex={0}>Delete</span>
-        </Menu.Item>
-      </Popconfirm>
     </Menu>
   );
 
@@ -177,62 +148,6 @@ const GridViewSearch = () => {
             </Dropdown>
           ))
       }
-      <Modal
-        footer={null}
-        title={false}
-        visible={shareModal}
-        onCancel={() => { setShareModal(false); fileObj.current = {}; setRemoveLoadingFlag(false); }}
-      >
-        <div>
-          {
-          fileObj.current.fileHash === ''
-            ? (
-              <div>
-                <span>
-                  User Name:&nbsp;
-                  <Input ref={userName} />
-                </span>
-                <br />
-                {
-                  fileObj.current.sharedWith.map((value)=>{
-                    return(
-                      <Tag color="geekblue">{value}</Tag>
-                    )
-                  })
-                }
-                {
-                  PublicLoadingFlag?
-                  <div>
-                  <Button type="primary" style={{ float: 'right', marginTop: '10px' }} loading={ShareLoadingFlag} disabled onClick={()=>handleShare()}>Share</Button>
-                  <Button type="primary" style={{ float: 'right', marginTop: '10px', marginRight: '10px' }} loading={PublicLoadingFlag} onClick={handleSharePublic}>Public</Button>
-                  </div>
-                  :
-                  <div>
-                  <Button type="primary" style={{ float: 'right', marginTop: '10px' }} loading={ShareLoadingFlag} onClick={()=>handleShare()}>Share</Button>
-                  <Button type="primary" style={{ float: 'right', marginTop: '10px', marginRight: '10px' }} loading={PublicLoadingFlag} onClick={handleSharePublic}>Public</Button>
-                  </div>
-                }
-                <br />
-                <br />
-              </div>
-            )
-            : (
-              <div>
-                <span id="public-url" style={{color:'#4D85BD'}} onClick={() => { navigator.clipboard.writeText(`${window.location.href}icdrive/*${fileObj.current.fileHash}`); message.info('copied to clipboard'); }}>
-                  {window.location.href}
-                  icdrive/*
-                  {fileObj.current.fileHash}
-                </span>
-                <br />
-                <Button type="primary" style={{ float: 'right', marginRight: '10px' }} loading={removeFlag} onClick={()=>removeSharePublic()}>Remove</Button>
-                <br />
-                <br />
-              </div>
-            )
-        }
-          <br />
-        </div>
-      </Modal>
     </div>
   );
 };

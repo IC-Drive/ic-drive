@@ -12,12 +12,13 @@ import {
   DownloadOutlined, DeleteOutlined, ShareAltOutlined,
 } from '@ant-design/icons';
 import {
-  downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, removeFilePublic, bytesToSize,
+  downloadFile, downloadSharedFile, viewFile, viewSharedFile, markFile, deleteFile, deleteSharedFile, shareFile, shareFilePublic, removeFilePublic, bytesToSize,
 } from '../Methods';
 import { filesUpdate, refreshFiles } from '../../../state/actions';
 
 const ListViewSearch = () => {
   const files = useSelector((state) => state.FileHandler.files);
+  const sharedFiles = useSelector((state) => state.FileHandler.shared);
   const searched = useSelector((state) => state.FileHandler.searched);
 
   const [data, setData] = React.useState('');
@@ -39,69 +40,45 @@ const ListViewSearch = () => {
         break
       }
     }
+    for (let i = 0; i < sharedFiles.length; i += 1) {
+      if (sharedFiles[i].name===searched) {
+        temp.push(sharedFiles[i]);
+        break
+      }
+    }
     setData(temp);
   }, []);
 
-  const handleDownload = async (record) => {
-    await downloadFile(record);
+  const handleDownload = async () => {
+    if(fileObj.current.userName===localStorage.getItem('userName')){
+      await downloadFile(fileObj.current);
+    } else{
+      await downloadSharedFile(fileObj.current, localStorage.getItem('userName'));
+    }
   };
 
-  const handleMarked = async (record) => {
-    const temp = [...files];
-    for (let i = 0; i < temp.length; i += 1) {
-      if (temp[i].fileId === record.fileId) {
-        temp[i].marked = false;
-        break;
+  const handleDelete = async () => {
+    if(fileObj.current.userName===localStorage.getItem('userName')){
+      await deleteFile(fileObj.current);
+      dispatch(refreshFiles(true));
+    } else{
+      await deleteSharedFile(fileObj.current);
+      dispatch(refreshFiles(true));
+    }
+  };
+
+  const handleView = async () => {
+    if(fileObj.current.userName===localStorage.getItem('userName')){
+      const response = await viewFile(fileObj.current);
+      if (!response) {
+        message.info('Only PDF and Images can be viewed');
+      }
+    } else{
+      const response = await viewSharedFile(fileObj.current, localStorage.getItem('userName'));
+      if (!response) {
+        message.info('Only PDF and Images can be viewed');
       }
     }
-    dispatch(filesUpdate(temp));
-    await markFile(record);
-  };
-
-  const handleDelete = async (record) => {
-    setDeletingFlag(true);
-    await deleteFile(record);
-    dispatch(refreshFiles(true));
-  };
-
-  const handleView = async (record) => {
-    const response = await viewFile(record);
-    if (!response) {
-      message.info('Only PDF and Images can be viewed');
-    }
-  };
-
-  const handleShare = async () => {
-    setShareLoadingFlag(true);
-    const response = await shareFile(fileObj.current, userName.current.state.value);
-    if (response) {
-      message.success('File Shared');
-    } else {
-      message.error('Something Went Wrong! Check User Name');
-    }
-    setShareLoadingFlag(false);
-  };
-
-  const handleSharePublic = async () => {
-    setPublicLoadingFlag(true);
-    const response = await shareFilePublic(fileObj.current);
-    if (response) {
-      fileObj.current.fileHash = response;
-    } else {
-      message.info('Only Images and PDF can be made public!!!');
-    }
-    setPublicLoadingFlag(false);
-  };
-
-  const removeSharePublic = async () => {
-    setRemoveLoadingFlag(true);
-    const response = await removeFilePublic(fileObj.current);
-    if (response) {
-      fileObj.current.fileHash = '';
-    } else {
-      message.info('Something Went Wrong, Try again!!!');
-    }
-    setRemoveLoadingFlag(false);
   };
 
   // Defining Columns of Table
@@ -111,7 +88,7 @@ const ListViewSearch = () => {
       dataIndex: 'name',
       key: 'name',
       editable: true,
-      render: (text, record) => <div onDoubleClick={() => { handleView(record); }}>{text}</div>,
+      render: (text, record) => <div onDoubleClick={() => { fileObj.current = record;handleView(); }}>{text}</div>,
     },
     {
       title: 'File Size',
@@ -125,26 +102,12 @@ const ListViewSearch = () => {
       key: 'createdAt',
     },
     {
-      title: 'Mark',
-      dataIndex: 'marked',
-      key: 'marked',
-      render: (_, record) => <div>{record.marked ? <img src="./icons/mark-blue.svg" alt="mark icon" style={{ height: '14px' }} onClick={() => handleMarked(record)} /> : <img src="./icons/mark-gray.svg" alt="mark icon" style={{ height: '14px' }} onClick={() => handleMarked(record)} />}</div>,
-    },
-    {
       title: '',
       key: 'operation',
       render: (_, record) => (
         <Space size="middle">
           <span>
-            <DownloadOutlined style={{ color: '#4D85BD' }} onClick={() => handleDownload(record)} />
-          </span>
-          <Popconfirm className="popconfirm" title="Sure to delete?" onConfirm={() => { handleDelete(record); }}>
-            <span>
-              <DeleteOutlined style={{ color: '#4D85BD' }} />
-            </span>
-          </Popconfirm>
-          <span>
-            <ShareAltOutlined style={{ color: '#4D85BD' }} onClick={() => { setShareModal(true); fileObj.current = record; }} />
+            <DownloadOutlined style={{ color: '#4D85BD' }} onClick={() => {fileObj.current = record; handleDownload()}} />
           </span>
         </Space>
       ),
@@ -158,65 +121,6 @@ const ListViewSearch = () => {
           defaultPageSize: 50
         }}/>
       </div>
-
-      {/* Modal For Input User Name */}
-      <Modal
-        footer={null}
-        title={false}
-        visible={shareModal}
-        onCancel={() => { setShareModal(false); fileObj.current = {}; setRemoveLoadingFlag(false); }}
-      >
-        <div>
-          {
-          fileObj.current.fileHash === ''
-            ? (
-              <div>
-                <span>
-                  User Name:&nbsp;
-                  <Input ref={userName} />
-                </span>
-                <br />
-                {
-                  fileObj.current.sharedWith.map((value)=>{
-                    return(
-                      <Tag color="geekblue">{value}</Tag>
-                    )
-                  })
-                }
-                {
-                  PublicLoadingFlag?
-                  <div>
-                  <Button type="primary" style={{ float: 'right', marginTop: '10px' }} loading={ShareLoadingFlag} disabled onClick={()=>handleShare()}>Share</Button>
-                  <Button type="primary" style={{ float: 'right', marginTop: '10px', marginRight: '10px' }} loading={PublicLoadingFlag} onClick={handleSharePublic}>Public</Button>
-                  </div>
-                  :
-                  <div>
-                  <Button type="primary" style={{ float: 'right', marginTop: '10px' }} loading={ShareLoadingFlag} onClick={()=>handleShare()}>Share</Button>
-                  <Button type="primary" style={{ float: 'right', marginTop: '10px', marginRight: '10px' }} loading={PublicLoadingFlag} onClick={handleSharePublic}>Public</Button>
-                  </div>
-                }
-                <br />
-                <br />
-              </div>
-            )
-            : (
-              <div>
-                <span id="public-url" style={{color:'#4D85BD'}} onClick={() => { navigator.clipboard.writeText(`${window.location.href}icdrive/*${fileObj.current.fileHash}`); message.info('copied to clipboard'); }}>
-                  {window.location.href}
-                  icdrive/*
-                  {fileObj.current.fileHash}
-                </span>
-                <br />
-                <Button type="primary" style={{ float: 'right', marginRight: '10px' }} loading={removeFlag} onClick={()=>removeSharePublic()}>Remove</Button>
-                <br />
-                <br />
-              </div>
-            )
-        }
-          <br />
-        </div>
-      </Modal>
-
     </div>
   );
 };
