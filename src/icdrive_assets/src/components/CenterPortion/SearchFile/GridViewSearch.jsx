@@ -102,6 +102,9 @@ const GridViewSearch = () => {
 
   const menu = (
     <Menu>
+      <Menu.Item key="0" onClick={() => {  }}>
+        <span id="context-download" role="button" tabIndex={0}></span>
+      </Menu.Item>
       <Menu.Item key="1" onClick={() => { handleDownload(); }}>
         <span id="context-download" role="button" tabIndex={0}>Download</span>
       </Menu.Item>
@@ -167,7 +170,7 @@ const GridViewSearch = () => {
                   }
                 </div>
                 <div className="grid-view-text-part truncate-overflow">
-                  {value.name}
+                  <p align="center">{value.name}</p>
                 </div>
               </div>
               </Tooltip>
@@ -215,9 +218,9 @@ const GridViewSearch = () => {
             )
             : (
               <div>
-                <span id="public-url" style={{color:'#4D85BD'}} onClick={() => { navigator.clipboard.writeText(`${window.location.href}icdrive/${localStorage.getItem('fileCanister')}/${fileObj.current.fileHash}`); message.info('copied to clipboard'); }}>
+                <span id="public-url" style={{color:'#4D85BD'}} onClick={() => { navigator.clipboard.writeText(`${window.location.href}icdrive/*${fileObj.current.fileHash}`); message.info('copied to clipboard'); }}>
                   {window.location.href}
-                  icdrive/{localStorage.getItem('fileCanister')}/
+                  icdrive/*
                   {fileObj.current.fileHash}
                 </span>
                 <br />

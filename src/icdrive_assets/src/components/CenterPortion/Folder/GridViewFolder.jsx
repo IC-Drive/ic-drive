@@ -39,7 +39,7 @@ const GridViewMarked = () => {
       }
     }
     setData(temp);
-  }, [previousFileObjectLength!=files.length]);
+  }, [previousFileObjectLength!=files.length, refreshData]);
 
   const handleDownload = async () => {
     await downloadFile(fileObj.current);
@@ -49,7 +49,7 @@ const GridViewMarked = () => {
     const temp = [...files];
     for (let i = 0; i < temp.length; i += 1) {
       if (temp[i].fileId === fileObj.current.fileId) {
-        temp[i].marked = false;
+        temp[i].marked = !temp[i].marked;
         break
       }
     }
@@ -180,7 +180,7 @@ const GridViewMarked = () => {
                   }
                 </div>
                 <div className="grid-view-text-part truncate-overflow">
-                  {value.name}
+                  <p align="center">{value.name}</p>
                 </div>
               </div>
               </Tooltip>
@@ -228,9 +228,9 @@ const GridViewMarked = () => {
             )
             : (
               <div>
-                <span id="public-url" style={{color:'#4D85BD'}} onClick={() => { navigator.clipboard.writeText(`${window.location.href}icdrive/${localStorage.getItem('fileCanister')}/${fileObj.current.fileHash}`); message.info('copied to clipboard'); }}>
+                <span id="public-url" style={{color:'#4D85BD'}} onClick={() => { navigator.clipboard.writeText(`${window.location.href}icdrive/*${fileObj.current.fileHash}`); message.info('copied to clipboard'); }}>
                   {window.location.href}
-                  icdrive/{localStorage.getItem('fileCanister')}/
+                  icdrive/*
                   {fileObj.current.fileHash}
                 </span>
                 <br />

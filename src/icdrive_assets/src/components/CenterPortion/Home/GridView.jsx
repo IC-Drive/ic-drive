@@ -92,6 +92,7 @@ const GridView = () => {
   const handleSharePublic = async () => {
     setPublicLoadingFlag(true);
     const response = await shareFilePublic(fileObj.current);
+    console.log(response)
     if (response) {
       fileObj.current.fileHash = response;
     } else {
@@ -113,6 +114,9 @@ const GridView = () => {
 
   const menu = (
     <Menu>
+      <Menu.Item key="0" onClick={() => {  }}>
+        <span id="context-download" role="button" tabIndex={0}></span>
+      </Menu.Item>
       <Menu.Item key="1" onClick={() => { handleDownload(); }}>
         <span id="context-download" role="button" tabIndex={0}>Download</span>
       </Menu.Item>
@@ -156,26 +160,25 @@ const GridView = () => {
     dispatch(switchFolder(value))
   }
   // Drag and Drop method begins
-  const onDragStart = (e) =>{
-    e.dataTransfer.setData("fileTransfer", [fileObj.current])
+  const onDragStart = (e, value) =>{
+    fileObj.current = value; 
+    e.dataTransfer.setData("fileTransfer", [value])
   }
   const onDragOver = (e) =>{
     e.preventDefault()
   }
   const onDrop = (e, value) =>{
-    const temp = [];
-    for (let i = 0; i < files.length; i+=1) {
-      if (files[i].id===fileObj.current.id) {
-        let current = Object.assign(fileObj.current);
-        current['folder'] = value;
-        temp.push(current);
-        continue;
+    let temp = [...files]
+
+    for (let i = 0; i < temp.length; i+=1) {
+      if (temp[i]['fileId']===fileObj.current.fileId) {
+        temp[i]['folder'] = value;
       }
-      temp.push(files[i]);
     }
+    console.log(temp)
     dispatch(filesUpdate(temp));
     dispatch(refreshComponents(true));
-    changeFileDirectory(temp);
+    changeFileDirectory(fileObj.current.fileId, value);
   }
   // Drag and Drop method ends
 
@@ -188,7 +191,7 @@ const GridView = () => {
               <img id="display-icon" src="./icons/folder.svg" alt="file icon" />
             </div>
             <div className="grid-view-text-part truncate-overflow">
-              {value}
+              <p align="center">{value}</p>
             </div>
           </div>
         ))
@@ -198,7 +201,7 @@ const GridView = () => {
           data.map((value) => (
             <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
               <Tooltip placement="right" title={()=>getToolTipText(value)}>
-              <div className="file-div" onDoubleClick={()=>{fileObj.current = value; handleView() }} onContextMenu={() => { fileObj.current = value; }} onDragStart={e=>{fileObj.current = value;onDragStart(e)}} draggable>
+              <div className="file-div" onDoubleClick={()=>{fileObj.current = value; handleView() }} onContextMenu={() => { fileObj.current = value; }} onDragStart={e=>{onDragStart(e, value)}} draggable>
                 <div className="grid-view-icon-part">
                   {
                     isImage(value.mimeType)?
@@ -218,7 +221,7 @@ const GridView = () => {
                   }
                 </div>
                 <div className="grid-view-text-part truncate-overflow">
-                  {value.name}
+                <p align="center">{value.name}</p>
                 </div>
               </div>
               </Tooltip>
@@ -266,9 +269,9 @@ const GridView = () => {
             )
             : (
               <div>
-                <span id="public-url" style={{color:'#4D85BD'}} onClick={() => { navigator.clipboard.writeText(`${window.location.href}icdrive/${localStorage.getItem('fileCanister')}/${fileObj.current.fileHash}`); message.info('copied to clipboard'); }}>
+                <span id="public-url" style={{color:'#4D85BD'}} onClick={() => { navigator.clipboard.writeText(`${window.location.href}icdrive/*${fileObj.current.fileHash}`); message.info('copied to clipboard'); }}>
                   {window.location.href}
-                  icdrive/{localStorage.getItem('fileCanister')}/
+                  icdrive/*
                   {fileObj.current.fileHash}
                 </span>
                 <br />
