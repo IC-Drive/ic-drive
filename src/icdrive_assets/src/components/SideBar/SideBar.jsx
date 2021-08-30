@@ -132,10 +132,18 @@ const SideBar = () => {
               ? (
                 <div style={{ display: 'flex' }}>
                   <div className="side-bar-import-icon-part-2">
+                    {uploadInProgress.file_count > 0?
+                    null
+                    :
                     <span><GoogleDriveImport /></span>
+                    }
                   </div>
                   <div className="side-bar-import-icon-part-3" onClick={() => { setImportModal(false); }}>
+                    {uploadInProgress.file_count > 0?
+                    null
+                    :
                     <span><DropboxImport /></span>
+                    }
                   </div>
                 </div>
               )

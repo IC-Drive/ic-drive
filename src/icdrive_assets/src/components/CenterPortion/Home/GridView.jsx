@@ -114,8 +114,8 @@ const GridView = () => {
 
   const menu = (
     <Menu>
-      <Menu.Item key="0" onClick={() => {  }}>
-        <span id="context-download" role="button" tabIndex={0}>{'    '}</span>
+      <Menu.Item key="0" >
+        <span id="context-view" role="button" tabIndex={0}>New Folder</span>
       </Menu.Item>
       <Menu.Item key="1" onClick={() => { handleDownload(); }}>
         <span id="context-download" role="button" tabIndex={0}>Download</span>
@@ -186,7 +186,7 @@ const GridView = () => {
     <div className="grid-container">
       {
         folders.map((value) => (
-          <div className="file-div" onDoubleClick={()=>{ switchToFolder(value) }} onContextMenu={() => {  }} onDragOver={e=>onDragOver(e)} onDrop={e=>onDrop(e, value)}>
+          <div className="file-div" onDoubleClick={()=>{ switchToFolder(value) }} onDragOver={e=>onDragOver(e)} onDrop={e=>onDrop(e, value)}>
             <div className="grid-view-icon-part">
               <img id="display-icon" src="./icons/folder.svg" alt="file icon" />
             </div>
