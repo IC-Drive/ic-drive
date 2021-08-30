@@ -21,6 +21,7 @@ const TopBar = () => {
   const feedback = React.useRef('');
   const sideBarShow = useSelector((state) => state.SideBarShow.sideBar);
   const files = useSelector((state) => state.FileHandler.files);
+  const sharedFiles = useSelector((state) => state.FileHandler.shared);
   const [helpModal, setHelpModal] = React.useState(false);
   const [loadingFlag, setLoadingFlag] = React.useState(false);
 
@@ -42,7 +43,15 @@ const TopBar = () => {
     const temp = [];
     for (let i = 0; i < files.length; i += 1) {
       if (files[i].name.toLowerCase().indexOf(query) > -1) {
-        temp.push({ value: files[i].name, id: files[i].id });
+        temp.push({ value: files[i].name, id: files[i].id, type: "owner" });
+      }
+      if (temp.length > 5) {
+        break;
+      }
+    }
+    for (let i = 0; i < sharedFiles.length; i += 1) {
+      if (sharedFiles[i].name.toLowerCase().indexOf(query) > -1) {
+        temp.push({ value: sharedFiles[i].name, id: sharedFiles[i].id, type: "shared" });
       }
       if (temp.length > 5) {
         break;
