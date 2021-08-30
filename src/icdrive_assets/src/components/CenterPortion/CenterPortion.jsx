@@ -15,7 +15,7 @@ import ListViewSearch from './SearchFile/ListViewSearch';
 import GridViewSearch from './SearchFile/GridViewSearch';
 
 // 3rd party imports
-import { Progress, Menu, Dropdown, Input, Button, Modal, Spin } from 'antd';
+import { Progress, Menu, Dropdown, Input, Button, Modal, Spin, message } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   MenuOutlined, AppstoreOutlined, CaretDownOutlined, CaretUpOutlined,
@@ -42,11 +42,22 @@ const CenterPortion = () => {
   );
 
   const createNewFolder = () =>{
-    const temp = [...folders];
-    temp.push(folderName.current.state.value);
-    dispatch(folderUpdate(temp));
-    folderName.current.state.value = '';
-    setCreateFolderModal(false);
+    if(!folderName.current.state.value){
+      message.info("Enter Folder Name")
+    }else{
+      folderName.current.state.value= folderName.current.state.value.trim()
+      if(folderName.current.state.value===''){
+        message.info('Folder Name Empty');
+        setCreateFolderModal(false);
+      } else{
+        // console.log("here");
+        const temp = [...folders];
+        temp.push(folderName.current.state.value);
+        dispatch(folderUpdate(temp));
+        folderName.current.state.value = '';
+        setCreateFolderModal(false);
+      }
+    }
   }
 
   return (

@@ -66,23 +66,37 @@ const ListView = () => {
   };
 
   const handleShare = async () => {
-    setShareLoadingFlag(true);
-    const response = await shareFile(fileObj.current, userName.current.state.value);
-    if (response) {
-      message.success('File Shared');
-    } else {
-      message.error('Something Went Wrong! Check User Name');
+    if(!userName.current.state.value){
+      message.info("Enter User Name")
+    }else{
+      userName.current.state.value = userName.current.state.value.trim()
+      if(userName.current.state.value===''){
+        message.info('Username Cant be empty');
+        setShareLoadingFlag(false);
+      } else{
+        setShareLoadingFlag(true);
+        const response = await shareFile(fileObj.current, userName.current.state.value);
+        if (response) {
+          message.success('File Shared');
+        } else {
+          message.error('Something Went Wrong! Check User Name');
+        }
+        setShareLoadingFlag(false);
+      }
     }
-    setShareLoadingFlag(false);
   };
 
   const handleSharePublic = async () => {
     setPublicLoadingFlag(true);
-    const response = await shareFilePublic(fileObj.current);
-    if (response) {
-      fileObj.current.fileHash = response;
-    } else {
-      message.info('Only Images and PDF can be made public!!!');
+    if(userName.current.state.value!=""){
+      const response = await shareFilePublic(fileObj.current);
+      if (response) {
+        fileObj.current.fileHash = response;
+      } else {
+        message.info('Only Images and PDF can be made public!!!');
+      }
+    } else{
+      message.info('Username Cant be empty');
     }
     setPublicLoadingFlag(false);
   };

@@ -85,12 +85,12 @@ export async function uploadFile(file, folder, userAgent, dispatch, uploadProgre
 
 export async function useUploadFile(file, folder, dispatch, uploadProgress, uploadFileId) {
   const userAgent = await canisterHttpAgent();
-  console.info('Storing File...');
+  // console.info('Storing File...');
   try {
     await uploadFile(file, folder, userAgent, dispatch, uploadProgress, uploadFileId);
-    console.timeEnd('Stored in');
+    // console.timeEnd('Stored in');
   } catch (error) {
-    console.error('Failed to store file.', error);
+    // console.error('Failed to store file.', error);
     return (0);
   }
 }

@@ -81,14 +81,24 @@ const GridViewMarked = () => {
   };
 
   const handleShare = async () => {
-    setShareLoadingFlag(true);
-    const response = await shareFile(fileObj.current, userName.current.state.value);
-    if (response) {
-      message.success('File Shared');
-    } else {
-      message.error('Something Went Wrong! Check User Name');
+    if(!userName.current.state.value){
+      message.info("Enter User Name")
+    }else{
+      userName.current.state.value = userName.current.state.value.trim()
+      if(userName.current.state.value===''){
+        message.info('Username Cant be empty');
+        setShareLoadingFlag(false);
+      } else{
+        setShareLoadingFlag(true);
+        const response = await shareFile(fileObj.current, userName.current.state.value);
+        if (response) {
+          message.success('File Shared');
+        } else {
+          message.error('Something Went Wrong! Check User Name');
+        }
+        setShareLoadingFlag(false);
+      }
     }
-    setShareLoadingFlag(false);
   };
 
   const handleSharePublic = async () => {
