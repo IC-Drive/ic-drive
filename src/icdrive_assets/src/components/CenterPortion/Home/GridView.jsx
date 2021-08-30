@@ -11,7 +11,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   downloadFile, viewFile, markFile, deleteFile, shareFile, shareFilePublic, removeFilePublic, bytesToSize, changeFileDirectory
 } from '../Methods';
-import { filesUpdate, switchFolder, refreshComponents } from '../../../state/actions';
+import { filesUpdate, switchFolder, refreshComponents, folderUpdate } from '../../../state/actions';
 
 const GridView = () => {
   const files = useSelector((state) => state.FileHandler.files);
@@ -26,6 +26,8 @@ const GridView = () => {
   const [ShareLoadingFlag, setShareLoadingFlag] = React.useState(false);
   const [removeFlag, setRemoveLoadingFlag] = React.useState(false);
   const [PublicLoadingFlag, setPublicLoadingFlag] = React.useState(false);
+  const [createFolderModal, setCreateFolderModal] = React.useState(false);
+  const folderName = React.useRef('');
   const userName = React.useRef('');
 
   React.useEffect(() => {
@@ -79,14 +81,24 @@ const GridView = () => {
   };
 
   const handleShare = async () => {
-    setShareLoadingFlag(true);
-    const response = await shareFile(fileObj.current, userName.current.state.value);
-    if (response) {
-      message.success('File Shared');
-    } else {
-      message.error('Something Went Wrong! Check User Name');
+    if(!userName.current.state.value){
+      message.info("Enter User Name")
+    }else{
+      userName.current.state.value = userName.current.state.value.trim()
+      if(userName.current.state.value===''){
+        message.info('Username Cant be empty');
+        setShareLoadingFlag(false);
+      } else{
+        setShareLoadingFlag(true);
+        const response = await shareFile(fileObj.current, userName.current.state.value);
+        if (response) {
+          message.success('File Shared');
+        } else {
+          message.error('Something Went Wrong! Check User Name');
+        }
+        setShareLoadingFlag(false);
+      }
     }
-    setShareLoadingFlag(false);
   };
 
   const handleSharePublic = async () => {
@@ -112,10 +124,29 @@ const GridView = () => {
     setRemoveLoadingFlag(false);
   };
 
+  const createNewFolder = () =>{
+    if(!folderName.current.state.value){
+      message.info("Enter Folder Name")
+    }else{
+      folderName.current.state.value= folderName.current.state.value.trim()
+      if(folderName.current.state.value===''){
+        message.info('Folder Name Empty');
+        setCreateFolderModal(false);
+      } else{
+        // console.log("here");
+        const temp = [...folders];
+        temp.push(folderName.current.state.value);
+        dispatch(folderUpdate(temp));
+        folderName.current.state.value = '';
+        setCreateFolderModal(false);
+      }
+    }
+  }
+
   const menu = (
     <Menu>
-      <Menu.Item key="0" onClick={() => {  }}>
-        <span id="context-download" role="button" tabIndex={0}>{'    '}</span>
+      <Menu.Item key="0" onClick={() => { setCreateFolderModal(true); }} >
+        <span id="context-view" role="button" tabIndex={0}>New Folder</span>
       </Menu.Item>
       <Menu.Item key="1" onClick={() => { handleDownload(); }}>
         <span id="context-download" role="button" tabIndex={0}>Download</span>
@@ -186,7 +217,7 @@ const GridView = () => {
     <div className="grid-container">
       {
         folders.map((value) => (
-          <div className="file-div" onDoubleClick={()=>{ switchToFolder(value) }} onContextMenu={() => {  }} onDragOver={e=>onDragOver(e)} onDrop={e=>onDrop(e, value)}>
+          <div className="file-div" onDoubleClick={()=>{ switchToFolder(value) }} onDragOver={e=>onDragOver(e)} onDrop={e=>onDrop(e, value)}>
             <div className="grid-view-icon-part">
               <img id="display-icon" src="./icons/folder.svg" alt="file icon" />
             </div>
@@ -284,6 +315,22 @@ const GridView = () => {
           <br />
         </div>
       </Modal>
+
+      <Modal
+        footer={null}
+        title={false}
+        visible={createFolderModal}
+        onCancel={() => { setCreateFolderModal(false); }}
+      >
+        <span>
+          Folder Name:&nbsp;
+          <Input ref={folderName} />
+        </span>
+        <br/><br/>
+        <Button type="primary" style={{ float: 'right', marginTop: '10px' }} onClick={()=>{createNewFolder()}}>Create</Button>
+        <br/><br/>
+      </Modal>
+
     </div>
   );
 };
