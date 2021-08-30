@@ -26,11 +26,9 @@ shared (msg) actor class FileHandle (){
 
   stable var fileEntries : [(FileId, FileInfo)] = [];
   stable var chunkEntries : [(ChunkId, ChunkData)] = [];
-  stable var public_file_url_entries : [(Text, FileId)] = [];
   
   var state = FileTypes.empty();
   stable var owner:Principal = msg.caller;
-  var fileUrlTrieMap = TrieMap.TrieMap<Text, FileId>(Text.equal, Text.hash);
 
   public query(msg) func getOwner() : async Principal{
     owner
@@ -214,7 +212,6 @@ shared (msg) actor class FileHandle (){
     do ? {
       assert(msg.caller==owner);
       let fileInfo = state.files.get(fileId)!;
-      fileUrlTrieMap.put(fileHash, fileId);
       state.files.put(fileId, {
         userName = fileInfo.userName;
         createdAt = fileInfo.createdAt ;
@@ -231,13 +228,6 @@ shared (msg) actor class FileHandle (){
         folder = fileInfo.folder;
       });
     }
-  };
-
-  public query(msg) func getPublicFileMeta(fileHash : Text) : async ?FileInfo {
-    do?{
-      let fileId = fileUrlTrieMap.get(fileHash)!;
-      let fileInfo = state.files.get(fileId)!;
-    };
   };
 
   public query(msg) func getPublicFileChunk(fileId : FileId, chunkNum : Nat) : async ?ChunkData {
@@ -322,7 +312,6 @@ shared (msg) actor class FileHandle (){
   system func preupgrade() {
     fileEntries := Iter.toArray(state.files.entries());
     chunkEntries := Iter.toArray(state.chunks.entries());
-    public_file_url_entries := Iter.toArray(fileUrlTrieMap.entries());
   };
 
   system func postupgrade() {
@@ -349,15 +338,9 @@ shared (msg) actor class FileHandle (){
     for ((chunkId, chunkData) in chunkEntries.vals()) {
       state.chunks.put(chunkId, chunkData);
     };
-
-    //Restore URL Hash and Data
-    for ((hash, data) in public_file_url_entries.vals()) {
-      fileUrlTrieMap.put(hash, data);
-    };
     
     fileEntries := [];
     chunkEntries := [];
-    public_file_url_entries := [];
   };
 
 ///////////////////////////////////////////////////// TEST  //////////////////////////////////////

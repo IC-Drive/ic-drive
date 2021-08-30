@@ -82,8 +82,7 @@ const PublicUrl = () => {
                 data===''?
                 <div style={{marginTop: "calc(50vh - 13px)", marginLeft: "calc(50vw - 13px)"}}><Spin /></div>
                 :
-                // <img alt="IC Drive - File on Blockchain" id="the-image" src={data} />
-                <div style={{marginTop: "calc(100vh - 50px)", marginLeft: "calc(100vw - 50px)"}}><Spin /></div>
+                <img alt="IC Drive - File on Blockchain" id="the-image" src={data} />
               }
             </div>
           )

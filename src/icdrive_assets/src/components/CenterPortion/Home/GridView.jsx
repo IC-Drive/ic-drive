@@ -114,6 +114,9 @@ const GridView = () => {
 
   const menu = (
     <Menu>
+      <Menu.Item key="0" onClick={() => {  }}>
+        <span id="context-download" role="button" tabIndex={0}></span>
+      </Menu.Item>
       <Menu.Item key="1" onClick={() => { handleDownload(); }}>
         <span id="context-download" role="button" tabIndex={0}>Download</span>
       </Menu.Item>
@@ -198,7 +201,7 @@ const GridView = () => {
           data.map((value) => (
             <Dropdown overlayStyle={{ width: '150px', background: '#324851 !important', color: '#fff !important' }} overlay={menu} trigger={['contextMenu']}>
               <Tooltip placement="right" title={()=>getToolTipText(value)}>
-              <div className="file-div" onDoubleClick={()=>{fileObj.current = value; handleView() }} onContextMenu={() => { fileObj.current = value; }} onDragStart={e=>{onDragStart(e, value)}} draggable>
+              <div className="file-div" style={{zIndex:"2"}} onDoubleClick={()=>{fileObj.current = value; handleView() }} onContextMenu={() => { fileObj.current = value; }} onDragStart={e=>{onDragStart(e, value)}} draggable>
                 <div className="grid-view-icon-part">
                   {
                     isImage(value.mimeType)?

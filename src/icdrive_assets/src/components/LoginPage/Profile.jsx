@@ -87,6 +87,7 @@ const Profile = () => {
                           Username:&nbsp;
                           <Input style={{ width: '80% !important' }} ref={userName} />
                         </span>
+                        <br/><br/>
                         <Button type="primary" loading={loadingFlag} onClick={createCanister}>Create Account</Button>
                       </div>
                     </div>
